@@ -5,7 +5,8 @@ import { NextRequest } from "next/server";
 export async function POST(
   request: NextRequest,
   context: { params: { threadId: string } }
-) {
+): Promise<Response> {
+  
   const { toolCallOutputs, runId } = await request.json();
   const { threadId } = await context.params;
 
