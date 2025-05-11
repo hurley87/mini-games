@@ -4,12 +4,14 @@ import { openai } from "@/lib/openai";
 export const runtime = "nodejs";
 
 // Send a new message to a thread
-export async function POST(
-  request: Request,
-  context: { params: { threadId: string } }
-) {
+export async function POST(request: Request) {
   const { content, prompt } = await request.json();
-  const { threadId } = await context.params;
+
+  // Extract threadId from the URL
+  const url = new URL(request.url);
+  const pathParts = url.pathname.split("/");
+  const threadIdIndex = pathParts.findIndex(part => part === "threads") + 1;
+  const threadId = pathParts[threadIdIndex];
 
   await openai.beta.threads.messages.create(threadId, {
     role: "user",
@@ -20,29 +22,29 @@ export async function POST(
     assistant_id: assistantId,
   });
 
-  const { readable, writable } = new TransformStream()
-  const writer = writable.getWriter()
-  const encoder = new TextEncoder()
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
 
-  let fullOutput = ''
-  let currentCodeBlock = ''
+  let fullOutput = '';
+  let currentCodeBlock = '';
 
   ;(async () => {
     for await (const event of stream) {
       if (event.event === 'thread.message.delta') {
-        const delta = event.data?.delta?.content?.[0]
+        const delta = event.data?.delta?.content?.[0];
         if (delta?.type === 'text') {
-          const content = delta.text?.value
+          const content = delta.text?.value;
           if (content) {
-            fullOutput += content
+            fullOutput += content;
 
             // Check if we're inside a code block
             if (content.includes('```')) {
-              currentCodeBlock += content
+              currentCodeBlock += content;
               // If we've found a complete code block, save it
               if (currentCodeBlock.split('```').length >= 3) {
-                const codeMatch = currentCodeBlock.match(/```(?:tsx|jsx)?\n?([\s\S]*?)```/)
-                const extractedCode = codeMatch?.[1]?.trim()
+                const codeMatch = currentCodeBlock.match(/```(?:tsx|jsx)?\n?([\s\S]*?)```/);
+                const extractedCode = codeMatch?.[1]?.trim();
                 
                 if (extractedCode) {
                   await fetch(`${process.env.c}/api/save-game`, {
@@ -53,11 +55,11 @@ export async function POST(
                       reactCode: extractedCode,
                       userId: 'user-123', // replace with session
                     }),
-                  })
+                  });
                 }
-                currentCodeBlock = ''
+                currentCodeBlock = '';
               }
-              continue // Skip sending code block content to frontend
+              continue; // Skip sending code block content to frontend
             }
 
             // Only send non-code content to frontend
@@ -65,19 +67,19 @@ export async function POST(
               const eventData = JSON.stringify({
                 type: 'text',
                 content: content
-              }) + '\n'
-              await writer.write(encoder.encode(eventData))
+              }) + '\n';
+              await writer.write(encoder.encode(eventData));
             }
           }
         }
       }
     }
 
-    await writer.close()
+    await writer.close();
 
     // Extract and save the code block
-    const codeMatch = fullOutput.match(/```(?:tsx|jsx)?\n?([\s\S]*?)```/)
-    const extractedCode = codeMatch?.[1]?.trim()
+    const codeMatch = fullOutput.match(/```(?:tsx|jsx)?\n?([\s\S]*?)```/);
+    const extractedCode = codeMatch?.[1]?.trim();
 
     if (extractedCode) {
       await fetch(`${process.env.NEXT_PUBLIC_URL}/api/save-game`, {
@@ -88,9 +90,9 @@ export async function POST(
           extractedCode,
           userId: 'user-123', // replace with session
         }),
-      })
+      });
     }
-  })()
+  })();
 
   return new Response(readable, {
     headers: { 
@@ -98,5 +100,5 @@ export async function POST(
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
     },
-  })
+  });
 }
