@@ -158,13 +158,10 @@ const Chat = ({
   };
 
   // textDelta - append text to last assistant message
-  const handleTextDelta = (delta: { value?: string; annotations?: any }, snapshot: any) => {
+  const handleTextDelta = (delta: { value?: string}) => {
     if (delta.value != null) {
       appendToLastMessage(delta.value);
     };
-    if (delta.annotations != null) {
-      annotateLastMessage(delta.annotations);
-    }
   };
 
   // imageFileDone - show image in chat
@@ -179,7 +176,7 @@ const Chat = ({
   };
 
   // toolCallDelta - log delta and snapshot for the tool call
-  const toolCallDelta = (delta: { type: string; code_interpreter?: { input?: string } }, snapshot: any) => {
+  const toolCallDelta = (delta: { type: string; code_interpreter?: { input?: string } }) => {
     if (delta.type != "code_interpreter") return;
     if (!delta.code_interpreter?.input) return;
     appendToLastMessage(delta.code_interpreter.input);
