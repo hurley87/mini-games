@@ -10,6 +10,10 @@ export async function POST(request: Request): Promise<Response> {
   const threadIdIndex = pathParts.findIndex(part => part === "threads") + 1;
   const threadId = pathParts[threadIdIndex];
 
+  console.log('info')
+  console.log(toolCallOutputs, runId);
+  console.log(threadId);
+
   const stream = openai.beta.threads.runs.submitToolOutputsStream(
     threadId,
     runId,
