@@ -246,16 +246,18 @@ const Chat = ({
   };
 
   return (
-    <div className="flex flex-col-reverse h-full w-full">
-      <div className="flex-grow overflow-y-auto p-2.5 flex flex-col order-2 whitespace-pre-wrap">
-        {messages.map((msg, index) => (
-          <Message key={index} role={msg.role} text={msg.text} />
-        ))}
-        <div ref={messagesEndRef} />
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-2.5 flex flex-col-reverse">
+        <div className="flex flex-col">
+          {messages.map((msg, index) => (
+            <Message key={index} role={msg.role} text={msg.text} />
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
       <form
         onSubmit={handleSubmit}
-        className="flex w-full p-2.5 pb-10 order-1"
+        className="flex w-full p-2.5 pb-10"
       >
         <input
           type="text"
