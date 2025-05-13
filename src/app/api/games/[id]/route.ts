@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { params }: any
 ) {
   console.log('request', request);
   const { id } = await params;
