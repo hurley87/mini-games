@@ -46,7 +46,7 @@ export function GameRenderer({ reactCode }: GameRendererProps) {
     <iframe
       ref={iframeRef}
       sandbox="allow-scripts"
-      className="w-full min-h-[400px] border rounded"
+      className="w-full min-h-[800px] border rounded"
     />
   );
 }
