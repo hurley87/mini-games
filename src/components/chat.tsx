@@ -6,6 +6,8 @@ import Markdown from "react-markdown";
 // @ts-expect-error - no types for this yet
 import { AssistantStreamEvent } from "openai/resources/beta/assistants/assistants";
 import { RequiredActionFunctionToolCall } from "openai/resources/beta/threads/runs/runs";
+import { useAccount } from "wagmi";
+import { useRouter } from "next/navigation";
 
 type MessageProps = {
   role: "user" | "assistant";
@@ -48,10 +50,15 @@ type ChatProps = {
 const Chat = ({
   functionCallHandler = () => Promise.resolve(""), // default to return empty string
 }: ChatProps) => {
+  const router = useRouter();
   const [userInput, setUserInput] = useState("");
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [inputDisabled, setInputDisabled] = useState(false);
   const [threadId, setThreadId] = useState("");
+  const [currentCodeBlock, setCurrentCodeBlock] = useState("");
+  const { address } = useAccount();
+
+  console.log('address', address);
 
   // automatically scroll to bottom of chat
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -86,55 +93,57 @@ const Chat = ({
     );
     if (!response.body) throw new Error('Response body is null');
     
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    
-    // Create initial assistant message
-    appendMessage("assistant", "");
-    
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim());
-        
-        for (const line of lines) {
-          try {
-            const event = JSON.parse(line);
-            if (event.type === 'text') {
-              appendToLastMessage(event.content);
-            }
-          } catch (e) {
-            console.error('Error parsing event:', e);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error reading stream:', error);
-    } finally {
-      setInputDisabled(false);
-    }
+    const stream = AssistantStream.fromReadableStream(response.body);
+    handleReadableStream(stream);
   };
 
-  const submitActionResult = async (runId: string, toolCallOutputs: { output: string, tool_call_id: string }[]) => {
+  const submitActionResult = async (runId: string, toolCallOutputs: { output: string, tool_call_id: string, tool_call_name: string, args: string }[]) => {
+    if(toolCallOutputs.length === 0) return;
+    console.log('submitActionResult', runId, toolCallOutputs, toolCallOutputs[0].args);
+    const args = JSON.parse(toolCallOutputs[0].args);
+    const gameName = args.game_name;
+    const category = args.category;
+    const buildInstructions = args.build_instructions;
+    console.log('gameName', gameName);
+
+    // Show creating game message immediately
+    appendMessage("assistant", "Creating your game...");
+
+    // Handle game creation asynchronously
     const response = await fetch(
-      `/api/assistants/threads/${threadId}/actions`,
+      `/api/save-game`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          runId: runId,
-          toolCallOutputs: toolCallOutputs,
+          threadId,
+          address,
+          gameName,
+          runId,
+          category,
+          buildInstructions,
         }),
       }
     );
-    if (!response.body) throw new Error('Response body is null');
-    const stream = AssistantStream.fromReadableStream(response.body);
-    handleReadableStream(stream);
+
+    if (!response.ok) {
+      console.error('Error creating game:', response.statusText);
+      appendMessage("assistant", "Sorry, there was an error creating your game. Please try again.");
+      return;
+    }
+
+    const data = await response.json();
+    console.log('data', data);
+    if (data.success) {
+      appendMessage("assistant", "Game created successfully!");
+    } else {
+      appendMessage("assistant", "Sorry, there was an error creating your game. Please try again.");
+    }
+
+    // redirect to game page
+    router.push(`/game/${data.game_id}`);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -160,8 +169,39 @@ const Chat = ({
   // textDelta - append text to last assistant message
   const handleTextDelta = (delta: { value?: string}) => {
     if (delta.value != null) {
-      appendToLastMessage(delta.value);
-    };
+      // Check if we're inside a code block
+      console.log('delta.value', delta.value);
+      if (delta.value.includes('```')) {
+        setCurrentCodeBlock(prev => {
+          const newBlock = prev + delta.value;
+          // If we've found a complete code block, save it
+          if (newBlock.split('```').length >= 3) {
+            const codeMatch = newBlock.match(/```(?:tsx|jsx)?\n?([\s\S]*?)```/);
+            const extractedCode = codeMatch?.[1]?.trim();
+            
+            if (extractedCode) {
+              // Save the code block
+              fetch('/api/save-game', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  threadId,
+                  extractedCode,
+                  userId: 'user-123', // replace with session
+                }),
+              });
+            }
+            return ''; // Reset the code block
+          }
+          return newBlock;
+        });
+      }
+
+      // Only append non-code content to the message
+      if (!currentCodeBlock) {
+        appendToLastMessage(delta.value);
+      }
+    }
   };
 
   // imageFileDone - show image in chat
@@ -192,7 +232,9 @@ const Chat = ({
     const toolCallOutputs = await Promise.all(
       toolCalls.map(async (toolCall: RequiredActionFunctionToolCall) => {
         const result = await functionCallHandler(toolCall);
-        return { output: result, tool_call_id: toolCall.id };
+        console.log('result', result);
+        console.log('toolCall', toolCall);
+        return { output: result, tool_call_id: toolCall.id, tool_call_name: toolCall.function.name, args: toolCall.function.arguments };
       })
     );
     setInputDisabled(true);
