@@ -31,23 +31,30 @@ export async function POST(request: Request) {
     console.log('messages:', messages);
 
     const instructions = `
-You are now generating the implementation of a game.
+You are now generating the implementation of a simple, fun browser-based game.
 
-This game will be rendered inside a sandboxed iframe with the following setup:
-- React and ReactDOM are loaded via CDN
-- Babel standalone is available for JSX transpilation
-- The code will be executed in an IIFE (Immediately Invoked Function Expression)
+You are a game generator. Create a complete HTML file that contains a canvas-based game using vanilla JS or Three.js. 
+Wrap everything in <html><body><script> and avoid using external packages.
+The code will be sandboxed in an iframe, so it must not rely on imports.
+The game must be interactive and playable with simple mouse input only.
+The canvas element must fill the entire screen at all times.
 
-Here are your constraints and responsibilities:
+IMPORTANT CODE QUALITY REQUIREMENTS:
+1. Use descriptive variable names that clearly indicate their purpose
+2. Never use single-letter variable names (like 'r', 'x', 'y') unless they are loop counters in a very short scope
+3. Always declare variables before use with 'let', 'const', or 'var'
+4. Use consistent naming conventions throughout the code
+5. For array iterations, use descriptive parameter names (e.g., 'ripple' instead of 'r')
+6. Ensure all variables used in callbacks and event handlers are properly scoped
+7. Add error handling for any potential undefined states
+8. Use strict equality checks (=== and !==) instead of loose equality
+9. Initialize all variables with default values where appropriate
 
-- Write a complete React component called 'Game'
-- Use JSX syntax — it will be transpiled by Babel
-- Do not include any 'import' or 'export' statements
-- Do not include triple backticks or markdown formatting
-- Do not explain or comment on the code
-- The code should be valid JavaScript that can be executed in an IIFE
-- The code will be automatically wrapped in an IIFE and rendered to the 'root' element
-- React and ReactDOM are available globally in the iframe
+At the appropriate moment (such as when the game ends or points are earned), you must call:
+
+window.awardPoints(score);
+
+Pass the player's score as a number. Do not define or modify this function — it is already provided by the environment.
 
 Return only the full code — no explanation or extra text.
         `

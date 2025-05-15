@@ -1,52 +1,45 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState } from 'react';
+import { useAccount } from 'wagmi';
 
 interface GameRendererProps {
-  reactCode: string;
+  id: string;
 }
 
-export function GameRenderer({ reactCode }: GameRendererProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+export function GameRenderer({ id }: GameRendererProps) {
+  const [loading, setLoading] = useState(true);
+  const { address, isConnecting } = useAccount();
 
-  useEffect(() => {
-    if (!iframeRef.current || !reactCode) return;
+  // Debug logs
+  console.log('Game ID:', id);
+  console.log('Wallet Address:', address);
+  console.log('Is Connecting:', isConnecting);
 
-    const blob = new Blob([
-      `
-      <html>
-        <head>
-          <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-          <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-          <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        </head>
-        <body>
-          <div id="root"></div>
-          <script type="text/babel" data-presets="env,react">
-            (() => {
-              ${reactCode}
-              const root = document.getElementById('root');
-              ReactDOM.createRoot(root).render(React.createElement(Game));
-            })();
-          </script>
-        </body>
-      </html>
-      `
-    ], { type: 'text/html' });
+  const iframeUrl = `/api/embed/${id}?userId=${address}&gameId=${id}`;
+  console.log('Iframe URL:', iframeUrl);
 
-    const url = URL.createObjectURL(blob);
-    iframeRef.current.src = url;
+  if (isConnecting) {
+    return <div>Connecting wallet...</div>;
+  }
 
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [reactCode]);
+  if (!address) {
+    return <div>Please connect your wallet to play the game</div>;
+  }
 
   return (
-    <iframe
-      ref={iframeRef}
-      sandbox="allow-scripts"
-      className="w-full min-h-[800px] border rounded"
-    />
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      {loading && <p>Loading game...</p>}
+      <iframe
+        src={iframeUrl}
+        sandbox="allow-scripts"
+        style={{
+          width: '100%',
+          height: '100%',
+          border: 'none',
+        }}
+        onLoad={() => setLoading(false)}
+      />
+    </div>
   );
 }

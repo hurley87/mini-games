@@ -28,17 +28,8 @@ export default async function GamePage({
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{game.name}</h1>
-        <p className="text-gray-600">Category: {game.category}</p>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="prose max-w-none">
-          <GameRenderer reactCode={game.react_code} />
-        </div>
-      </div>
+    <div className="w-screen h-screen">
+      <GameRenderer id={id} />
     </div>
   );
 }
