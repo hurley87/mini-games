@@ -3,6 +3,7 @@ import { openai } from '@/lib/openai';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes timeout
 
 export async function POST(request: Request) {
   try {
