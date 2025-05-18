@@ -16,7 +16,7 @@ type MessageProps = {
 
 const UserMessage = ({ text }: { text: string }) => {
   return (
-    <div className="m-2 p-2 bg-black text-white rounded-[15px] max-w-[80%] self-end overflow-wrap-anywhere">
+    <div className="m-2 p-2 bg-black text-white rounded-[15px] max-w-[80%] self-end break-words">
       {text}
     </div>
   );
