@@ -82,10 +82,16 @@ const Chat = ({
   }, []);
 
   const sendMessage = async (text: string) => {
+    if (!threadId) {
+      console.error("Thread ID missing, cannot send message");
+      return;
+    }
+
     const response = await fetch(
       `/api/threads/${threadId}/messages`,
       {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: text,
         }),
