@@ -8,6 +8,7 @@ import { AssistantStreamEvent } from "openai/resources/beta/assistants/assistant
 import { RequiredActionFunctionToolCall } from "openai/resources/beta/threads/runs/runs";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 type MessageProps = {
   role: "user" | "assistant";
@@ -314,13 +315,9 @@ const Chat = ({
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="Enter your question"
         />
-        <button
-          type="submit"
-          className="px-6 py-2 bg-black text-white border-none text-base rounded-[60px] disabled:bg-gray-300"
-          disabled={inputDisabled}
-        >
+        <Button type="submit" className="px-6 py-2" disabled={inputDisabled}>
           Send
-        </button>
+        </Button>
       </form>
     </div>
   );
