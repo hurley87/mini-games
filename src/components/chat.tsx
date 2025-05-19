@@ -8,6 +8,7 @@ import { AssistantStreamEvent } from "openai/resources/beta/assistants/assistant
 import { RequiredActionFunctionToolCall } from "openai/resources/beta/threads/runs/runs";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 type MessageProps = {
   role: "user" | "assistant";
@@ -53,6 +54,7 @@ const Chat = ({
   const router = useRouter();
   const [userInput, setUserInput] = useState("");
   const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [games, setGames] = useState<{ id: string; name: string }[]>([]);
   const [inputDisabled, setInputDisabled] = useState(false);
   const [threadId, setThreadId] = useState("");
   const [currentCodeBlock, setCurrentCodeBlock] = useState("");
@@ -69,6 +71,19 @@ const Chat = ({
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const res = await fetch('/api/games');
+        const data = await res.json();
+        setGames(data.games || []);
+      } catch (e) {
+        console.error('Failed to load games', e);
+      }
+    };
+    fetchGames();
+  }, []);
+
   // create a new threadID when chat component created
   useEffect(() => {
     const createThread = async () => {
@@ -82,10 +97,16 @@ const Chat = ({
   }, []);
 
   const sendMessage = async (text: string) => {
+    if (!threadId) {
+      console.error("Thread ID missing, cannot send message");
+      return;
+    }
+
     const response = await fetch(
       `/api/threads/${threadId}/messages`,
       {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: text,
         }),
@@ -306,16 +327,26 @@ const Chat = ({
           className="flex-grow px-6 py-4 mr-2.5 rounded-[60px] border-2 border-transparent text-base bg-[#efefef] focus:outline-none focus:border-black focus:bg-white"
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
-          placeholder="Enter your question"
+          placeholder="What are we build next?"
         />
-        <button
-          type="submit"
-          className="px-6 py-2 bg-black text-white border-none text-base rounded-[60px] disabled:bg-gray-300"
-          disabled={inputDisabled}
-        >
-          Send
-        </button>
+        <Button type="submit" className="px-6 py-2" disabled={inputDisabled}>
+          Build
+        </Button>
       </form>
+      {games.length > 0 && (
+        <ul className="p-2.5 space-y-1 text-sm">
+          {games.map((game) => (
+            <li key={game.id}>
+              <a
+                href={`/game/${game.id}`}
+                className="text-blue-600 hover:underline"
+              >
+                {game.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

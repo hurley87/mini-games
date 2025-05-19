@@ -21,8 +21,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Here you would typically save the code to your database or storage
-    // For now, we'll just log it
+    // The generated game data will be persisted to Supabase
     console.log('address:', address);
     console.log('gameName:', gameName);
     console.log('Saving code for thread:', threadId);
