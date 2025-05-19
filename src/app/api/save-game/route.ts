@@ -27,10 +27,6 @@ export async function POST(request: Request) {
     console.log('gameName:', gameName);
     console.log('Saving code for thread:', threadId);
 
-    const messages = await openai.beta.threads.messages.list(threadId)
-
-    console.log('messages:', messages);
-
     const instructions = `
 You are now generating the implementation of a simple, fun browser-based game.
 
@@ -39,6 +35,9 @@ Wrap everything in <html><body><script> and avoid using external packages.
 The code will be sandboxed in an iframe, so it must not rely on imports.
 The game must be interactive and playable with simple mouse input only.
 The canvas element must fill the entire screen at all times.
+
+SPECIFIC GAME REQUIREMENTS:
+${buildInstructions}
 
 IMPORTANT CODE QUALITY REQUIREMENTS:
 1. Use descriptive variable names that clearly indicate their purpose
