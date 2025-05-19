@@ -58,6 +58,7 @@ const Chat = ({
   const [inputDisabled, setInputDisabled] = useState(false);
   const [threadId, setThreadId] = useState("");
   const [currentCodeBlock, setCurrentCodeBlock] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const { address } = useAccount();
 
   console.log('address', address);
@@ -96,22 +97,30 @@ const Chat = ({
     createThread();
   }, []);
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string, imageFile: File | null) => {
     if (!threadId) {
       console.error("Thread ID missing, cannot send message");
       return;
     }
 
-    const response = await fetch(
-      `/api/threads/${threadId}/messages`,
-      {
+    let response: Response;
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append("content", text);
+      formData.append("image", imageFile);
+      response = await fetch(`/api/threads/${threadId}/messages`, {
+        method: "POST",
+        body: formData,
+      });
+    } else {
+      response = await fetch(`/api/threads/${threadId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: text,
         }),
-      }
-    );
+      });
+    }
     if (!response.body) throw new Error('Response body is null');
     
     const stream = AssistantStream.fromReadableStream(response.body);
@@ -169,13 +178,14 @@ const Chat = ({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!userInput.trim()) return;
-    sendMessage(userInput);
+    if (!userInput.trim() && !imageFile) return;
+    sendMessage(userInput, imageFile);
     setMessages((prevMessages) => [
       ...prevMessages,
       { role: "user", text: userInput },
     ]);
     setUserInput("");
+    setImageFile(null);
     setInputDisabled(true);
     scrollToBottom();
   };
@@ -322,6 +332,12 @@ const Chat = ({
         onSubmit={handleSubmit}
         className="flex w-full p-2.5 pb-10"
       >
+        <input
+          type="file"
+          accept="image/*"
+          className="mr-2.5"
+          onChange={(e) => setImageFile(e.target.files ? e.target.files[0] : null)}
+        />
         <input
           type="text"
           className="flex-grow px-6 py-4 mr-2.5 rounded-[60px] border-2 border-transparent text-base bg-[#efefef] focus:outline-none focus:border-black focus:bg-white"
