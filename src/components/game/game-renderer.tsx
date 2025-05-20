@@ -32,7 +32,7 @@ export function GameRenderer({ id }: GameRendererProps) {
       {loading && <p>Loading game...</p>}
       <iframe
         src={iframeUrl}
-        sandbox="allow-scripts"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
         style={{
           width: '100%',
           height: '100%',
