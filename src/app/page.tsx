@@ -78,12 +78,12 @@ export default function Home() {
       <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">
         <AnimatedBackground />
         <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">Mini Game Studio</h1>
+          <h1 className="text-4xl font-bold mb-4">Drop It in the Feed.</h1>
 
-          <p className="text-zinc-300 mb-8 max-w-md">
-            Turn your wildest game ideas into reality! Build retro arcade games,
-            puzzle adventures, or multiplayer experiences - all with the power
-            of AI at your fingertips.
+          <p className="text-zinc-300 mb-8 max-w-md text-lg">
+            Mini Games Studio lets anyone spin up a game with AI and share it
+            instantly. Each game is tokenized so your fans can tap in and back
+            what you’re building.
           </p>
 
           <Button
@@ -113,7 +113,7 @@ export default function Home() {
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe another task"
+              placeholder="Describe your game idea"
               className="border-none bg-transparent min-h-[120px] p-4 text-white resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
               disabled={isSubmitting}
             />
@@ -125,7 +125,7 @@ export default function Home() {
                 onClick={handleSubmit}
                 disabled={isSubmitting || !address}
               >
-                {isSubmitting ? 'Submitting...' : 'Build'}
+                {isSubmitting ? 'Building...' : 'Build Game'}
               </Button>
             </div>
           </div>
