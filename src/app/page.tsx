@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
-import AnimatedBackground from '@/components/animated-background';
+import { FloatingBubbles } from '@/components/floating-bubbles';
 
 export default function Home() {
   const { status: accountStatus, address } = useAccount();
@@ -16,8 +16,6 @@ export default function Home() {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-
-  console.log('accountStatus', accountStatus);
 
   const handleConnect = () => {
     const coinbaseConnector = connectors.find(
@@ -76,14 +74,14 @@ export default function Home() {
   if (accountStatus !== 'connected') {
     return (
       <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">
-        <AnimatedBackground />
+        <FloatingBubbles />
         <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold mb-4">Drop It in the Feed.</h1>
 
           <p className="text-zinc-300 mb-8 max-w-md text-lg">
             Mini Games Studio lets anyone spin up a game with AI and share it
             instantly. Each game is tokenized so your fans can tap in and back
-            what you’re building.
+            what you're building.
           </p>
 
           <Button
