@@ -1,4 +1,4 @@
-import supabase from '@/lib/supabase';
+import { getBuild } from '@/lib/supabase';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  
+
   // Parse URL manually
   const url = new URL(request.url);
   const userId = url.searchParams.get('userId');
@@ -27,13 +27,9 @@ export async function GET(
     );
   }
 
-  const { data: game, error } = await supabase
-    .from('games')
-    .select('react_code')
-    .eq('id', id)
-    .single();
+  const build = await getBuild(id);
 
-  if (error || !game) {
+  if (!build) {
     return NextResponse.json({ error: 'Game not found' }, { status: 404 });
   }
 
@@ -53,11 +49,11 @@ export async function GET(
   </script>
 `;
 
-  const html = game.react_code.replace('</body>', `${injectedScript}</body>`);
+  const html = build.html.replace('</body>', `${injectedScript}</body>`);
 
   console.log('html', html);
 
   return new Response(html, {
     headers: { 'Content-Type': 'text/html' },
   });
-} 
+}

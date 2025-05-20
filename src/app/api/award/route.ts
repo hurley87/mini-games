@@ -1,4 +1,4 @@
-import supabase from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -29,7 +29,7 @@ export async function OPTIONS() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
     // Validate the request body
     const validatedData = awardSchema.parse(body);
     const { userId, gameId, score } = validatedData;
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
           game_id: gameId,
           score: score,
           created_at: new Date().toISOString(),
-        }
+        },
       ])
       .select();
 
@@ -77,4 +77,4 @@ export async function POST(request: Request) {
       { status: 500, headers: corsHeaders() }
     );
   }
-} 
+}

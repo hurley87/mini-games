@@ -1,4 +1,4 @@
-import supabase from '@/lib/supabase'
+import { supabase } from '@/lib/supabase';
 import { openai } from '@/lib/openai';
 import { NextResponse } from 'next/server';
 
@@ -7,17 +7,17 @@ export const maxDuration = 300; // 5 minutes timeout
 
 export async function POST(request: Request) {
   try {
-    const { threadId, address, gameName, runId, category, buildInstructions } = await request.json();
+    const { threadId, address, gameName, runId, category, buildInstructions } =
+      await request.json();
 
     console.log('runId:', runId);
 
-
     if (runId) {
       try {
-        await openai.beta.threads.runs.cancel(threadId, runId)
+        await openai.beta.threads.runs.cancel(threadId, runId);
         console.log('Run cancelled');
       } catch (e) {
-        console.warn('Could not cancel active run:', e)
+        console.warn('Could not cancel active run:', e);
       }
     }
 
@@ -56,7 +56,7 @@ window.awardPoints(score);
 Pass the player's score as a number. Do not define or modify this function — it is already provided by the environment.
 
 Return only the full code — no explanation or extra text.
-        `
+        `;
 
     console.log('instructions:', instructions);
 
@@ -64,20 +64,23 @@ Return only the full code — no explanation or extra text.
     const run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: process.env.OPENAI_ASSISTANT_ID!,
       instructions,
-    })
+    });
 
     console.log('NEW run:', run);
 
     // Poll for run completion
     let runResult = await openai.beta.threads.runs.retrieve(threadId, run.id);
-    while (runResult.status === 'in_progress' || runResult.status === 'queued') {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between polls
+    while (
+      runResult.status === 'in_progress' ||
+      runResult.status === 'queued'
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second between polls
       runResult = await openai.beta.threads.runs.retrieve(threadId, run.id);
     }
 
     console.log('runResult:', runResult);
 
-    const tools = runResult.tools[0]
+    const tools = runResult.tools[0];
 
     console.log('tools:', tools);
 
@@ -85,7 +88,7 @@ Return only the full code — no explanation or extra text.
       // Get the latest message which should contain our code
       const messages = await openai.beta.threads.messages.list(threadId);
       const latestMessage = messages.data[0];
-      
+
       if (latestMessage) {
         const content = latestMessage.content[0];
         console.log('content:', content);
@@ -105,13 +108,16 @@ Return only the full code — no explanation or extra text.
                 category,
                 build_instructions: buildInstructions,
                 react_code: code,
-              }
+              },
             ])
             .select('*');
 
           if (error) {
             console.error('Error inserting into Supabase:', error);
-            return NextResponse.json({ error: 'Database insert failed' }, { status: 500 });
+            return NextResponse.json(
+              { error: 'Database insert failed' },
+              { status: 500 }
+            );
           }
 
           console.log('data:', data);
@@ -129,14 +135,9 @@ Return only the full code — no explanation or extra text.
       );
     }
 
-
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error saving code:', error);
-    return NextResponse.json(
-      { error: 'Failed to save code' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to save code' }, { status: 500 });
   }
-} 
+}

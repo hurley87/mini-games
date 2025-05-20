@@ -1,12 +1,31 @@
-'use client'
+'use client';
 
-import { WalletConnect } from './wallet-connect'
+import Link from 'next/link';
+import { Button } from './ui/button';
+import { WalletConnect } from './wallet-connect';
 
 export default function Header() {
   return (
-    <header className="flex items-center justify-between w-full border-b bg-white px-6 py-4">
-      <h1 className="text-xl font-semibold">Mini Games Studio</h1>
-      <WalletConnect />
+    <header className="border-b border-gray-800 p-3 flex items-center justify-between">
+      <div className="flex items-center">
+        <Link href="/">
+          <Button
+            variant="ghost"
+            className="text-white font-medium flex items-center gap-2 px-2 cursor-pointer"
+          >
+            <div className="w-5 h-5 rounded-full border border-white flex items-center justify-center">
+              <span className="text-xs">M</span>
+            </div>
+            Mini Games
+          </Button>
+        </Link>
+      </div>
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" className="text-gray-300 hover:text-white">
+          Docs
+        </Button>
+        <WalletConnect />
+      </div>
     </header>
-  )
+  );
 }
