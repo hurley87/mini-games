@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     console.log('address', address);
 
     const { object: agentResponse } = await generateObject({
-      model: openai('gpt-4o'),
+      model: openai('gpt-4.1'),
       schema: buildSchema,
       mode: 'json',
       system: getSystemPrompt(),
