@@ -105,6 +105,16 @@ export async function POST(request: Request) {
 
     console.log('agentResponse', validatedResponse);
 
+    // Generate an image based on the description
+    const image = await openaiSDK.images.generate({
+      prompt: description,
+      n: 1,
+      size: '1024x1024',
+      response_format: 'url',
+      model: 'dall-e-3',
+    });
+    const imageUrl = image.data?.[0]?.url ?? '';
+
     // Add the generated HTML to the thread
     await openaiSDK.beta.threads.messages.create(thread.id, {
       role: 'assistant',
@@ -118,6 +128,7 @@ export async function POST(request: Request) {
       model,
       address,
       thread_id: thread.id,
+      image: imageUrl,
     });
 
     return NextResponse.json({
