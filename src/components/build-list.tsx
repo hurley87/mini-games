@@ -6,6 +6,7 @@ import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 type Build = {
   id: string;
@@ -41,11 +42,7 @@ export default function BuildList() {
     fetchBuilds();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this build?')) {
-      return;
-    }
-
+  const deleteBuild = async (id: string) => {
     setDeletingId(id);
     try {
       const response = await fetch(`/api/builds/${id}`, {
@@ -63,6 +60,18 @@ export default function BuildList() {
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const handleDelete = (id: string) => {
+    toast.warning('Are you sure you want to delete this build?', {
+      action: {
+        label: 'Delete',
+        onClick: () => deleteBuild(id),
+      },
+      cancel: {
+        label: 'Cancel',
+      },
+    });
   };
 
   if (isLoading) {
