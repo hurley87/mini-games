@@ -23,6 +23,8 @@ export default function Home() {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [model, setModel] = useState('gpt-4o');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const router = useRouter();
 
   const handleConnect = () => {
@@ -31,6 +33,20 @@ export default function Home() {
     );
     if (coinbaseConnector) {
       connect({ connector: coinbaseConnector });
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setImageFile(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
     }
   };
 
@@ -47,6 +63,16 @@ export default function Home() {
 
     try {
       setIsSubmitting(true);
+      let imageData: string | null = null;
+      if (imageFile) {
+        imageData = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error('Failed to read image'));
+          reader.readAsDataURL(imageFile);
+        });
+      }
+
       const response = await fetch('/api/create-build', {
         method: 'POST',
         headers: {
@@ -56,6 +82,7 @@ export default function Home() {
           description: description.trim(),
           address,
           model,
+          image: imageData,
         }),
       });
 
@@ -71,6 +98,8 @@ export default function Home() {
 
       toast.success('Build request submitted successfully');
       setDescription(''); // Clear the textarea
+      setImageFile(null);
+      setImagePreview(null);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : 'Something went wrong'
@@ -117,15 +146,31 @@ export default function Home() {
 
           {/* Input area */}
           <div className="bg-[#2a2a2a] rounded-lg overflow-hidden mb-6">
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your game idea"
-              className="border-none bg-transparent min-h-[120px] p-4 text-white resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe your game idea"
+            className="border-none bg-transparent min-h-[120px] p-4 text-white resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            disabled={isSubmitting}
+          />
+          <div className="p-3 border-t border-gray-800">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
               disabled={isSubmitting}
+              className="text-sm text-gray-300 file:bg-gray-700 file:text-white file:px-2 file:py-1 file:rounded-md"
             />
-            <div className="flex items-center justify-between p-3 border-t border-gray-800">
-              <DropdownMenu>
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="mt-3 max-h-48 w-full object-contain rounded"
+              />
+            )}
+          </div>
+          <div className="flex items-center justify-between p-3 border-t border-gray-800">
+            <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"

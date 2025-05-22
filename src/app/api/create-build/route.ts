@@ -11,6 +11,7 @@ const createBuildSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   address: z.string().min(1, 'Address is required'),
   model: z.string().min(1, 'Model is required'),
+  image: z.string().optional().nullable(),
 });
 
 const buildSchema = z.object({
@@ -22,7 +23,7 @@ const getSystemPrompt = () => {
   return 'You are a helpful assistant that generates a build for a mini game. You must respond with a JSON object containing "title" and "html" fields.';
 };
 
-const getActionPrompt = (description: string) => {
+const getActionPrompt = (description: string, image?: string | null) => {
   return `
 
   You are now generating the implementation of a simple, fun browser-based game.
@@ -76,6 +77,7 @@ const getActionPrompt = (description: string) => {
           "html": "The complete HTML code for the game"
         }
 
+${image ? `Take visual inspiration from this image encoded as base64: ${image}` : ''}
 ⸻
 Generate a build for a mini game based on the following description: ${description}`;
 };
@@ -89,7 +91,7 @@ export async function POST(request: Request) {
     // Validate the request body
     const validatedData = createBuildSchema.parse(body);
 
-    const { description, address, model } = validatedData;
+    const { description, address, model, image } = validatedData;
     // Create a new thread
     const thread = await openaiSDK.beta.threads.create();
 
@@ -98,7 +100,7 @@ export async function POST(request: Request) {
       schema: buildSchema,
       mode: 'json',
       system: getSystemPrompt(),
-      prompt: getActionPrompt(description),
+      prompt: getActionPrompt(description, image),
     });
 
     const validatedResponse = buildSchema.parse(agentResponse);
@@ -116,6 +118,7 @@ export async function POST(request: Request) {
       html: validatedResponse.html,
       description,
       model,
+      image,
       address,
       thread_id: thread.id,
     });

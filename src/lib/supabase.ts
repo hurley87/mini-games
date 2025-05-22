@@ -9,6 +9,7 @@ type Build = {
   thread_id: string;
   model: string;
   description: string;
+  image?: string | null;
 };
 
 export const supabase = createClient(
