@@ -91,6 +91,7 @@ export async function POST(request: Request) {
     // Create a new thread
     const thread = await openai.beta.threads.create();
 
+<<<<<<< HEAD
     // Generate the game using OpenAI
     const completion = await openai.chat.completions.create({
       model,
@@ -110,6 +111,17 @@ export async function POST(request: Request) {
     await openai.beta.threads.messages.create(thread.id, {
       role: 'assistant',
       content: `Generated game HTML for "${validatedResponse.title}":\n\n${validatedResponse.html}`,
+=======
+    console.log('description', description);
+    console.log('address', address);
+
+    const { object: agentResponse } = await generateObject({
+      model: openai('gpt-4.1'),
+      schema: buildSchema,
+      mode: 'json',
+      system: getSystemPrompt(),
+      prompt: getActionPrompt(description),
+>>>>>>> f9434066e678e820ff0c03cf213d8ce2fb0ef4a6
     });
 
     const build = await insertBuild({
