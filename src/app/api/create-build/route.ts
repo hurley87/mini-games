@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import OpenAI from 'openai';
 import { insertBuild } from '@/lib/supabase';
+import { openai } from '@ai-sdk/openai';
+import { generateObject } from 'ai';
 
-const openai = new OpenAI();
+const openaiSDK = new OpenAI();
 
 const createBuildSchema = z.object({
   description: z.string().min(1, 'Description is required'),
@@ -89,25 +91,22 @@ export async function POST(request: Request) {
 
     const { description, address, model } = validatedData;
     // Create a new thread
-    const thread = await openai.beta.threads.create();
+    const thread = await openaiSDK.beta.threads.create();
 
-    // Generate the game using OpenAI
-    const completion = await openai.chat.completions.create({
-      model,
-      messages: [
-        { role: 'system', content: getSystemPrompt() },
-        { role: 'user', content: getActionPrompt(description) },
-      ],
-      response_format: { type: 'json_object' },
+    const { object: agentResponse } = await generateObject({
+      model: openai(model),
+      schema: buildSchema,
+      mode: 'json',
+      system: getSystemPrompt(),
+      prompt: getActionPrompt(description),
     });
 
-    const response = JSON.parse(completion.choices[0].message.content || '{}');
-    const validatedResponse = buildSchema.parse(response);
+    const validatedResponse = buildSchema.parse(agentResponse);
 
     console.log('agentResponse', validatedResponse);
 
     // Add the generated HTML to the thread
-    await openai.beta.threads.messages.create(thread.id, {
+    await openaiSDK.beta.threads.messages.create(thread.id, {
       role: 'assistant',
       content: `Generated game HTML for "${validatedResponse.title}":\n\n${validatedResponse.html}`,
     });

@@ -3,18 +3,26 @@
 import GameList from '@/components/build-list';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAccount, useConnect } from 'wagmi';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { FloatingBubbles } from '@/components/floating-bubbles';
+import { ChevronDown } from 'lucide-react';
 
 export default function Home() {
   const { status: accountStatus, address } = useAccount();
   const { connectors, connect } = useConnect();
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [model, setModel] = useState('gpt-4o');
   const router = useRouter();
 
   const handleConnect = () => {
@@ -36,8 +44,6 @@ export default function Home() {
       toast.error('Please enter a description');
       return;
     }
-
-    const model = 'gpt-4.1';
 
     try {
       setIsSubmitting(true);
@@ -118,11 +124,51 @@ export default function Home() {
               className="border-none bg-transparent min-h-[120px] p-4 text-white resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
               disabled={isSubmitting}
             />
-            <div className="flex items-center justify-end p-3 border-t border-gray-800">
+            <div className="flex items-center justify-between p-3 border-t border-gray-800">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 text-sm cursor-pointer bg-gray-700 rounded-full"
+                  >
+                    Model: {model}
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="bg-[#2a2a2a] border-gray-800 text-white"
+                >
+                  <DropdownMenuItem
+                    onClick={() => setModel('gpt-4.1')}
+                    className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
+                  >
+                    gpt-4.1
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setModel('gpt-4o')}
+                    className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
+                  >
+                    gpt-4o
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setModel('gpt-4o-mini')}
+                    className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
+                  >
+                    gpt-4o-mini
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setModel('gpt-4o-mini-high')}
+                    className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
+                  >
+                    gpt-4o-mini-high
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 size="lg"
                 variant="secondary"
-                className="bg-gray-700 hover:bg-gray-600 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className=" cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSubmit}
                 disabled={isSubmitting || !address}
               >

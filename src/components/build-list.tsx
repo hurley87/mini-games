@@ -12,6 +12,7 @@ type Build = {
   title: string;
   html: string;
   created_at: string;
+  model?: string; // Optional model field
 };
 
 export default function BuildList() {
@@ -108,6 +109,15 @@ export default function BuildList() {
             </div>
           </Link>
           <div className="flex items-center gap-2">
+            {build.model && (
+              <Badge
+                variant="outline"
+                className="bg-blue-900/30 text-blue-400 border-blue-800 flex items-center gap-1"
+              >
+                <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                {build.model}
+              </Badge>
+            )}
             <Badge
               variant="outline"
               className="bg-purple-900/30 text-purple-400 border-purple-800 flex items-center gap-1"
