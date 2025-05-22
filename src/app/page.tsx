@@ -157,12 +157,6 @@ export default function Home() {
                   >
                     gpt-4o-mini
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setModel('gpt-4o-mini-high')}
-                    className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
-                  >
-                    gpt-4o-mini-high
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button

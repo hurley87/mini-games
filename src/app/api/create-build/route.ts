@@ -123,12 +123,6 @@ export async function POST(request: Request) {
     const imageUrl = image.data?.[0]?.url ?? '';
     const publicImageUrl = imageUrl ? await uploadImageFromUrl(imageUrl) : '';
 
-    // Add the generated HTML to the thread
-    await openaiSDK.beta.threads.messages.create(thread.id, {
-      role: 'assistant',
-      content: `Generated game HTML for "${validatedResponse.title}":\n\n${validatedResponse.html}`,
-    });
-
     const build = await insertBuild({
       title: validatedResponse.title,
       html: validatedResponse.html,

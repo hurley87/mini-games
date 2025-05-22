@@ -21,9 +21,9 @@ export default function Header() {
         </Link>
       </div>
       <div className="flex items-center gap-4">
-        <Button variant="ghost" className="text-gray-300 hover:text-white">
+        <Link href="#" className="text-gray-300 hover:text-gray-200">
           Docs
-        </Button>
+        </Link>
         <WalletConnect />
       </div>
     </header>
