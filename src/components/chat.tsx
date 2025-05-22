@@ -28,7 +28,7 @@ type MessageState = {
 
 const UserMessage = ({ text }: { text: string }) => {
   return (
-    <div className="m-2 p-2 bg-black text-white rounded-[15px] max-w-[80%] self-end break-words">
+    <div className="m-2 p-3 bg-[#21262d] text-[#c9d1d9] rounded-lg max-w-[80%] self-end break-words">
       {text}
     </div>
   );
@@ -36,7 +36,7 @@ const UserMessage = ({ text }: { text: string }) => {
 
 const AssistantMessage = ({ text }: { text: string }) => {
   return (
-    <div className="m-2 p-2 bg-[#efefef] rounded-[15px] max-w-[80%] self-start overflow-x-auto">
+    <div className="m-2 p-3 bg-[#2a2a2a] text-[#c9d1d9] rounded-lg max-w-[80%] self-start overflow-x-auto">
       <Markdown>{text}</Markdown>
     </div>
   );
@@ -401,19 +401,20 @@ const Chat = ({
       </div>
       <form
         onSubmit={handleSubmit}
-        className="flex w-full p-2.5 pb-10 bg-[#181a20] border-t border-[#23262f]"
+        className="flex w-full p-2.5 pb-10 bg-[#1a1a1a] border-t border-gray-800"
       >
         <Textarea
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="What are we build next?"
-          className="flex-grow min-h-[48px] max-h-32 px-6 py-4 mr-2.5 rounded-[20px] border-none bg-[#23262f] text-white focus-visible:ring-2 focus-visible:ring-[#4f46e5] focus-visible:ring-offset-0 resize-none shadow-md placeholder:text-zinc-400 disabled:opacity-60"
+          className="flex-grow min-h-[48px] max-h-32 px-4 py-2 mr-2.5 rounded-md border-none bg-transparent text-[#c9d1d9] focus-visible:ring-0 focus-visible:ring-offset-0 resize-none placeholder:text-gray-400 disabled:opacity-60"
           disabled={inputDisabled}
         />
         <Button
           type="submit"
           size="lg"
-          className="px-8 py-2 rounded-[20px] bg-[#4f46e5] text-white font-semibold shadow-lg hover:bg-[#6366f1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="secondary"
+          className="px-6 bg-gray-700 hover:bg-gray-600 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={inputDisabled}
         >
           Build
