@@ -58,11 +58,13 @@ type ChatProps = {
     toolCall: RequiredActionFunctionToolCall
   ) => Promise<string>;
   threadId: string;
+  onBuildUpdated?: () => void;
 };
 
 const Chat = ({
   functionCallHandler = () => Promise.resolve(''),
   threadId,
+  onBuildUpdated,
 }: ChatProps) => {
   const [userInput, setUserInput] = useState('');
   const [messageState, setMessageState] = useState<MessageState>({
@@ -202,6 +204,9 @@ const Chat = ({
     console.log('data', data);
     if (data.success) {
       appendMessage('assistant', 'Game updated successfully!');
+      if (onBuildUpdated) {
+        onBuildUpdated();
+      }
       // Cancel the current run
       try {
         await fetch(`/api/threads/${threadId}/runs/${runId}/cancel`, {

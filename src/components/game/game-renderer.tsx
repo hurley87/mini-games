@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 
 interface GameRendererProps {
   id: string;
+  refreshKey?: number;
 }
 
-export function GameRenderer({ id }: GameRendererProps) {
+export function GameRenderer({ id, refreshKey }: GameRendererProps) {
   const [loading, setLoading] = useState(true);
   const { address, isConnecting } = useAccount();
 
@@ -16,8 +17,12 @@ export function GameRenderer({ id }: GameRendererProps) {
   console.log('Wallet Address:', address);
   console.log('Is Connecting:', isConnecting);
 
-  const iframeUrl = `/api/embed/${id}?userId=${address}&gameId=${id}`;
+  const iframeUrl = `/api/embed/${id}?userId=${address}&gameId=${id}&refresh=${refreshKey}`;
   console.log('Iframe URL:', iframeUrl);
+
+  useEffect(() => {
+    setLoading(true);
+  }, [iframeUrl]);
 
   if (isConnecting) {
     return <div>Connecting wallet...</div>;

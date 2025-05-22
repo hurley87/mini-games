@@ -1,5 +1,4 @@
-import Chat from '@/components/chat';
-import { GameRenderer } from '@/components/game/game-renderer';
+import BuildClient from '@/components/build-client';
 import { Button } from '@/components/ui/button';
 import { getBuild } from '@/lib/supabase';
 import { ChevronLeft } from 'lucide-react';
@@ -51,26 +50,7 @@ export default async function BuildPage({ params }: BuildPageProps) {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left sidebar */}
-        <div className="w-96 border-r border-[#30363d] flex flex-col">
-          {/* Scrollable content */}
-          <div className="flex-1 p-4 overflow-y-auto">
-            <Chat threadId={build.thread_id} />
-          </div>
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-4 h-full">
-            <div className="w-full max-w-7xl h-[calc(100vh-4rem)]">
-              <div className="w-full h-[calc(100%-5rem)] bg-gray-100 rounded-lg overflow-hidden">
-                <GameRenderer id={id} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <BuildClient buildId={id} threadId={build.thread_id} />
     </div>
   );
 }
