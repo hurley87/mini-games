@@ -12,7 +12,7 @@ type Build = {
   title: string;
   html: string;
   created_at: string;
-  model?: string; // Optional model field
+  model?: string;
   image?: string;
 };
 
@@ -100,7 +100,10 @@ export default function BuildList() {
           key={build.id}
           className="flex items-stretch justify-between group w-full bg-[#2a2a2a] rounded-lg overflow-hidden hover:bg-[#333333] transition-colors"
         >
-          <Link href={`/build/${build.id}`} className="flex flex-1 items-stretch">
+          <Link
+            href={`/build/${build.id}`}
+            className="flex flex-1 items-stretch"
+          >
             {build.image && (
               <img
                 src={build.image}
