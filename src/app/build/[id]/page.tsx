@@ -37,6 +37,13 @@ export default async function BuildPage({ params }: BuildPageProps) {
             <ChevronLeft className="h-5 w-5" />
           </Button>
         </Link>
+        {build.image && (
+          <img
+            src={build.image}
+            alt={build.title}
+            className="w-8 h-8 object-cover rounded-md ml-2"
+          />
+        )}
         <div className="ml-2">
           <h1 className="text-sm font-medium">{build.title}</h1>
         </div>
