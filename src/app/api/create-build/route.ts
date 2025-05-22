@@ -112,6 +112,8 @@ export async function POST(request: Request) {
         Focus on capturing the core mechanic, visual tone, and atmosphere of the game.
         Avoid realistic detail or clutter. Do not include any words or letters in the image.
         The image should look like a logo or visual identity — clean, iconic, and immediately readable.
+        IMPORTANT: The illustration must fill the entire canvas edge-to-edge without any borders, padding, or empty space.
+        Design the elements to extend all the way to the edges of the frame for a full-bleed appearance.
 
         Game description:
         ${description}`,
