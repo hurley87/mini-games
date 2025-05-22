@@ -1,11 +1,10 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import DeleteBuildButton from '@/components/delete-build-button';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Trash2 } from 'lucide-react';
 
 type Build = {
   id: string;
@@ -20,7 +19,6 @@ export default function BuildList() {
   const [builds, setBuilds] = useState<Build[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchBuilds = async () => {
     try {
@@ -41,29 +39,6 @@ export default function BuildList() {
     fetchBuilds();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this build?')) {
-      return;
-    }
-
-    setDeletingId(id);
-    try {
-      const response = await fetch(`/api/builds/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete build');
-      }
-
-      // Refresh the builds list
-      await fetchBuilds();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -134,15 +109,7 @@ export default function BuildList() {
               <span className="w-2 h-2 rounded-full bg-purple-400"></span>
               Draft
             </Badge>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-gray-400 hover:text-red-400 hover:bg-red-900/20"
-              onClick={() => handleDelete(build.id)}
-              disabled={deletingId === build.id}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <DeleteBuildButton id={build.id} onDeleted={fetchBuilds} />
           </div>
         </div>
       ))}
