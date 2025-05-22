@@ -49,8 +49,9 @@ export default async function BuildPage({ params }: BuildPageProps) {
         </div>
         <div className="ml-auto flex items-center gap-2">
           <Button
-            variant="outline"
-            className="text-xs border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9]"
+            className="bg-white cursor-pointer"
+            variant="secondary"
+            size="lg"
           >
             Publish
           </Button>

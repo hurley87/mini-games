@@ -420,7 +420,7 @@ const Chat = ({
             type="submit"
             size="lg"
             variant="secondary"
-            className="px-6 bg-gray-700 hover:bg-gray-600 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 bg-gray-500 hover:bg-gray-300 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={inputDisabled}
           >
             {inputDisabled ? (
