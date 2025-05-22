@@ -1,6 +1,10 @@
+import Chat from '@/components/chat';
 import { GameRenderer } from '@/components/game/game-renderer';
+import { Button } from '@/components/ui/button';
 import { getBuild } from '@/lib/supabase';
+import { ChevronLeft } from 'lucide-react';
 import { Metadata } from 'next';
+import Link from 'next/link';
 
 interface BuildPageProps {
   params: Promise<{ id: string }>;
@@ -19,14 +23,54 @@ export async function generateMetadata({
 
 export default async function BuildPage({ params }: BuildPageProps) {
   const { id } = await params;
-  console.log('id', id);
+  const build = await getBuild(id);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-8">
-      <div className="w-full max-w-7xl h-[calc(100vh-4rem)]">
-        <div className="w-full h-[calc(100%-5rem)] bg-gray-100 rounded-lg overflow-hidden">
-          <GameRenderer id={id} />
+    <div className="flex flex-col h-screen bg-[#0d1117] text-[#c9d1d9] font-sans">
+      {/* Header */}
+      <header className="flex items-center p-3 border-b border-[#30363d]">
+        <Link href="/">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-[#c9d1d9] cursor-pointer"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+        </Link>
+        <div className="ml-2">
+          <h1 className="text-sm font-medium">{build.title}</h1>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="text-xs border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9]"
+          >
+            Publish
+          </Button>
+        </div>
+      </header>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left sidebar */}
+        <div className="w-96 border-r border-[#30363d] flex flex-col">
+          {/* Scrollable content */}
+          <div className="flex-1 p-4 overflow-y-auto">
+            <Chat threadId={build.thread_id} />
+          </div>
+        </div>
+
+        {/* Main content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4 h-full">
+            <div className="w-full max-w-7xl h-[calc(100vh-4rem)]">
+              <div className="w-full h-[calc(100%-5rem)] bg-gray-100 rounded-lg overflow-hidden">
+                <GameRenderer id={id} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

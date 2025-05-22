@@ -6,6 +6,9 @@ type Build = {
   html: string;
   address: string;
   created_at: string;
+  thread_id: string;
+  model: string;
+  description: string;
 };
 
 export const supabase = createClient(
@@ -54,4 +57,22 @@ export const deleteBuild = async (id: string) => {
   if (error) {
     throw error;
   }
+};
+
+export const updateBuildByThreadId = async (
+  threadId: string,
+  updates: { title: string; html: string }
+) => {
+  const { data, error } = await supabase
+    .from('builds')
+    .update(updates)
+    .eq('thread_id', threadId)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Build;
 };

@@ -1,18 +1,29 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { AssistantStream } from "openai/lib/AssistantStream";
-import Markdown from "react-markdown";
+import React, { useState, useEffect, useRef } from 'react';
+import { AssistantStream } from 'openai/lib/AssistantStream';
+import Markdown from 'react-markdown';
 // @ts-expect-error - no types for this yet
-import { AssistantStreamEvent } from "openai/resources/beta/assistants/assistants";
-import { RequiredActionFunctionToolCall } from "openai/resources/beta/threads/runs/runs";
-import { useAccount } from "wagmi";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { AssistantStreamEvent } from 'openai/resources/beta/assistants/assistants';
+import { RequiredActionFunctionToolCall } from 'openai/resources/beta/threads/runs/runs';
+import { useAccount } from 'wagmi';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+
+type MessageApiResponse = {
+  role: 'user' | 'assistant';
+  content: { text: { value: string } }[];
+};
 
 type MessageProps = {
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   text: string;
+};
+
+type MessageState = {
+  messages: MessageProps[];
+  isLoading: boolean;
+  error: string | null;
 };
 
 const UserMessage = ({ text }: { text: string }) => {
@@ -33,9 +44,9 @@ const AssistantMessage = ({ text }: { text: string }) => {
 
 const Message = ({ role, text }: MessageProps) => {
   switch (role) {
-    case "user":
+    case 'user':
       return <UserMessage text={text} />;
-    case "assistant":
+    case 'assistant':
       return <AssistantMessage text={text} />;
     default:
       return null;
@@ -46,136 +57,176 @@ type ChatProps = {
   functionCallHandler?: (
     toolCall: RequiredActionFunctionToolCall
   ) => Promise<string>;
+  threadId: string;
 };
 
 const Chat = ({
-  functionCallHandler = () => Promise.resolve(""), // default to return empty string
+  functionCallHandler = () => Promise.resolve(''),
+  threadId,
 }: ChatProps) => {
-  const router = useRouter();
-  const [userInput, setUserInput] = useState("");
-  const [messages, setMessages] = useState<MessageProps[]>([]);
-  const [games, setGames] = useState<{ id: string; name: string }[]>([]);
+  const [userInput, setUserInput] = useState('');
+  const [messageState, setMessageState] = useState<MessageState>({
+    messages: [],
+    isLoading: true,
+    error: null,
+  });
   const [inputDisabled, setInputDisabled] = useState(false);
-  const [threadId, setThreadId] = useState("");
-  const [currentCodeBlock, setCurrentCodeBlock] = useState("");
+  const [currentCodeBlock, setCurrentCodeBlock] = useState('');
   const { address } = useAccount();
+
+  // Fetch existing messages when component mounts
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!threadId) {
+        setMessageState((prev) => ({ ...prev, isLoading: false }));
+        return;
+      }
+
+      try {
+        setMessageState((prev) => ({ ...prev, isLoading: true, error: null }));
+        const response = await fetch(`/api/threads/${threadId}/messages`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch messages: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const formattedMessages = data.messages.map(
+          (msg: MessageApiResponse) => ({
+            role: msg.role,
+            text: msg.content[0]?.text.value ?? '',
+          })
+        );
+
+        setMessageState({
+          messages: formattedMessages,
+          isLoading: false,
+          error: null,
+        });
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        setMessageState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error:
+            error instanceof Error ? error.message : 'Failed to fetch messages',
+        }));
+      }
+    };
+
+    fetchMessages();
+  }, [threadId]);
 
   console.log('address', address);
 
   // automatically scroll to bottom of chat
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const res = await fetch('/api/games');
-        const data = await res.json();
-        setGames(data.games || []);
-      } catch (e) {
-        console.error('Failed to load games', e);
-      }
-    };
-    fetchGames();
-  }, []);
-
-  // create a new threadID when chat component created
-  useEffect(() => {
-    const createThread = async () => {
-      const res = await fetch(`/api/threads`, {
-        method: "POST",
-      });
-      const data = await res.json();
-      setThreadId(data.threadId);
-    };
-    createThread();
-  }, []);
+  }, [messageState.messages]);
 
   const sendMessage = async (text: string) => {
     if (!threadId) {
-      console.error("Thread ID missing, cannot send message");
+      console.error('Thread ID missing, cannot send message');
       return;
     }
 
-    const response = await fetch(
-      `/api/threads/${threadId}/messages`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: text,
-        }),
-      }
-    );
+    const response = await fetch(`/api/threads/${threadId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: text,
+      }),
+    });
     if (!response.body) throw new Error('Response body is null');
-    
+
     const stream = AssistantStream.fromReadableStream(response.body);
     handleReadableStream(stream);
   };
 
-  const submitActionResult = async (runId: string, toolCallOutputs: { output: string, tool_call_id: string, tool_call_name: string, args: string }[]) => {
-    if(toolCallOutputs.length === 0) return;
-    console.log('submitActionResult', runId, toolCallOutputs, toolCallOutputs[0].args);
+  const submitActionResult = async (
+    runId: string,
+    toolCallOutputs: {
+      output: string;
+      tool_call_id: string;
+      tool_call_name: string;
+      args: string;
+    }[]
+  ) => {
+    if (toolCallOutputs.length === 0) return;
+    console.log(
+      'submitActionResult',
+      runId,
+      toolCallOutputs,
+      toolCallOutputs[0].args
+    );
     const args = JSON.parse(toolCallOutputs[0].args);
-    const gameName = args.game_name;
-    const category = args.category;
-    const buildInstructions = args.build_instructions;
-    console.log('gameName', gameName);
+    const title = args.title;
+    const html = args.html;
+
+    console.log('title', title);
+    console.log('html', html);
+    console.log('threadId', threadId);
 
     // Show creating game message immediately
-    appendMessage("assistant", "Creating your game...");
+    appendMessage('assistant', 'Updating your game...');
+
+    // cancel run run_LH2xknZK3dp9gv3RpvsWZLgJ
 
     // Handle game creation asynchronously
-    const response = await fetch(
-      `/api/save-game`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          threadId,
-          address,
-          gameName,
-          runId,
-          category,
-          buildInstructions,
-        }),
-      }
-    );
+    const response = await fetch(`/api/update-build`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        threadId,
+        html,
+        title,
+      }),
+    });
 
     if (!response.ok) {
       console.error('Error creating game:', response.statusText);
-      appendMessage("assistant", "Sorry, there was an error creating your game. Please try again.");
+      appendMessage(
+        'assistant',
+        'Sorry, there was an error creating your game. Please try again.'
+      );
       return;
     }
 
     const data = await response.json();
     console.log('data', data);
     if (data.success) {
-      appendMessage("assistant", "Game created successfully!");
+      appendMessage('assistant', 'Game updated successfully!');
+      // Cancel the current run
+      try {
+        await fetch(`/api/threads/${threadId}/runs/${runId}/cancel`, {
+          method: 'POST',
+        });
+      } catch (error) {
+        console.error('Error cancelling run:', error);
+      }
     } else {
-      appendMessage("assistant", "Sorry, there was an error creating your game. Please try again.");
+      appendMessage(
+        'assistant',
+        'Sorry, there was an error creating your game. Please try again.'
+      );
     }
-
-    // redirect to game page
-    router.push(`/game/${data.game_id}`);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!userInput.trim()) return;
     sendMessage(userInput);
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { role: "user", text: userInput },
-    ]);
-    setUserInput("");
+    setMessageState((prev) => ({
+      ...prev,
+      messages: [...prev.messages, { role: 'user', text: userInput }],
+    }));
+    setUserInput('');
     setInputDisabled(true);
     scrollToBottom();
   };
@@ -184,22 +235,22 @@ const Chat = ({
 
   // textCreated - create new assistant message
   const handleTextCreated = () => {
-    appendMessage("assistant", "");
+    appendMessage('assistant', '');
   };
 
   // textDelta - append text to last assistant message
-  const handleTextDelta = (delta: { value?: string}) => {
+  const handleTextDelta = (delta: { value?: string }) => {
     if (delta.value != null) {
       // Check if we're inside a code block
       console.log('delta.value', delta.value);
       if (delta.value.includes('```')) {
-        setCurrentCodeBlock(prev => {
+        setCurrentCodeBlock((prev) => {
           const newBlock = prev + delta.value;
           // If we've found a complete code block, save it
           if (newBlock.split('```').length >= 3) {
             const codeMatch = newBlock.match(/```(?:tsx|jsx)?\n?([\s\S]*?)```/);
             const extractedCode = codeMatch?.[1]?.trim();
-            
+
             if (extractedCode) {
               // Save the code block
               fetch('/api/save-game', {
@@ -228,17 +279,20 @@ const Chat = ({
   // imageFileDone - show image in chat
   const handleImageFileDone = (image: { file_id: string }) => {
     appendToLastMessage(`\n![${image.file_id}](/api/files/${image.file_id})\n`);
-  }
+  };
 
   // toolCallCreated - log new tool call
   const toolCallCreated = (toolCall: { type: string }) => {
-    if (toolCall.type != "code_interpreter") return;
-    appendMessage("assistant", "");
+    if (toolCall.type != 'code_interpreter') return;
+    appendMessage('assistant', '');
   };
 
   // toolCallDelta - log delta and snapshot for the tool call
-  const toolCallDelta = (delta: { type: string; code_interpreter?: { input?: string } }) => {
-    if (delta.type != "code_interpreter") return;
+  const toolCallDelta = (delta: {
+    type: string;
+    code_interpreter?: { input?: string };
+  }) => {
+    if (delta.type != 'code_interpreter') return;
     if (!delta.code_interpreter?.input) return;
     appendToLastMessage(delta.code_interpreter.input);
   };
@@ -255,7 +309,12 @@ const Chat = ({
         const result = await functionCallHandler(toolCall);
         console.log('result', result);
         console.log('toolCall', toolCall);
-        return { output: result, tool_call_id: toolCall.id, tool_call_name: toolCall.function.name, args: toolCall.function.arguments };
+        return {
+          output: result,
+          tool_call_id: toolCall.id,
+          tool_call_name: toolCall.function.name,
+          args: toolCall.function.arguments,
+        };
       })
     );
     setInputDisabled(true);
@@ -269,21 +328,21 @@ const Chat = ({
 
   const handleReadableStream = (stream: AssistantStream) => {
     // messages
-    stream.on("textCreated", handleTextCreated);
-    stream.on("textDelta", handleTextDelta);
+    stream.on('textCreated', handleTextCreated);
+    stream.on('textDelta', handleTextDelta);
 
     // image
-    stream.on("imageFileDone", handleImageFileDone);
+    stream.on('imageFileDone', handleImageFileDone);
 
     // code interpreter
-    stream.on("toolCallCreated", toolCallCreated);
-    stream.on("toolCallDelta", toolCallDelta);
+    stream.on('toolCallCreated', toolCallCreated);
+    stream.on('toolCallDelta', toolCallDelta);
 
     // events without helpers yet (e.g. requires_action and run.done)
-    stream.on("event", (event) => {
-      if (event.event === "thread.run.requires_action")
+    stream.on('event', (event) => {
+      if (event.event === 'thread.run.requires_action')
         handleRequiresAction(event);
-      if (event.event === "thread.run.completed") handleRunCompleted();
+      if (event.event === 'thread.run.completed') handleRunCompleted();
     });
   };
 
@@ -294,59 +353,67 @@ const Chat = ({
   */
 
   const appendToLastMessage = (text: string) => {
-    setMessages((prevMessages) => {
-      const lastMessage = prevMessages[prevMessages.length - 1];
-      const updatedLastMessage = {
-        ...lastMessage,
-        text: lastMessage.text + text,
-      };
-      return [...prevMessages.slice(0, -1), updatedLastMessage];
-    });
+    setMessageState((prev) => ({
+      ...prev,
+      messages: [
+        ...prev.messages.slice(0, -1),
+        {
+          ...prev.messages[prev.messages.length - 1],
+          text: prev.messages[prev.messages.length - 1].text + text,
+        },
+      ],
+    }));
   };
 
-  const appendMessage = (role: "user" | "assistant", text: string) => {
-    setMessages((prevMessages) => [...prevMessages, { role, text }]);
+  const appendMessage = (role: 'user' | 'assistant', text: string) => {
+    setMessageState((prev) => ({
+      ...prev,
+      messages: [...prev.messages, { role, text }],
+    }));
   };
+
+  console.log('messages', messageState.messages);
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-2.5 flex flex-col-reverse">
         <div className="flex flex-col">
-          {messages.map((msg, index) => (
-            <Message key={index} role={msg.role} text={msg.text} />
-          ))}
+          {messageState.isLoading ? (
+            <div className="flex items-center justify-center p-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4f46e5]" />
+            </div>
+          ) : messageState.error ? (
+            <div className="text-red-500 p-4 text-center">
+              {messageState.error}
+            </div>
+          ) : (
+            messageState.messages.map((msg, index) => (
+              <Message key={index} role={msg.role} text={msg.text} />
+            ))
+          )}
           <div ref={messagesEndRef} />
         </div>
       </div>
       <form
         onSubmit={handleSubmit}
-        className="flex w-full p-2.5 pb-10"
+        className="flex w-full p-2.5 pb-10 bg-[#181a20] border-t border-[#23262f]"
       >
-        <input
-          type="text"
-          className="flex-grow px-6 py-4 mr-2.5 rounded-[60px] border-2 border-transparent text-base bg-[#efefef] focus:outline-none focus:border-black focus:bg-white"
+        <Textarea
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="What are we build next?"
+          className="flex-grow min-h-[48px] max-h-32 px-6 py-4 mr-2.5 rounded-[20px] border-none bg-[#23262f] text-white focus-visible:ring-2 focus-visible:ring-[#4f46e5] focus-visible:ring-offset-0 resize-none shadow-md placeholder:text-zinc-400 disabled:opacity-60"
+          disabled={inputDisabled}
         />
-        <Button type="submit" className="px-6 py-2" disabled={inputDisabled}>
+        <Button
+          type="submit"
+          size="lg"
+          className="px-8 py-2 rounded-[20px] bg-[#4f46e5] text-white font-semibold shadow-lg hover:bg-[#6366f1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={inputDisabled}
+        >
           Build
         </Button>
       </form>
-      {games.length > 0 && (
-        <ul className="p-2.5 space-y-1 text-sm">
-          {games.map((game) => (
-            <li key={game.id}>
-              <a
-                href={`/game/${game.id}`}
-                className="text-blue-600 hover:underline"
-              >
-                {game.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 };

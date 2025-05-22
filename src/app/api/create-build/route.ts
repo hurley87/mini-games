@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { openai } from '@ai-sdk/openai';
-import { generateObject } from 'ai';
+import OpenAI from 'openai';
 import { insertBuild } from '@/lib/supabase';
+
+const openai = new OpenAI();
 
 const createBuildSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   address: z.string().min(1, 'Address is required'),
+  model: z.string().min(1, 'Model is required'),
 });
 
 const buildSchema = z.object({
@@ -15,7 +17,7 @@ const buildSchema = z.object({
 });
 
 const getSystemPrompt = () => {
-  return 'You are a helpful assistant that generates a build for a mini game.';
+  return 'You are a helpful assistant that generates a build for a mini game. You must respond with a JSON object containing "title" and "html" fields.';
 };
 
 const getActionPrompt = (description: string) => {
@@ -66,6 +68,12 @@ const getActionPrompt = (description: string) => {
 
         Use simple colors and shapes. Interactions should be simple - just taps and clicks (no swipes or complex gestures). Don't use any external packacges. dont follow the users cursor.
 
+        Return your response as a JSON object with the following structure:
+        {
+          "title": "The title of the game",
+          "html": "The complete HTML code for the game"
+        }
+
 ⸻
 Generate a build for a mini game based on the following description: ${description}`;
 };
@@ -79,37 +87,47 @@ export async function POST(request: Request) {
     // Validate the request body
     const validatedData = createBuildSchema.parse(body);
 
-    const { description, address } = validatedData;
+    const { description, address, model } = validatedData;
+    // Create a new thread
+    const thread = await openai.beta.threads.create();
 
-    console.log('description', description);
-    console.log('address', address);
-
-    const { object: agentResponse } = await generateObject({
-      model: openai('gpt-4o'),
-      schema: buildSchema,
-      mode: 'json',
-      system: getSystemPrompt(),
-      prompt: getActionPrompt(description),
+    // Generate the game using OpenAI
+    const completion = await openai.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: getSystemPrompt() },
+        { role: 'user', content: getActionPrompt(description) },
+      ],
+      response_format: { type: 'json_object' },
     });
 
-    console.log('agentResponse', agentResponse);
-    // TODO: Save the build to the database
+    const response = JSON.parse(completion.choices[0].message.content || '{}');
+    const validatedResponse = buildSchema.parse(response);
+
+    console.log('agentResponse', validatedResponse);
+
+    // Add the generated HTML to the thread
+    await openai.beta.threads.messages.create(thread.id, {
+      role: 'assistant',
+      content: `Generated game HTML for "${validatedResponse.title}":\n\n${validatedResponse.html}`,
+    });
+
     const build = await insertBuild({
-      title: agentResponse.title,
-      html: agentResponse.html,
+      title: validatedResponse.title,
+      html: validatedResponse.html,
+      description,
+      model,
       address,
+      thread_id: thread.id,
     });
 
-    console.log('build', build);
-
-    // TODO: Add your actual API call here
-    // For now, we'll just return a success response
     return NextResponse.json({
       success: true,
       message: 'Build request received',
       data: build,
     });
   } catch (error) {
+    console.error('Error creating build:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, message: 'Invalid input', errors: error.errors },

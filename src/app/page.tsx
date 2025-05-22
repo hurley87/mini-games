@@ -37,6 +37,8 @@ export default function Home() {
       return;
     }
 
+    const model = 'gpt-4.1';
+
     try {
       setIsSubmitting(true);
       const response = await fetch('/api/create-build', {
@@ -47,6 +49,7 @@ export default function Home() {
         body: JSON.stringify({
           description: description.trim(),
           address,
+          model,
         }),
       });
 

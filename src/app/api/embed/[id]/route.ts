@@ -11,14 +11,6 @@ export async function GET(
   const url = new URL(request.url);
   const userId = url.searchParams.get('userId');
   const gameId = url.searchParams.get('gameId');
-
-  // Debug logs
-  console.log('API Route - Full URL:', request.url);
-  console.log('API Route - Params:', params);
-  console.log('API Route - URL Search Params:', url.searchParams.toString());
-  console.log('API Route - userId:', userId);
-  console.log('API Route - gameId:', gameId);
-
   // Validate required parameters
   if (!userId || !gameId) {
     return NextResponse.json(
@@ -50,8 +42,6 @@ export async function GET(
 `;
 
   const html = build.html.replace('</body>', `${injectedScript}</body>`);
-
-  console.log('html', html);
 
   return new Response(html, {
     headers: { 'Content-Type': 'text/html' },
