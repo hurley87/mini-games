@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 
 type Build = {
   id: string;
@@ -16,6 +17,26 @@ export const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY! // use in server routes only
 );
+
+export const uploadImageFromUrl = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.statusText}`);
+  }
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const contentType = response.headers.get('content-type') ?? 'image/png';
+  const extension = contentType.split('/')[1] ?? 'png';
+  const fileName = `${randomUUID()}.${extension}`;
+  const { error } = await supabase.storage
+    .from('mini-games')
+    .upload(fileName, buffer, { contentType, upsert: false });
+  if (error) {
+    throw error;
+  }
+  const { data } = supabase.storage.from('mini-games').getPublicUrl(fileName);
+  return data.publicUrl;
+};
 
 export const insertBuild = async (build: Omit<Build, 'id' | 'created_at'>) => {
   const { data, error } = await supabase.from('builds').insert(build).select();

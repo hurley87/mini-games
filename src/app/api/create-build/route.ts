@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import OpenAI from 'openai';
-import { insertBuild } from '@/lib/supabase';
+import { insertBuild, uploadImageFromUrl } from '@/lib/supabase';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 
@@ -121,6 +121,7 @@ export async function POST(request: Request) {
       model: 'dall-e-3',
     });
     const imageUrl = image.data?.[0]?.url ?? '';
+    const publicImageUrl = imageUrl ? await uploadImageFromUrl(imageUrl) : '';
 
     // Add the generated HTML to the thread
     await openaiSDK.beta.threads.messages.create(thread.id, {
@@ -135,7 +136,7 @@ export async function POST(request: Request) {
       model,
       address,
       thread_id: thread.id,
-      image: imageUrl,
+      image: publicImageUrl,
     });
 
     return NextResponse.json({
