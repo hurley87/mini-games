@@ -1,4 +1,5 @@
 import BuildClient from '@/components/build-client';
+import DeleteBuildButton from '@/components/delete-build-button';
 import { Button } from '@/components/ui/button';
 import { getBuild } from '@/lib/supabase';
 import { ChevronLeft } from 'lucide-react';
@@ -55,6 +56,7 @@ export default async function BuildPage({ params }: BuildPageProps) {
           >
             Publish
           </Button>
+          <DeleteBuildButton id={id} />
         </div>
       </header>
 
