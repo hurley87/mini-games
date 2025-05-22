@@ -71,13 +71,14 @@ export default function BuildList() {
         {[...Array(3)].map((_, i) => (
           <div
             key={i}
-            className="flex items-start justify-between w-full bg-[#2a2a2a] rounded-lg p-4 animate-pulse"
+            className="flex items-stretch justify-between w-full bg-[#2a2a2a] rounded-lg overflow-hidden animate-pulse"
           >
-            <div className="space-y-2">
-              <div className="h-4 bg-gray-700 rounded w-32"></div>
-              <div className="h-3 bg-gray-700 rounded w-24"></div>
+            <div className="w-24 bg-gray-700" />
+            <div className="p-4 flex-1 space-y-2">
+              <div className="h-4 bg-gray-700 rounded w-32" />
+              <div className="h-3 bg-gray-700 rounded w-24" />
             </div>
-            <div className="h-6 bg-gray-700 rounded w-24"></div>
+            <div className="p-4 h-6 bg-gray-700 rounded w-24" />
           </div>
         ))}
       </div>
@@ -97,10 +98,17 @@ export default function BuildList() {
       {builds.map((build) => (
         <div
           key={build.id}
-          className="flex items-start justify-between group w-full bg-[#2a2a2a] rounded-lg p-4 hover:bg-[#333333] transition-colors"
+          className="flex items-stretch justify-between group w-full bg-[#2a2a2a] rounded-lg overflow-hidden hover:bg-[#333333] transition-colors"
         >
-          <Link href={`/build/${build.id}`} className="flex-1">
-            <div>
+          <Link href={`/build/${build.id}`} className="flex flex-1 items-stretch">
+            {build.image && (
+              <img
+                src={build.image}
+                alt={build.title}
+                className="w-24 object-cover rounded-l-lg"
+              />
+            )}
+            <div className="p-4">
               <h3 className="font-medium text-white">{build.title}</h3>
               <p className="text-sm text-gray-400 mt-1">
                 {formatDistanceToNow(new Date(build.created_at), {
@@ -109,7 +117,7 @@ export default function BuildList() {
               </p>
             </div>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 p-4">
             {build.model && (
               <Badge
                 variant="outline"
