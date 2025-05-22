@@ -197,6 +197,7 @@ const Chat = ({
         'assistant',
         'Sorry, there was an error creating your game. Please try again.'
       );
+      setInputDisabled(false);
       return;
     }
 
@@ -207,6 +208,8 @@ const Chat = ({
       if (onBuildUpdated) {
         onBuildUpdated();
       }
+      // Enable input after successful update
+      setInputDisabled(false);
       // Cancel the current run
       try {
         await fetch(`/api/threads/${threadId}/runs/${runId}/cancel`, {
@@ -220,6 +223,8 @@ const Chat = ({
         'assistant',
         'Sorry, there was an error creating your game. Please try again.'
       );
+      // Also enable input when there's an error
+      setInputDisabled(false);
     }
   };
 
@@ -401,7 +406,7 @@ const Chat = ({
       </div>
       <form
         onSubmit={handleSubmit}
-        className="flex w-full p-2.5 pb-10 bg-[#1a1a1a] border-t border-gray-800"
+        className="flex flex-col w-full p-2.5 bg-[#1a1a1a] border-t border-gray-800"
       >
         <Textarea
           value={userInput}
@@ -410,15 +415,24 @@ const Chat = ({
           className="flex-grow min-h-[48px] max-h-32 px-4 py-2 mr-2.5 rounded-md border-none bg-transparent text-[#c9d1d9] focus-visible:ring-0 focus-visible:ring-offset-0 resize-none placeholder:text-gray-400 disabled:opacity-60"
           disabled={inputDisabled}
         />
-        <Button
-          type="submit"
-          size="lg"
-          variant="secondary"
-          className="px-6 bg-gray-700 hover:bg-gray-600 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={inputDisabled}
-        >
-          Build
-        </Button>
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            size="lg"
+            variant="secondary"
+            className="px-6 bg-gray-700 hover:bg-gray-600 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={inputDisabled}
+          >
+            {inputDisabled ? (
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin" />
+                Building...
+              </span>
+            ) : (
+              'Build'
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );
