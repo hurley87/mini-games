@@ -107,7 +107,14 @@ export async function POST(request: Request) {
 
     // Generate an image based on the description
     const image = await openaiSDK.images.generate({
-      prompt: description,
+      prompt: `Create a square, text-free digital illustration inspired by the game description below.
+        Use a bold, minimalist art style with flat shapes, soft lighting, and strong visual contrast.
+        Focus on capturing the core mechanic, visual tone, and atmosphere of the game.
+        Avoid realistic detail or clutter. Do not include any words or letters in the image.
+        The image should look like a logo or visual identity — clean, iconic, and immediately readable.
+
+        Game description:
+        ${description}`,
       n: 1,
       size: '1024x1024',
       response_format: 'url',
