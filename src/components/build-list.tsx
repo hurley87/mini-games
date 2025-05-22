@@ -13,6 +13,7 @@ type Build = {
   html: string;
   created_at: string;
   model?: string; // Optional model field
+  image?: string;
 };
 
 export default function BuildList() {
