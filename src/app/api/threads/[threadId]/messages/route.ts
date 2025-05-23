@@ -189,9 +189,9 @@ export async function POST(
         You will be given the current HTML code of a game.
         Wait for the user to describe what they want to change. If their request is unclear or ambiguous, ask a concise clarifying question.
 
-        Once you're confident you understand the user's request, respond with a complete updated HTML file. Keep all changes inline (HTML, CSS, JS). Use only simple web features — no external libraries or imports.
+        Once you're confident you understand the user's request, call the update_game function with the complete updated HTML file. Keep all changes inline (HTML, CSS, JS). Use only simple web features — no external libraries or imports.
 
-        Never include explanations — just the updated code, unless you're still asking questions.
+        Never include explanations or return HTML directly — always use the update_game function, unless you're still asking questions.
         Here is the current version of the game:
         ${html}
 
