@@ -57,12 +57,14 @@ type ChatProps = {
   functionCallHandler?: (
     toolCall: RequiredActionFunctionToolCall
   ) => Promise<string>;
+  buildId: string;
   threadId: string;
   onBuildUpdated?: () => void;
 };
 
 const Chat = ({
   functionCallHandler = () => Promise.resolve(''),
+  buildId,
   threadId,
   onBuildUpdated,
 }: ChatProps) => {
@@ -141,6 +143,7 @@ const Chat = ({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         content: text,
+        buildId,
       }),
     });
     if (!response.body) throw new Error('Response body is null');
@@ -411,7 +414,7 @@ const Chat = ({
         <Textarea
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
-          placeholder="What are we build next?"
+          placeholder="What would you like to update?"
           className="flex-grow min-h-[48px] max-h-32 px-4 py-2 mr-2.5 rounded-md border-none bg-transparent text-[#c9d1d9] focus-visible:ring-0 focus-visible:ring-offset-0 resize-none placeholder:text-gray-400 disabled:opacity-60"
           disabled={inputDisabled}
         />
@@ -426,10 +429,10 @@ const Chat = ({
             {inputDisabled ? (
               <span className="flex items-center gap-2">
                 <span className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin" />
-                Building...
+                Updating ...
               </span>
             ) : (
-              'Build'
+              'Update'
             )}
           </Button>
         </div>

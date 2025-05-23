@@ -1,5 +1,6 @@
 import { assistantId } from '@/lib/assistant';
 import { openai } from '@/lib/openai';
+import { getBuild } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -49,7 +50,7 @@ export async function POST(
   { params }: { params: Promise<{ threadId: string }> }
 ) {
   try {
-    const { content } = await request.json();
+    const { content, buildId } = await request.json();
     const { threadId } = await params;
 
     console.log('Processing message for thread:', threadId);
@@ -176,8 +177,27 @@ export async function POST(
       }
     }
 
+    const build = await getBuild(buildId);
+    const html = build.html;
+
     const stream = openai.beta.threads.runs.stream(threadId, {
       assistant_id: assistantId,
+      instructions: `
+        You are an interactive game editor assistant.
+        You help users make changes to their HTML-based browser games.
+
+        You will be given the current HTML code of a game.
+        Wait for the user to describe what they want to change. If their request is unclear or ambiguous, ask a concise clarifying question.
+
+        Once you're confident you understand the user's request, respond with a complete updated HTML file. Keep all changes inline (HTML, CSS, JS). Use only simple web features — no external libraries or imports.
+
+        Never include explanations — just the updated code, unless you're still asking questions.
+        Here is the current version of the game:
+        ${html}
+
+        The user's request is:
+        ${content}
+      `,
     });
 
     return new Response(stream.toReadableStream());

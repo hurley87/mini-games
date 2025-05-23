@@ -22,7 +22,11 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
       <div className="w-96 border-r border-[#30363d] flex flex-col">
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto">
-          <Chat threadId={threadId} onBuildUpdated={handleBuildUpdated} />
+          <Chat
+            buildId={buildId}
+            threadId={threadId}
+            onBuildUpdated={handleBuildUpdated}
+          />
         </div>
       </div>
 
