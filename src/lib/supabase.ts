@@ -22,6 +22,17 @@ type Build = {
   image: string;
 };
 
+type Token = {
+  name: string;
+  description: string;
+  image: string;
+  symbol: string;
+  coin_address: string;
+  build_id: string;
+  user_id: string;
+  updated_at: string;
+};
+
 export const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY! // use in server routes only
@@ -125,4 +136,18 @@ export const insertPlayer = async (
   }
 
   return data as Players;
+};
+
+export const insertToken = async (token: Token) => {
+  const { data, error } = await supabase
+    .from('tokens')
+    .insert(token)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Token;
 };
