@@ -75,7 +75,6 @@ const Chat = ({
     error: null,
   });
   const [inputDisabled, setInputDisabled] = useState(false);
-  const [currentCodeBlock, setCurrentCodeBlock] = useState('');
   const { user } = usePrivy();
   const fid = user?.farcaster?.fid;
 
@@ -255,10 +254,7 @@ const Chat = ({
   // textDelta - append text to last assistant message
   const handleTextDelta = (delta: { value?: string }) => {
     if (delta.value != null) {
-      // Only append non-code content to the message
-      if (!currentCodeBlock) {
-        appendToLastMessage(delta.value);
-      }
+      appendToLastMessage(delta.value);
     }
   };
 
