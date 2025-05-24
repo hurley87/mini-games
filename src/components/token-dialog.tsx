@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
-export default function TokenDialog() {
+export default function TokenDialog({ buildImage }: { buildImage: string }) {
   const [open, setOpen] = useState(false);
   const [header, setHeader] = useState('');
   const [description, setDescription] = useState('');
@@ -25,7 +25,7 @@ export default function TokenDialog() {
       const res = await fetch('/api/create-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ header, description, symbol }),
+        body: JSON.stringify({ header, description, symbol, buildImage }),
       });
       const data = await res.json();
       console.log('create-token response', data);
