@@ -13,9 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
-interface TokenDialogProps {}
-
-export default function TokenDialog({}: TokenDialogProps) {
+export default function TokenDialog() {
   const [open, setOpen] = useState(false);
   const [header, setHeader] = useState('');
   const [description, setDescription] = useState('');
