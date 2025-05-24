@@ -30,6 +30,7 @@ export function GameRenderer({ id, refreshKey }: GameRendererProps) {
 
   return (
     <div
+      className="border-4 border-white rounded-lg shadow-sm shadow-amber-100 p-1 bg-[#30363d]"
       style={{
         width: '400px',
         height: '750px',
@@ -46,7 +47,8 @@ export function GameRenderer({ id, refreshKey }: GameRendererProps) {
         style={{
           width: '100%',
           height: '100%',
-          border: 'none',
+          borderRadius: '20px',
+          border: '4px solid #30363d',
         }}
         onLoad={() => setLoading(false)}
       />

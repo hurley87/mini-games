@@ -17,7 +17,7 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
   };
 
   return (
-    <div className="flex gap-10 h-screen overflow-hidden w-full max-w-screen-lg mx-auto border-l border-[#30363d]">
+    <div className="flex gap-8 h-screen overflow-hidden w-full max-w-screen-lg mx-auto border-l border-[#30363d]">
       {/* Left sidebar */}
       <div className="flex-1 min-w-0 border-r border-[#30363d] flex flex-col h-full">
         {/* Scrollable content */}
