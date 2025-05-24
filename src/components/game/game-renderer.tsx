@@ -29,7 +29,16 @@ export function GameRenderer({ id, refreshKey }: GameRendererProps) {
   }
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div
+      style={{
+        width: '400px',
+        height: '750px',
+        position: 'relative',
+        margin: '0 auto',
+        borderRadius: '30px',
+        overflow: 'hidden',
+      }}
+    >
       {loading && <p>Loading game...</p>}
       <iframe
         src={iframeUrl}
