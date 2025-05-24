@@ -9,33 +9,61 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAccount, useConnect } from 'wagmi';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { FloatingBubbles } from '@/components/floating-bubbles';
 import { ChevronDown } from 'lucide-react';
+import { useLogin, usePrivy } from '@privy-io/react-auth';
 
 export default function Home() {
-  const { status: accountStatus, address } = useAccount();
-  const { connectors, connect } = useConnect();
+  const { ready, authenticated, user } = usePrivy();
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [model, setModel] = useState('gpt-4o');
   const router = useRouter();
+  const fid = user?.farcaster?.fid;
+  const { login } = useLogin({
+    onComplete: async (params) => {
+      console.log('User logged in successfully', params.user);
+      const player = params.user;
 
-  const handleConnect = () => {
-    const coinbaseConnector = connectors.find(
-      (connector) => connector.name === 'Coinbase Wallet'
-    );
-    if (coinbaseConnector) {
-      connect({ connector: coinbaseConnector });
-    }
-  };
+      if (!player.farcaster?.fid) {
+        toast.error('Farcaster ID not found');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/players', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fid: player.farcaster.fid,
+            bio: player.farcaster?.bio || '',
+            username: player.farcaster?.username || '',
+            pfp: player.farcaster?.pfp || '',
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to create profile');
+        }
+      } catch (error) {
+        console.error('Failed to create profile:', error);
+      }
+    },
+    onError: (error) => {
+      console.error('Login failed', error);
+      // Show error message
+    },
+  });
 
   const handleSubmit = async () => {
-    if (!address) {
+    if (!user) {
       toast.error('Please connect your wallet first');
       return;
     }
@@ -54,7 +82,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           description: description.trim(),
-          address,
+          fid,
           model,
         }),
       });
@@ -80,7 +108,15 @@ export default function Home() {
     }
   };
 
-  if (accountStatus !== 'connected') {
+  if (!ready) {
+    return (
+      <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">
+        <FloatingBubbles />
+      </main>
+    );
+  }
+
+  if (!authenticated) {
     return (
       <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">
         <FloatingBubbles />
@@ -94,12 +130,12 @@ export default function Home() {
           </p>
 
           <Button
-            onClick={handleConnect}
+            onClick={login}
             disabled={isSubmitting}
             size="lg"
             className="bg-white text-black hover:bg-zinc-200 rounded-full px-8 cursor-pointer"
           >
-            Connect Wallet
+            Get Started
           </Button>
         </div>
       </main>
@@ -164,7 +200,7 @@ export default function Home() {
                 variant="secondary"
                 className=" cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSubmit}
-                disabled={isSubmitting || !address}
+                disabled={isSubmitting || !user}
               >
                 {isSubmitting ? 'Building...' : 'Build Game'}
               </Button>

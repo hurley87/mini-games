@@ -1,5 +1,4 @@
 import BuildClient from '@/components/build-client';
-import DeleteBuildButton from '@/components/delete-build-button';
 import { Button } from '@/components/ui/button';
 import { getBuild } from '@/lib/supabase';
 import { ChevronLeft } from 'lucide-react';
@@ -26,7 +25,7 @@ export default async function BuildPage({ params }: BuildPageProps) {
   const build = await getBuild(id);
 
   return (
-    <div className="flex flex-col h-screen bg-[#0d1117] text-[#c9d1d9] font-sans">
+    <div className="flex flex-col h-screen bg-[#1a1a1a] text-[#c9d1d9] font-sans">
       {/* Header */}
       <header className="flex items-center p-3 border-b border-[#30363d]">
         <Link href="/">
@@ -56,10 +55,8 @@ export default async function BuildPage({ params }: BuildPageProps) {
           >
             Publish
           </Button>
-          <DeleteBuildButton id={id} />
         </div>
       </header>
-
       <BuildClient buildId={id} threadId={build.thread_id} />
     </div>
   );

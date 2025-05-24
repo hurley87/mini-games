@@ -1,7 +1,7 @@
 'use client';
 
+import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
 
 interface GameRendererProps {
   id: string;
@@ -10,12 +10,12 @@ interface GameRendererProps {
 
 export function GameRenderer({ id, refreshKey }: GameRendererProps) {
   const [loading, setLoading] = useState(true);
-  const { address, isConnecting } = useAccount();
+  const { user } = usePrivy();
+  const address = user?.farcaster?.fid;
 
   // Debug logs
   console.log('Game ID:', id);
   console.log('Wallet Address:', address);
-  console.log('Is Connecting:', isConnecting);
 
   const iframeUrl = `/api/embed/${id}?userId=${address}&gameId=${id}&refresh=${refreshKey}`;
   console.log('Iframe URL:', iframeUrl);
@@ -23,10 +23,6 @@ export function GameRenderer({ id, refreshKey }: GameRendererProps) {
   useEffect(() => {
     setLoading(true);
   }, [iframeUrl]);
-
-  if (isConnecting) {
-    return <div>Connecting wallet...</div>;
-  }
 
   if (!address) {
     return <div>Please connect your wallet to play the game</div>;

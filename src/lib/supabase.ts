@@ -1,11 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 
+type Players = {
+  fid: number;
+  bio: string;
+  username: string;
+  pfp: string;
+  created_at: string;
+  updated_at: string;
+};
+
 type Build = {
   id: string;
   title: string;
   html: string;
-  address: string;
+  fid: number;
   created_at: string;
   thread_id: string;
   model: string;
@@ -97,4 +106,23 @@ export const updateBuildByThreadId = async (
   }
 
   return data as Build;
+};
+
+export const insertPlayer = async (
+  player: Omit<Players, 'created_at' | 'updated_at'>
+) => {
+  const { data, error } = await supabase
+    .from('players')
+    .upsert(player, {
+      onConflict: 'fid',
+      ignoreDuplicates: false,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Players;
 };

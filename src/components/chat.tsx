@@ -6,9 +6,9 @@ import Markdown from 'react-markdown';
 // @ts-expect-error - no types for this yet
 import { AssistantStreamEvent } from 'openai/resources/beta/assistants/assistants';
 import { RequiredActionFunctionToolCall } from 'openai/resources/beta/threads/runs/runs';
-import { useAccount } from 'wagmi';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { usePrivy } from '@privy-io/react-auth';
 
 type MessageApiResponse = {
   role: 'user' | 'assistant';
@@ -76,7 +76,8 @@ const Chat = ({
   });
   const [inputDisabled, setInputDisabled] = useState(false);
   const [currentCodeBlock, setCurrentCodeBlock] = useState('');
-  const { address } = useAccount();
+  const { user } = usePrivy();
+  const fid = user?.farcaster?.fid;
 
   // Fetch existing messages when component mounts
   useEffect(() => {
@@ -121,7 +122,7 @@ const Chat = ({
     fetchMessages();
   }, [threadId]);
 
-  console.log('address', address);
+  console.log('fid', fid);
 
   // automatically scroll to bottom of chat
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -254,34 +255,6 @@ const Chat = ({
   // textDelta - append text to last assistant message
   const handleTextDelta = (delta: { value?: string }) => {
     if (delta.value != null) {
-      // Check if we're inside a code block
-      console.log('delta.value', delta.value);
-      if (delta.value.includes('```')) {
-        setCurrentCodeBlock((prev) => {
-          const newBlock = prev + delta.value;
-          // If we've found a complete code block, save it
-          if (newBlock.split('```').length >= 3) {
-            const codeMatch = newBlock.match(/```(?:tsx|jsx)?\n?([\s\S]*?)```/);
-            const extractedCode = codeMatch?.[1]?.trim();
-
-            if (extractedCode) {
-              // Save the code block
-              fetch('/api/save-game', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  threadId,
-                  extractedCode,
-                  userId: 'user-123', // replace with session
-                }),
-              });
-            }
-            return ''; // Reset the code block
-          }
-          return newBlock;
-        });
-      }
-
       // Only append non-code content to the message
       if (!currentCodeBlock) {
         appendToLastMessage(delta.value);

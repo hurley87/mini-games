@@ -9,7 +9,7 @@ const openaiSDK = new OpenAI();
 
 const createBuildSchema = z.object({
   description: z.string().min(1, 'Description is required'),
-  address: z.string().min(1, 'Address is required'),
+  fid: z.number().min(1, 'Fid is required'),
   model: z.string().min(1, 'Model is required'),
 });
 
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     // Validate the request body
     const validatedData = createBuildSchema.parse(body);
 
-    const { description, address, model } = validatedData;
+    const { description, fid, model } = validatedData;
     // Create a new thread
     const thread = await openaiSDK.beta.threads.create();
 
@@ -130,7 +130,7 @@ export async function POST(request: Request) {
       html: validatedResponse.html,
       description,
       model,
-      address,
+      fid,
       thread_id: thread.id,
       image: publicImageUrl,
     });
