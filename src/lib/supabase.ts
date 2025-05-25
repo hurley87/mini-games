@@ -212,7 +212,7 @@ export const getPlayerByFID = async (fid: number) => {
 
 export const getCoinByBuildId = async (buildId: string) => {
   const { data, error } = await supabase
-    .from('tokens')
+    .from('coins')
     .select('*')
     .eq('build_id', buildId)
     .single();

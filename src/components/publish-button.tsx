@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Share2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -15,6 +15,31 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
     address: string;
     name: string;
   } | null>(null);
+
+  useEffect(() => {
+    const fetchPublishedCoin = async () => {
+      try {
+        const response = await fetch(`/api/coins/${buildId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch coin data');
+        }
+        const data = await response.json();
+
+        console.log('data', data);
+
+        if (data.coin) {
+          setPublishedCoin({
+            address: data.coin.address,
+            name: data.coin.name,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching published coin:', error);
+      }
+    };
+
+    fetchPublishedCoin();
+  }, [buildId]);
 
   const handlePublish = async () => {
     try {

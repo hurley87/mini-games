@@ -20,7 +20,7 @@ export async function GET(
 
     return NextResponse.json(game);
   } catch (error) {
-    console.log('request', request);
+    console.log('request', request.url);
     console.error('Error fetching game:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
