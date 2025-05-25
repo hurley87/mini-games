@@ -8,6 +8,7 @@ const playerSchema = z.object({
   username: z.string(),
   pfp: z.string(),
   id: z.string(),
+  score: z.number(),
   verified_addresses: z.object({
     primary: z.object({
       eth_address: z.string(),

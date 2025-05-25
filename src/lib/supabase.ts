@@ -9,6 +9,7 @@ type Players = {
   pfp: string;
   created_at: string;
   updated_at: string;
+  score: number;
   verified_addresses: {
     primary: {
       eth_address: string;

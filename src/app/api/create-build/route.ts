@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import OpenAI from 'openai';
-import { insertBuild, uploadImageFromUrl } from '@/lib/supabase';
+import { getPlayerByFID, insertBuild, uploadImageFromUrl } from '@/lib/supabase';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 
@@ -90,6 +90,23 @@ export async function POST(request: Request) {
     const validatedData = createBuildSchema.parse(body);
 
     const { description, fid, model } = validatedData;
+
+    // Check player score before proceeding
+    const player = await getPlayerByFID(fid);
+    if (!player) {
+      return NextResponse.json(
+        { success: false, message: 'Player not found' },
+        { status: 404 }
+      );
+    }
+
+    if (player.score < 0.8) {
+      return NextResponse.json(
+        { success: false, message: 'Insufficient player score' },
+        { status: 403 }
+      );
+    }
+
     // Create a new thread
     const thread = await openaiSDK.beta.threads.create();
 
