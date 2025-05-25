@@ -48,6 +48,9 @@ export default async function BuildPage({ params }: BuildPageProps) {
         <div className="ml-2">
           <h1 className="text-sm font-medium">{build.title}</h1>
         </div>
+        <Link href="/docs" className="ml-4 text-[#c9d1d9] hover:text-white">
+          Docs
+        </Link>
         <div className="ml-auto flex items-center gap-2">
           <PublishButton buildId={id} />
         </div>
