@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
-import { Share2, Loader2 } from 'lucide-react';
+import { Share2, Loader2, Rocket } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PublishButtonProps {
@@ -105,7 +105,10 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
               <span>Publishing...</span>
             </div>
           ) : (
-            'Publish'
+            <div className="flex items-center gap-2">
+              <Rocket className="w-4 h-4" />
+              <span>Publish</span>
+            </div>
           )}
         </Button>
       ) : (
