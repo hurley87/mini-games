@@ -1,5 +1,6 @@
 import BuildClient from '@/components/build-client';
 import TokenDialog from '@/components/token-dialog';
+import PublishButton from '@/components/publish-button';
 import { Button } from '@/components/ui/button';
 import { getBuild } from '@/lib/supabase';
 import { ChevronLeft } from 'lucide-react';
@@ -49,7 +50,7 @@ export default async function BuildPage({ params }: BuildPageProps) {
           <h1 className="text-sm font-medium">{build.title}</h1>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <TokenDialog buildImage={build.image || ''} />
+          <PublishButton buildId={id} />
         </div>
       </header>
       <BuildClient buildId={id} threadId={build.thread_id} />

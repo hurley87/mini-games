@@ -7,6 +7,12 @@ const playerSchema = z.object({
   bio: z.string(),
   username: z.string(),
   pfp: z.string(),
+  id: z.string(),
+  verified_addresses: z.object({
+    primary: z.object({
+      eth_address: z.string(),
+    }),
+  }),
 });
 
 export async function POST(request: Request) {

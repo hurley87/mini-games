@@ -2,12 +2,18 @@ import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 
 type Players = {
+  id: string;
   fid: number;
   bio: string;
   username: string;
   pfp: string;
   created_at: string;
   updated_at: string;
+  verified_addresses: {
+    primary: {
+      eth_address: string;
+    };
+  };
 };
 
 type Build = {
@@ -22,14 +28,14 @@ type Build = {
   image: string;
 };
 
-type Token = {
+type Coin = {
   name: string;
   description: string;
   image: string;
   symbol: string;
-  coin_address: string;
+  address: string;
   build_id: string;
-  user_id: string;
+  fid: number;
   updated_at: string;
 };
 
@@ -138,16 +144,83 @@ export const insertPlayer = async (
   return data as Players;
 };
 
-export const insertToken = async (token: Token) => {
+export const getTokenByBuildId = async (buildId: string) => {
   const { data, error } = await supabase
     .from('tokens')
-    .insert(token)
-    .select()
+    .select('*')
+    .eq('build_id', buildId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    // PGRST116 is the "no rows returned" error
+    throw error;
+  }
+
+  return data as Coin | null;
+};
+
+export const insertCoin = async (coin: Omit<Coin, 'updated_at'>) => {
+  try {
+    // Validate required fields
+    if (
+      !coin.name ||
+      !coin.symbol ||
+      !coin.address ||
+      !coin.build_id ||
+      !coin.fid
+    ) {
+      throw new Error('Missing required fields for coin creation');
+    }
+
+    // Check if a coin already exists for this build
+    const existingCoin = await getCoinByBuildId(coin.build_id);
+    console.log('existingCoin', existingCoin);
+    if (existingCoin) {
+      throw new Error('A coin already exists for this build');
+    }
+
+    const { data, error } = await supabase
+      .from('coins')
+      .insert(coin)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as Coin;
+  } catch (error) {
+    console.error('Error inserting coin:', error);
+    throw error;
+  }
+};
+
+export const getPlayerByFID = async (fid: number) => {
+  const { data, error } = await supabase
+    .from('players')
+    .select('*')
+    .eq('fid', fid)
     .single();
 
   if (error) {
     throw error;
   }
 
-  return data as Token;
+  return data as Players;
+};
+
+export const getCoinByBuildId = async (buildId: string) => {
+  const { data, error } = await supabase
+    .from('tokens')
+    .select('*')
+    .eq('build_id', buildId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    // PGRST116 is the "no rows returned" error
+    throw error;
+  }
+
+  return data as Coin | null;
 };

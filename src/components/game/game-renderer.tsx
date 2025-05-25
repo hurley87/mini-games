@@ -40,7 +40,13 @@ export function GameRenderer({ id, refreshKey }: GameRendererProps) {
         overflow: 'hidden',
       }}
     >
-      {loading && <p>Loading game...</p>}
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#30363d]/80 backdrop-blur-sm z-10">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 border-4 border-purple-400 border-t-transparent rounded-full animate-spin" />
+          </div>
+        </div>
+      )}
       <iframe
         src={iframeUrl}
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
