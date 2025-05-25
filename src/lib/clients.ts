@@ -13,11 +13,10 @@ import {
 import { base } from 'viem/chains';
 
 // Initialize the Privy client
-// @ts-ignore - Type conflict between @privy-io/react-auth and @privy-io/server-auth
 export const privy = new PrivyClient(
   process.env.PRIVY_APP_ID!,
   process.env.PRIVY_APP_SECRET!
-) as any;
+);
 
 const rpcUrl = process.env.RPC_URL!;
 
@@ -29,6 +28,7 @@ export async function getWalletAccount(
   return createViemAccount({
     walletId,
     address,
+    // @ts-expect-error - Type conflict between @privy-io/react-auth and @privy-io/server-auth
     privy,
   });
 }

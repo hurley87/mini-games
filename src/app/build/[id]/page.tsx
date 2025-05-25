@@ -1,5 +1,4 @@
 import BuildClient from '@/components/build-client';
-import TokenDialog from '@/components/token-dialog';
 import PublishButton from '@/components/publish-button';
 import { Button } from '@/components/ui/button';
 import { getBuild } from '@/lib/supabase';
