@@ -124,6 +124,20 @@ export const updateBuildByThreadId = async (
   return data as Build;
 };
 
+export const getBuildByThreadId = async (threadId: string) => {
+  const { data, error } = await supabase
+    .from('builds')
+    .select('*')
+    .eq('thread_id', threadId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Build;
+};
+
 export const insertPlayer = async (
   player: Omit<Players, 'created_at' | 'updated_at'>
 ) => {

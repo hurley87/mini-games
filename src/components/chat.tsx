@@ -75,7 +75,7 @@ const Chat = ({
     error: null,
   });
   const [inputDisabled, setInputDisabled] = useState(false);
-  const { user } = usePrivy();
+  const { user, getAccessToken } = usePrivy();
   const fid = user?.farcaster?.fid;
 
   // Fetch existing messages when component mounts
@@ -179,13 +179,15 @@ const Chat = ({
     // Show creating game message immediately
     appendMessage('assistant', 'Updating your game...');
 
-    // cancel run run_LH2xknZK3dp9gv3RpvsWZLgJ
+    // Get the access token
+    const accessToken = await getAccessToken();
 
     // Handle game creation asynchronously
     const response = await fetch(`/api/update-build`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         threadId,
