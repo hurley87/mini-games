@@ -107,12 +107,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'player not found' }, { status: 404 });
   }
 
-  const verifiedAddresses = player.verified_addresses;
+  const payoutRecipient = player.primary_address as `0x${string}`;
 
-  console.log('verifiedAddresses', verifiedAddresses);
-
-  const payoutRecipient = verifiedAddresses.primary
-    .eth_address as `0x${string}`;
+  console.log('payoutRecipient', payoutRecipient);
 
   if (!payoutRecipient) {
     return NextResponse.json(
