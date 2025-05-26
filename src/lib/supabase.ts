@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 
 type Players = {
-  id: string;
   fid: number;
   bio: string;
   username: string;
@@ -10,11 +9,10 @@ type Players = {
   created_at: string;
   updated_at: string;
   score: number;
-  verified_addresses: {
-    primary: {
-      eth_address: string;
-    };
-  };
+  primary_address: string;
+  follower_count: number;
+  following_count: number;
+  power_badge: boolean;
 };
 
 type Build = {

@@ -21,15 +21,16 @@ export default function Home() {
   const { ready, authenticated, user } = usePrivy();
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [model, setModel] = useState('gpt-4o');
+  const [model, setModel] = useState('gpt-4.1');
   const router = useRouter();
   const fid = user?.farcaster?.fid;
   const { login } = useLogin({
     onComplete: async (params) => {
       console.log('User logged in successfully', params.user);
       const player = params.user;
+      const fid = player.farcaster?.fid;
 
-      if (!player.farcaster?.fid) {
+      if (!fid) {
         toast.error('Farcaster ID not found');
         return;
       }
@@ -41,10 +42,7 @@ export default function Home() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            fid: player.farcaster.fid,
-            bio: player.farcaster?.bio || '',
-            username: player.farcaster?.username || '',
-            pfp: player.farcaster?.pfp || '',
+            fid,
           }),
         });
 

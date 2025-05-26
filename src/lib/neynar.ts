@@ -13,9 +13,23 @@ export interface UserResponse {
     platform?: string;
     username?: string;
   }>;
+  verified_addresses?: {
+    primary?: {
+      eth_address?: string | null;
+    };
+  };
+  profile?: {
+    bio?: {
+      text?: string;
+    };
+  };
+  follower_count?: number;
+  following_count?: number;
+  power_badge?: boolean;
+  score?: number;
 }
 
-export const getPlayerByFid = async (fid: number): Promise<UserResponse> => {
+export const getUserByFid = async (fid: number): Promise<UserResponse> => {
   const response = await neynarClient.fetchBulkUsers({
     fids: [fid],
   });

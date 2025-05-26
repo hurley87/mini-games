@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import OpenAI from 'openai';
-import { getPlayerByFID, insertBuild, uploadImageFromUrl } from '@/lib/supabase';
+import {
+  getPlayerByFID,
+  insertBuild,
+  uploadImageFromUrl,
+} from '@/lib/supabase';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 
