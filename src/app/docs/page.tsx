@@ -90,11 +90,11 @@ export default function CreatorDocs() {
                 1. Be Specific About Mechanics
               </h4>
               <p className="text-zinc-300 text-sm mb-2">
-                Instead of: "Make a fun game"
+                Instead of: &quot;Make a fun game&quot;
               </p>
               <p className="text-zinc-300 text-sm">
-                Try: "Create a game where colored circles fall from the top and
-                the player clicks matching colors to score points"
+                Try: &quot;Create a game where colored circles fall from the top
+                and the player clicks matching colors to score points&quot;
               </p>
             </div>
 
@@ -103,17 +103,17 @@ export default function CreatorDocs() {
                 2. Define Clear Win/Loss Conditions
               </h4>
               <p className="text-zinc-300 text-sm mb-2">
-                Example: "Player loses if they miss 3 circles. Each successful
-                match adds 1 point. Game ends after 30 seconds with final score
-                display."
+                Example: &quot;Player loses if they miss 3 circles. Each
+                successful match adds 1 point. Game ends after 30 seconds with
+                final score display.&quot;
               </p>
             </div>
 
             <div className="bg-zinc-800 p-4 rounded-lg">
               <h4 className="font-semibold mb-2">3. Specify Visual Style</h4>
               <p className="text-zinc-300 text-sm mb-2">
-                Example: "Use a neon color palette with glowing effects.
-                Background should be dark with particle effects."
+                Example: &quot;Use a neon color palette with glowing effects.
+                Background should be dark with particle effects.&quot;
               </p>
             </div>
 
@@ -122,8 +122,8 @@ export default function CreatorDocs() {
                 4. Include Difficulty Progression
               </h4>
               <p className="text-zinc-300 text-sm mb-2">
-                Example: "Start with 2 falling objects per second, increase
-                speed every 5 points scored."
+                Example: &quot;Start with 2 falling objects per second, increase
+                speed every 5 points scored.&quot;
               </p>
             </div>
           </div>
@@ -139,11 +139,11 @@ export default function CreatorDocs() {
                 ✓ Good Prompt
               </h4>
               <p className="text-zinc-300 text-sm italic mb-2">
-                "Create a bubble popping game where colorful bubbles rise from
-                the bottom. Player clicks to pop them for 1 point each. Bubbles
-                get faster every 10 points. Missing a bubble that reaches the
-                top loses 1 life (start with 3 lives). Use pastel colors and
-                smooth animations."
+                &quot;Create a bubble popping game where colorful bubbles rise
+                from the bottom. Player clicks to pop them for 1 point each.
+                Bubbles get faster every 10 points. Missing a bubble that
+                reaches the top loses 1 life (start with 3 lives). Use pastel
+                colors and smooth animations.&quot;
               </p>
               <p className="text-zinc-400 text-xs">
                 Clear mechanics, scoring, difficulty curve, and visual style.
@@ -155,11 +155,11 @@ export default function CreatorDocs() {
                 ✓ Good Prompt
               </h4>
               <p className="text-zinc-300 text-sm italic mb-2">
-                "Make a reaction time game: A circle appears randomly on screen
-                every 1-3 seconds. Player must click it within 1 second to
-                score. Circle gets smaller as score increases. Show remaining
+                &quot;Make a reaction time game: A circle appears randomly on
+                screen every 1-3 seconds. Player must click it within 1 second
+                to score. Circle gets smaller as score increases. Show remaining
                 time and current score. Use high contrast colors for
-                accessibility."
+                accessibility.&quot;
               </p>
               <p className="text-zinc-400 text-xs">
                 Simple mechanic with clear challenge escalation.
@@ -169,7 +169,7 @@ export default function CreatorDocs() {
             <div className="bg-zinc-800 p-4 rounded-lg">
               <h4 className="font-semibold text-red-400 mb-1">✗ Poor Prompt</h4>
               <p className="text-zinc-300 text-sm italic mb-2">
-                "Make a platformer game like Mario"
+                &quot;Make a platformer game like Mario&quot;
               </p>
               <p className="text-zinc-400 text-xs">
                 Too vague, requires keyboard input, complex for 30-second
@@ -188,8 +188,8 @@ export default function CreatorDocs() {
           <ol className="list-decimal list-inside space-y-2 text-zinc-300">
             <li>Test the game in the preview window</li>
             <li>
-              Use the chat to request specific changes: "Make the targets
-              bigger" or "Add a countdown timer"
+              Use the chat to request specific changes: &quot;Make the targets
+              bigger&quot; or &quot;Add a countdown timer&quot;
             </li>
             <li>The AI will update your game in real-time</li>
             <li>Iterate until the gameplay feels just right</li>
@@ -199,15 +199,10 @@ export default function CreatorDocs() {
         <section>
           <h2 className="text-2xl font-semibold mb-2">How Scoring Works</h2>
           <p className="text-zinc-300">
-            Players earn points during gameplay. The game automatically calls{' '}
-            <code className="bg-zinc-800 px-2 py-1 rounded">
-              window.awardPoints(score)
-            </code>{' '}
-            to record points on the server. Remember:
+            Players earn points during gameplay. Remember:
           </p>
           <ul className="list-disc list-inside space-y-1 text-zinc-300 mt-2">
             <li>Points must increase by 1 at a time (no bulk scoring)</li>
-            <li>Score is displayed in the top-left corner</li>
             <li>Final score is recorded when the 30-second timer ends</li>
           </ul>
         </section>
