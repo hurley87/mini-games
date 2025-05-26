@@ -13,6 +13,12 @@ type Build = {
   created_at: string;
   model?: string;
   image?: string;
+  isPublished: boolean;
+  coin?: {
+    address: string;
+    name: string;
+    symbol: string;
+  } | null;
 };
 
 export default function BuildList() {
@@ -38,7 +44,6 @@ export default function BuildList() {
   useEffect(() => {
     fetchBuilds();
   }, []);
-
 
   if (isLoading) {
     return (
@@ -105,13 +110,23 @@ export default function BuildList() {
                 {build.model}
               </Badge>
             )}
-            <Badge
-              variant="outline"
-              className="bg-purple-900/30 text-purple-400 border-purple-800 flex items-center gap-1"
-            >
-              <span className="w-2 h-2 rounded-full bg-purple-400"></span>
-              Draft
-            </Badge>
+            {build.isPublished ? (
+              <Badge
+                variant="outline"
+                className="bg-green-900/30 text-green-400 border-green-800 flex items-center gap-1"
+              >
+                <span className="w-2 h-2 rounded-full bg-green-400"></span>
+                Live
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className="bg-purple-900/30 text-purple-400 border-purple-800 flex items-center gap-1"
+              >
+                <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+                Draft
+              </Badge>
+            )}
             <DeleteBuildButton id={build.id} onDeleted={fetchBuilds} />
           </div>
         </div>

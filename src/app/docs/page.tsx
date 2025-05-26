@@ -2,12 +2,13 @@ import Header from '@/components/header';
 
 export const metadata = {
   title: 'Creator Docs - Mini Games Studio',
-  description: 'Learn how to create and publish mini games with optional tokens.'
+  description:
+    'Learn how to create and publish mini games with optional tokens.',
 };
 
 /**
  * Detailed documentation for creators building mini games.
- * Covers the workflow, game models, scoring and token mechanics.
+ * Covers the workflow, AI models, prompting strategies, scoring and token mechanics.
  */
 export default function CreatorDocs() {
   return (
@@ -22,60 +23,211 @@ export default function CreatorDocs() {
             a new build to begin.
           </p>
         </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold mb-2">AI Models</h2>
+          <p className="text-zinc-300 mb-4">
+            Choose from three AI models when creating your game. Each model has
+            different strengths:
+          </p>
+          <ul className="list-disc list-inside space-y-2 text-zinc-300">
+            <li>
+              <strong>GPT-4.1</strong> – Most capable model, best for complex
+              game mechanics and sophisticated logic. Great for puzzle games and
+              strategic gameplay.
+            </li>
+            <li>
+              <strong>GPT-4o</strong> – Fast and capable, balanced performance.
+              Good for action games and real-time interactions.
+            </li>
+            <li>
+              <strong>GPT-4o-mini</strong> – Quickest model, ideal for simple
+              arcade-style games and rapid prototyping.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold mb-2">
+            How to Write Effective Prompts
+          </h2>
+          <p className="text-zinc-300 mb-4">
+            The AI generates complete HTML5 games based on your description.
+            Follow these guidelines for best results:
+          </p>
+
+          <h3 className="text-xl font-semibold mb-2 mt-4">
+            Key Constraints to Remember
+          </h3>
+          <ul className="list-disc list-inside space-y-2 text-zinc-300">
+            <li>
+              Games must be <strong>30 seconds long</strong> before they reset
+            </li>
+            <li>
+              Use <strong>mouse/tap input only</strong> (no keyboard, no swipes)
+            </li>
+            <li>
+              Games run in a <strong>sandboxed iframe</strong> (no external
+              packages)
+            </li>
+            <li>
+              Canvas must <strong>fill the entire screen</strong>
+            </li>
+            <li>
+              Score increases <strong>1 point at a time</strong> only
+            </li>
+            <li>
+              Use <strong>simple colors and shapes</strong> for best performance
+            </li>
+          </ul>
+
+          <h3 className="text-xl font-semibold mb-2 mt-4">
+            Prompting Best Practices
+          </h3>
+          <div className="space-y-4">
+            <div className="bg-zinc-800 p-4 rounded-lg">
+              <h4 className="font-semibold mb-2">
+                1. Be Specific About Mechanics
+              </h4>
+              <p className="text-zinc-300 text-sm mb-2">
+                Instead of: "Make a fun game"
+              </p>
+              <p className="text-zinc-300 text-sm">
+                Try: "Create a game where colored circles fall from the top and
+                the player clicks matching colors to score points"
+              </p>
+            </div>
+
+            <div className="bg-zinc-800 p-4 rounded-lg">
+              <h4 className="font-semibold mb-2">
+                2. Define Clear Win/Loss Conditions
+              </h4>
+              <p className="text-zinc-300 text-sm mb-2">
+                Example: "Player loses if they miss 3 circles. Each successful
+                match adds 1 point. Game ends after 30 seconds with final score
+                display."
+              </p>
+            </div>
+
+            <div className="bg-zinc-800 p-4 rounded-lg">
+              <h4 className="font-semibold mb-2">3. Specify Visual Style</h4>
+              <p className="text-zinc-300 text-sm mb-2">
+                Example: "Use a neon color palette with glowing effects.
+                Background should be dark with particle effects."
+              </p>
+            </div>
+
+            <div className="bg-zinc-800 p-4 rounded-lg">
+              <h4 className="font-semibold mb-2">
+                4. Include Difficulty Progression
+              </h4>
+              <p className="text-zinc-300 text-sm mb-2">
+                Example: "Start with 2 falling objects per second, increase
+                speed every 5 points scored."
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold mb-2">
+            Example Prompts That Work Well
+          </h2>
+          <div className="space-y-4">
+            <div className="bg-zinc-800 p-4 rounded-lg">
+              <h4 className="font-semibold text-green-400 mb-1">
+                ✓ Good Prompt
+              </h4>
+              <p className="text-zinc-300 text-sm italic mb-2">
+                "Create a bubble popping game where colorful bubbles rise from
+                the bottom. Player clicks to pop them for 1 point each. Bubbles
+                get faster every 10 points. Missing a bubble that reaches the
+                top loses 1 life (start with 3 lives). Use pastel colors and
+                smooth animations."
+              </p>
+              <p className="text-zinc-400 text-xs">
+                Clear mechanics, scoring, difficulty curve, and visual style.
+              </p>
+            </div>
+
+            <div className="bg-zinc-800 p-4 rounded-lg">
+              <h4 className="font-semibold text-green-400 mb-1">
+                ✓ Good Prompt
+              </h4>
+              <p className="text-zinc-300 text-sm italic mb-2">
+                "Make a reaction time game: A circle appears randomly on screen
+                every 1-3 seconds. Player must click it within 1 second to
+                score. Circle gets smaller as score increases. Show remaining
+                time and current score. Use high contrast colors for
+                accessibility."
+              </p>
+              <p className="text-zinc-400 text-xs">
+                Simple mechanic with clear challenge escalation.
+              </p>
+            </div>
+
+            <div className="bg-zinc-800 p-4 rounded-lg">
+              <h4 className="font-semibold text-red-400 mb-1">✗ Poor Prompt</h4>
+              <p className="text-zinc-300 text-sm italic mb-2">
+                "Make a platformer game like Mario"
+              </p>
+              <p className="text-zinc-400 text-xs">
+                Too vague, requires keyboard input, complex for 30-second
+                format.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section>
           <h2 className="text-2xl font-semibold mb-2">Building and Testing</h2>
           <p className="text-zinc-300">
-            Use the chat on the left side of the build page to describe changes
-            or new ideas. The assistant updates your game in real-time.
+            After creating your initial game, use the chat interface to refine
+            it:
           </p>
           <ol className="list-decimal list-inside space-y-2 text-zinc-300">
-            <li>Open a build from your dashboard.</li>
-            <li>Describe features, rules or artwork in the chat window.</li>
-            <li>Test the game in the preview on the right and iterate until it feels just right.</li>
+            <li>Test the game in the preview window</li>
+            <li>
+              Use the chat to request specific changes: "Make the targets
+              bigger" or "Add a countdown timer"
+            </li>
+            <li>The AI will update your game in real-time</li>
+            <li>Iterate until the gameplay feels just right</li>
           </ol>
         </section>
-        <section>
-          <h2 className="text-2xl font-semibold mb-2">Game Models</h2>
-          <p className="text-zinc-300">
-            Choose from several starter models when beginning a build:
-          </p>
-          <ul className="list-disc list-inside space-y-1 text-zinc-300">
-            <li>
-              <strong>Arcade</strong> – fast-paced action with built-in movement and score tracking.
-            </li>
-            <li>
-              <strong>Puzzle</strong> – grid based challenges ideal for matching or logic games.
-            </li>
-            <li>
-              <strong>Trivia</strong> – multiple choice questions and timers for quick quizzes.
-            </li>
-          </ul>
-          <p className="text-zinc-300">
-            Each model provides a foundation so you can focus on rules and visuals instead of boilerplate code.
-          </p>
-        </section>
-        <section>
-          <h2 className="text-2xl font-semibold mb-2">Example Games</h2>
-          <p className="text-zinc-300">
-            Create endless variations: a side-scrolling runner where users collect tokens, a word scramble puzzle, or a head-to-head trivia battle. The templates are flexible, so experiment with mechanics that fit your community.
-          </p>
-        </section>
+
         <section>
           <h2 className="text-2xl font-semibold mb-2">How Scoring Works</h2>
           <p className="text-zinc-300">
-            Players earn points during gameplay. Call <code>window.awardPoints(score)</code> to record points on the server. You decide when to award points—after levels, for speed bonuses or any rule you invent.
+            Players earn points during gameplay. The game automatically calls{' '}
+            <code className="bg-zinc-800 px-2 py-1 rounded">
+              window.awardPoints(score)
+            </code>{' '}
+            to record points on the server. Remember:
           </p>
+          <ul className="list-disc list-inside space-y-1 text-zinc-300 mt-2">
+            <li>Points must increase by 1 at a time (no bulk scoring)</li>
+            <li>Score is displayed in the top-left corner</li>
+            <li>Final score is recorded when the 30-second timer ends</li>
+          </ul>
         </section>
+
         <section>
           <h2 className="text-2xl font-semibold mb-2">Tokens and Rewards</h2>
           <p className="text-zinc-300">
-            When publishing a game you can mint a token that represents it. Set the name and symbol in the publish dialog. Tokens are distributed based on final scores, so top players collect the most.
+            When publishing a game you can mint a token that represents it. Set
+            the name and symbol in the publish dialog. Tokens are distributed
+            based on final scores, so top players collect the most.
           </p>
         </section>
+
         <section>
           <h2 className="text-2xl font-semibold mb-2">Playing on Farcaster</h2>
           <p className="text-zinc-300">
-            Games are played directly in the Farcaster feed. Share your game link and anyone can jump in, play and start earning points immediately. You can also share a /coin link so players can collect your token.
+            Games are played directly in the Farcaster feed. Share your game
+            link and anyone can jump in, play and start earning points
+            immediately. You can also share a /coin link so players can collect
+            your token.
           </p>
         </section>
       </main>

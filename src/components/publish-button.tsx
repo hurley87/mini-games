@@ -2,8 +2,9 @@
 
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
-import { Share2, Loader2, Rocket } from 'lucide-react';
+import { Share2, Loader2, Rocket, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface PublishButtonProps {
   buildId: string;
@@ -14,6 +15,7 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
   const [publishedCoin, setPublishedCoin] = useState<{
     address: string;
     name: string;
+    symbol: string;
   } | null>(null);
 
   useEffect(() => {
@@ -31,6 +33,7 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
           setPublishedCoin({
             address: data.coin.address,
             name: data.coin.name,
+            symbol: data.coin.symbol,
           });
         }
       } catch (error) {
@@ -68,27 +71,6 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
     }
   };
 
-  const handleShare = async () => {
-    if (!publishedCoin) return;
-
-    const shareUrl = `${window.location.origin}/coin/${publishedCoin.address}`;
-
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: publishedCoin.name,
-          url: shareUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success('Link copied to clipboard!');
-      }
-    } catch (error) {
-      console.error('Share error:', error);
-      toast.error('Failed to share');
-    }
-  };
-
   return (
     <div className="flex items-center gap-2">
       {!publishedCoin ? (
@@ -112,15 +94,34 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
           )}
         </Button>
       ) : (
-        <Button
-          className="bg-white cursor-pointer"
-          variant="secondary"
-          size="lg"
-          onClick={handleShare}
-        >
-          <Share2 className="w-4 h-4 mr-2" />
-          Share
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`https://zora.co/coin/base:${publishedCoin.address}`}
+            target="_blank"
+          >
+            <Button
+              className="h-10 bg-transparent cursor-pointer"
+              variant="outline"
+              size="lg"
+            >
+              <DollarSign className="w-4 h-4 mr-2" />
+              Trade
+            </Button>
+          </Link>
+          <Link
+            href={`https://farcaster.xyz/~/compose?text=Check out my new game called ${publishedCoin.name} build with @minigames`}
+            target="_blank"
+          >
+            <Button
+              className="bg-white cursor-pointer"
+              variant="secondary"
+              size="lg"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </Button>
+          </Link>
+        </div>
       )}
     </div>
   );
