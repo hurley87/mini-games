@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { updateBuildByThreadId, getBuildByThreadId } from '@/lib/supabase';
 import { headers } from 'next/headers';
-import { privy } from '@/lib/clients';
 
 // Define the schema for the request body
 const updateBuildSchema = z.object({
@@ -31,31 +30,6 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
-
-    // Verify the token
-    const token = authorization.replace('Bearer ', '');
-    let userFid: number | undefined;
-
-    try {
-      const verifiedClaims = await privy.verifyAuthToken(token);
-      // Get the user details to extract FID
-      const user = await privy.getUser(verifiedClaims.userId);
-      userFid = user.farcaster?.fid;
-
-      if (!userFid) {
-        return NextResponse.json(
-          { success: false, message: 'User FID not found' },
-          { status: 403 }
-        );
-      }
-    } catch (error) {
-      console.error('Token verification failed:', error);
-      return NextResponse.json(
-        { success: false, message: 'Invalid token' },
-        { status: 401 }
-      );
-    }
-
     // Get the build to check ownership
     const build = await getBuildByThreadId(threadId);
 
@@ -63,17 +37,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, message: 'Build not found' },
         { status: 404 }
-      );
-    }
-
-    // Check if the user is the owner
-    if (build.fid !== userFid) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Forbidden: You are not the owner of this build',
-        },
-        { status: 403 }
       );
     }
 
