@@ -104,9 +104,12 @@ export async function POST(request: Request) {
       );
     }
 
-    if (player.score < 0.8) {
+    if (Number(player.score) < 0.7) {
       return NextResponse.json(
-        { success: false, message: 'Insufficient player score' },
+        {
+          success: false,
+          message: `You need a neynar score of 0.7 or higher to create a build. Your score is ${player.score}.`,
+        },
         { status: 403 }
       );
     }

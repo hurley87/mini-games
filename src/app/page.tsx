@@ -85,19 +85,21 @@ export default function Home() {
         }),
       });
 
-      const { data } = await response.json();
+      const { data, success, message } = await response.json();
+
+      if (!success) {
+        toast.error(message);
+        return;
+      }
 
       const build = data[0];
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create build');
-      }
 
       router.push(`/build/${build.id}`);
 
       toast.success('Build request submitted successfully');
       setDescription(''); // Clear the textarea
     } catch (error) {
+      console.error('Error creating build', error);
       toast.error(
         error instanceof Error ? error.message : 'Something went wrong'
       );
