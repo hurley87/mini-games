@@ -27,8 +27,8 @@ export default function Home() {
   const { login } = useLogin({
     onComplete: async (params) => {
       console.log('User logged in successfully', params.user);
-      const player = params.user;
-      const fid = player.farcaster?.fid;
+      const creator = params.user;
+      const fid = creator.farcaster?.fid;
 
       if (!fid) {
         toast.error('Farcaster ID not found');
@@ -36,7 +36,7 @@ export default function Home() {
       }
 
       try {
-        const response = await fetch('/api/players', {
+        const response = await fetch('/api/creators', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 
-type Players = {
+type Creators = {
   fid: number;
   bio: string;
   username: string;
@@ -140,12 +140,12 @@ export const getBuildByThreadId = async (threadId: string) => {
   return data as Build;
 };
 
-export const insertPlayer = async (
-  player: Omit<Players, 'created_at' | 'updated_at'>
+export const insertCreator = async (
+  creator: Omit<Creators, 'created_at' | 'updated_at'>
 ) => {
   const { data, error } = await supabase
-    .from('players')
-    .upsert(player, {
+    .from('creators')
+    .upsert(creator, {
       onConflict: 'fid',
       ignoreDuplicates: false,
     })
@@ -156,7 +156,7 @@ export const insertPlayer = async (
     throw error;
   }
 
-  return data as Players;
+  return data as Creators;
 };
 
 export const getTokenByBuildId = async (buildId: string) => {
@@ -214,9 +214,9 @@ export const insertCoin = async (coin: Omit<Coin, 'updated_at'>) => {
   }
 };
 
-export const getPlayerByFID = async (fid: number) => {
+export const getCreatorByFID = async (fid: number) => {
   const { data, error } = await supabase
-    .from('players')
+    .from('creators')
     .select('*')
     .eq('fid', fid)
     .single();
@@ -225,7 +225,7 @@ export const getPlayerByFID = async (fid: number) => {
     throw error;
   }
 
-  return data as Players;
+  return data as Creators;
 };
 
 export const getCoinByBuildId = async (buildId: string) => {

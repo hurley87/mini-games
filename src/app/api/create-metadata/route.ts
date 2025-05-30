@@ -1,5 +1,5 @@
 import { ipfsService } from '@/lib/pinata';
-import { getBuild, getPlayerByFID } from '@/lib/supabase';
+import { getBuild, getCreatorByFID } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -10,9 +10,9 @@ export async function POST(request: Request) {
 
   const buildFid = build?.fid;
 
-  const player = await getPlayerByFID(buildFid);
+  const creator = await getCreatorByFID(buildFid);
 
-  const username = player?.username;
+  const username = creator?.username;
   const description = `Mini Game created by @${username} on Farcaster`;
   const buildImage = build?.image;
 

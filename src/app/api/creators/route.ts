@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { insertPlayer } from '@/lib/supabase';
+import { insertCreator } from '@/lib/supabase';
 import { z } from 'zod';
 import { getUserByFid } from '@/lib/neynar';
 
-const playerSchema = z.object({
+const creatorSchema = z.object({
   fid: z.number(),
 });
 
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Validate the request body
-    const validatedData = playerSchema.parse(body);
+    const validatedData = creatorSchema.parse(body);
 
     const { fid } = validatedData;
 
@@ -45,8 +45,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Insert the player into the database
-    const player = await insertPlayer({
+    // Insert the creator into the database
+    const creator = await insertCreator({
       fid,
       username,
       pfp: pfp_url || '',
@@ -58,9 +58,9 @@ export async function POST(request: Request) {
       score: score || 0,
     });
 
-    return NextResponse.json({ data: player }, { status: 200 });
+    return NextResponse.json({ data: creator }, { status: 200 });
   } catch (error) {
-    console.error('Error creating player:', error);
+    console.error('Error creating creator:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: 'Failed to create player' },
+      { error: 'Failed to create creator' },
       { status: 500 }
     );
   }

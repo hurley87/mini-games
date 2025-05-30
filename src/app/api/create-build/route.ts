@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import OpenAI from 'openai';
 import {
-  getPlayerByFID,
+  getCreatorByFID,
   insertBuild,
   uploadImageFromUrl,
 } from '@/lib/supabase';
@@ -100,20 +100,20 @@ export async function POST(request: Request) {
 
     const { description, fid, model } = validatedData;
 
-    // Check player score before proceeding
-    const player = await getPlayerByFID(fid);
-    if (!player) {
+    // Check creator score before proceeding
+    const creator = await getCreatorByFID(fid);
+    if (!creator) {
       return NextResponse.json(
-        { success: false, message: 'Player not found' },
+        { success: false, message: 'Creator not found' },
         { status: 404 }
       );
     }
 
-    if (Number(player.score) < 0.7) {
+    if (Number(creator.score) < 0.7) {
       return NextResponse.json(
         {
           success: false,
-          message: `You need a neynar score of 0.7 or higher to create a build. Your score is ${player.score}.`,
+          message: `You need a neynar score of 0.7 or higher to create a build. Your score is ${creator.score}.`,
         },
         { status: 403 }
       );
