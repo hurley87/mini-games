@@ -392,7 +392,7 @@ export default function TokenDialog({
                 Launch Your Game Token
               </DialogTitle>
               <DialogDescription className="text-center text-gray-400 mt-2">
-                Create a unique token for your game's economy
+                {`Create a unique token for your game's economy`}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
