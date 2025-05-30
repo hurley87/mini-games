@@ -22,7 +22,14 @@ import {
 import { base } from 'viem/chains';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { createCoin, getCoinCreateFromLogs } from '@zoralabs/coins-sdk';
-import { CheckCircle } from 'lucide-react';
+import {
+  CheckCircle,
+  Coins,
+  Rocket,
+  Sparkles,
+  ArrowRight,
+  Loader2,
+} from 'lucide-react';
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!;
 
@@ -238,78 +245,151 @@ export default function TokenDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <Button
-          className="bg-white cursor-pointer"
-          variant="secondary"
-          size="lg"
-        >
-          Publish
+        <Button className="bg-white text-black hover:bg-gray-100" size="lg">
+          <Rocket className="mr-2 h-4 w-4" />
+          Launch Game
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-[#2a2a2a]">
+      <DialogContent className="bg-[#2a2a2a] border-gray-800">
         {isCoinCreated ? (
           <>
             <DialogHeader>
-              <DialogTitle>Create Reward Pool</DialogTitle>
-              <DialogDescription>
-                Review your token details and create the reward pool.
+              <div className="mx-auto mb-4 p-3 bg-[#30363d] rounded-full">
+                <CheckCircle className="h-10 w-10 text-green-500" />
+              </div>
+              <DialogTitle className="text-xl font-bold text-center text-white">
+                Token Created Successfully
+              </DialogTitle>
+              <DialogDescription className="text-center text-gray-400 mt-2">
+                Your game token is live on Base
               </DialogDescription>
             </DialogHeader>
-            <div className="py-6 space-y-4">
-              <div className="flex items-center justify-center mb-4">
-                <CheckCircle className="h-12 w-12 text-green-500" />
+            <div className="py-6 space-y-6">
+              <div className="bg-[#1a1a1a] rounded-lg p-4 border border-gray-800">
+                <div className="flex items-center mb-3">
+                  <Sparkles className="h-5 w-5 text-yellow-500 mr-2" />
+                  <h3 className="font-semibold text-white">
+                    Next Step: Initialize Rewards
+                  </h3>
+                </div>
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  Create a reward pool to enable token distribution to your
+                  players. This pool will be used to incentivize gameplay and
+                  reward achievements. You can always add more funds to the pool
+                  later.
+                </p>
               </div>
-              <p className="text-center">
-                You&apos;re about to create a reward pool for your game.
-              </p>
-              <p className="text-center text-sm text-muted-foreground">
-                Once created, the reward pool will be available for
-                distribution.
-              </p>
+              <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+                  <span>Token deployed</span>
+                </div>
+                <ArrowRight className="h-4 w-4" />
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-gray-600 rounded-full mr-2" />
+                  <span>Initialize rewards</span>
+                </div>
+              </div>
             </div>
-            <DialogFooter className="flex justify-between">
+            <DialogFooter>
               <Button
+                size="lg"
                 onClick={fundRewardPool}
                 disabled={isLoading || !coinAddress || !rewardPoolAddress}
-                className="disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-white text-black hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Funding Pool...' : 'Create Reward Pool'}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Reward Pool...
+                  </>
+                ) : (
+                  <>
+                    <Coins className="mr-2 h-4 w-4" />
+                    Initialize Reward Pool
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="text-white">Create Token</DialogTitle>
-              <DialogDescription className="text-[#adadad]">
-                Enter token details
+              <div className="mx-auto mb-4 p-3 bg-[#30363d] rounded-full">
+                <Coins className="h-10 w-10 text-gray-400" />
+              </div>
+              <DialogTitle className="text-xl font-bold text-center text-white">
+                Launch Your Game Token
+              </DialogTitle>
+              <DialogDescription className="text-center text-gray-400 mt-2">
+                Create a unique token for your game's economy
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <input
-                type="text"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-md border border-[#30363d] bg-[#1a1a1a] p-2 text-white"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Symbol"
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value)}
-                className="w-full rounded-md border border-[#30363d] bg-[#1a1a1a] p-2 text-white"
-                required
-              />
+            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Token Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Space Credits"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full rounded-md border border-[#30363d] bg-[#1a1a1a] px-4 py-3 text-white placeholder:text-gray-500 focus:border-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-600 transition-colors"
+                  required
+                />
+                <p className="text-xs text-gray-500">
+                  Choose a memorable name for your game token
+                </p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Token Symbol
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., SPACE"
+                  value={symbol}
+                  onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                  className="w-full rounded-md border border-[#30363d] bg-[#1a1a1a] px-4 py-3 text-white placeholder:text-gray-500 focus:border-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-600 transition-colors"
+                  required
+                  maxLength={6}
+                />
+                <p className="text-xs text-gray-500">
+                  3-6 characters, typically uppercase
+                </p>
+              </div>
+              <div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#30363d]">
+                <div className="flex items-start space-x-2">
+                  <Sparkles className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-xs text-gray-300">
+                    <p className="font-medium mb-1">Launch details:</p>
+                    <ul className="space-y-1 text-gray-500">
+                      <li>• Initial purchase: {PURCHASE_START_PRICE} ETH</li>
+                      <li>• Deployed on Base network</li>
+                      <li>• Instant tradability</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
               <DialogFooter className="pt-2">
                 <Button
                   type="submit"
-                  variant="secondary"
-                  className="bg-white text-black disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading}
+                  size="lg"
+                  className="w-full bg-white text-black hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isLoading || !title || !symbol}
                 >
-                  {isLoading ? 'Creating...' : 'Create Token'}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Token...
+                    </>
+                  ) : (
+                    <>
+                      <Rocket className="mr-2 h-4 w-4" />
+                      Create Game Token
+                    </>
+                  )}
                 </Button>
               </DialogFooter>
             </form>

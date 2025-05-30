@@ -168,16 +168,13 @@ export default function CoinRewards({
               target="_blank"
               className="block"
             >
-              <Button
-                className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
-                size="lg"
-              >
+              <Button variant="outline" className="w-full" size="lg">
                 <ExternalLink className="w-4 h-4 mr-2" />
-                View {name} on Zora
+                Trade ${symbol}
               </Button>
             </Link>
             <div className="text-xs text-[#adadad] text-center mt-2">
-              Trade your token on the Zora marketplace
+              Trade your token on Zora
             </div>
           </div>
         </div>

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { updateBuildByThreadId, getBuildByThreadId } from '@/lib/supabase';
-import { headers } from 'next/headers';
 
 // Define the schema for the request body
 const updateBuildSchema = z.object({
@@ -20,16 +19,6 @@ export async function POST(request: Request) {
     const validatedData = updateBuildSchema.parse(body);
     const { threadId, title, html } = validatedData;
 
-    // Get the authorization token
-    const headersList = await headers();
-    const authorization = headersList.get('authorization');
-
-    if (!authorization) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
     // Get the build to check ownership
     const build = await getBuildByThreadId(threadId);
 
