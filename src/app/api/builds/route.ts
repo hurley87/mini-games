@@ -14,7 +14,7 @@ export async function GET() {
           isPublished: !!coin,
           coin: coin
             ? {
-                address: coin.address,
+                address: coin.coin_address,
                 name: coin.name,
                 symbol: coin.symbol,
               }

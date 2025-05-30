@@ -260,7 +260,7 @@ export default function TokenDialog({
                 <CheckCircle className="h-12 w-12 text-green-500" />
               </div>
               <p className="text-center">
-                You're about to create a reward pool for your game.
+                You&apos;re about to create a reward pool for your game.
               </p>
               <p className="text-center text-sm text-muted-foreground">
                 Once created, the reward pool will be available for

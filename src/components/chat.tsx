@@ -8,7 +8,6 @@ import { AssistantStreamEvent } from 'openai/resources/beta/assistants/assistant
 import { RequiredActionFunctionToolCall } from 'openai/resources/beta/threads/runs/runs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { usePrivy } from '@privy-io/react-auth';
 
 type MessageApiResponse = {
   role: 'user' | 'assistant';
@@ -75,8 +74,6 @@ const Chat = ({
     error: null,
   });
   const [inputDisabled, setInputDisabled] = useState(false);
-  const { user, getAccessToken } = usePrivy();
-  const fid = user?.farcaster?.fid;
 
   // Fetch existing messages when component mounts
   useEffect(() => {
@@ -167,14 +164,12 @@ const Chat = ({
     appendMessage('assistant', 'Updating your game...');
 
     // Get the access token
-    const accessToken = await getAccessToken();
 
     // Handle game creation asynchronously
     const response = await fetch(`/api/update-build`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         threadId,

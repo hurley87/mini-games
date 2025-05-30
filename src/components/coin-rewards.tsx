@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dialog';
 import { useState, useEffect } from 'react';
 import { Coins, Copy, Check, ExternalLink } from 'lucide-react';
-import { usePrivy } from '@privy-io/react-auth';
 import { createPublicClient, http, Address } from 'viem';
 import { base } from 'viem/chains';
 import { formatEther } from 'viem';
@@ -53,7 +52,6 @@ export default function CoinRewards({
   symbol,
   name,
 }: CoinRewardsProps) {
-  const { user } = usePrivy();
   const [balance, setBalance] = useState<string>('0');
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -159,8 +157,8 @@ export default function CoinRewards({
               </Button>
             </div>
             <div className="text-xs text-[#adadad]">
-              This is your game's reward pool address where players can receive
-              tokens.
+              {`This is your game's reward pool address where players can receive
+              tokens.`}
             </div>
           </div>
 

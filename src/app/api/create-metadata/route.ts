@@ -13,9 +13,7 @@ export async function POST(request: Request) {
   const player = await getPlayerByFID(buildFid);
 
   const username = player?.username;
-
   const description = `Mini Game created by @${username} on Farcaster`;
-
   const buildImage = build?.image;
 
   const uri = await ipfsService.pinMetadata(title, description, buildImage!);
