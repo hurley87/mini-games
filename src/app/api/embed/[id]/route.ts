@@ -25,23 +25,7 @@ export async function GET(
     return NextResponse.json({ error: 'Game not found' }, { status: 404 });
   }
 
-  const injectedScript = `
-  <script>
-    window.awardPoints = async function(score) {
-      await fetch('/api/award', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: '${userId}',
-          gameId: '${gameId}',
-          score: score
-        })
-      });
-    };
-  </script>
-`;
-
-  const html = build.html.replace('</body>', `${injectedScript}</body>`);
+  const html = build.html;
 
   return new Response(html, {
     headers: { 'Content-Type': 'text/html' },

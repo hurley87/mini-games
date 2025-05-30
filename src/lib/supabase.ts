@@ -29,13 +29,15 @@ type Build = {
 
 type Coin = {
   name: string;
-  description: string;
   image: string;
   symbol: string;
-  address: string;
+  coin_address: string;
   build_id: string;
   fid: number;
   updated_at: string;
+  wallet_address: string;
+  wallet_id: string;
+  chain_type: string;
 };
 
 export const supabase = createClient(
@@ -178,9 +180,12 @@ export const insertCoin = async (coin: Omit<Coin, 'updated_at'>) => {
     if (
       !coin.name ||
       !coin.symbol ||
-      !coin.address ||
+      !coin.coin_address ||
       !coin.build_id ||
-      !coin.fid
+      !coin.fid ||
+      !coin.wallet_address ||
+      !coin.wallet_id ||
+      !coin.chain_type
     ) {
       throw new Error('Missing required fields for coin creation');
     }

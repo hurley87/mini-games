@@ -121,8 +121,6 @@ const Chat = ({
     fetchMessages();
   }, [threadId]);
 
-  console.log('fid', fid);
-
   // automatically scroll to bottom of chat
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollToBottom = () => {
@@ -162,20 +160,9 @@ const Chat = ({
     }[]
   ) => {
     if (toolCallOutputs.length === 0) return;
-    console.log(
-      'submitActionResult',
-      runId,
-      toolCallOutputs,
-      toolCallOutputs[0].args
-    );
     const args = JSON.parse(toolCallOutputs[0].args);
     const title = args.title;
     const html = args.html;
-
-    console.log('title', title);
-    console.log('html', html);
-    console.log('threadId', threadId);
-
     // Show creating game message immediately
     appendMessage('assistant', 'Updating your game...');
 
@@ -207,7 +194,6 @@ const Chat = ({
     }
 
     const data = await response.json();
-    console.log('data', data);
     if (data.success) {
       appendMessage('assistant', 'Game updated successfully!');
       if (onBuildUpdated) {
@@ -291,8 +277,6 @@ const Chat = ({
     const toolCallOutputs = await Promise.all(
       toolCalls.map(async (toolCall: RequiredActionFunctionToolCall) => {
         const result = await functionCallHandler(toolCall);
-        console.log('result', result);
-        console.log('toolCall', toolCall);
         return {
           output: result,
           tool_call_id: toolCall.id,
@@ -355,8 +339,6 @@ const Chat = ({
       messages: [...prev.messages, { role, text }],
     }));
   };
-
-  console.log('messages', messageState.messages);
 
   return (
     <div className="flex flex-col h-full">

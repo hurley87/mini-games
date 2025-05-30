@@ -66,11 +66,16 @@ const getActionPrompt = (description: string) => {
         
         Pass the player's score as a number. Do not define or modify this function — it is already provided by the environment.
 
-        Show the players score in the top left corner of the screen. Only update score but 1 point at a time.
+        IMPORTANT UI REQUIREMENTS:
+        - DO NOT display any text, numbers, scores, timers, or countdown elements anywhere on the screen
+        - DO NOT show the player's score visually in the game
+        - DO NOT display time remaining or any timer elements
+        - The game should be purely visual with shapes, colors, and animations only
+        - Keep track of score internally for the tryAwardPoints function, but never display it
 
         All games must be playable in the browser.
 
-        All game must last 30 seconds before they reset.
+        The game should run continuously without showing time limits or countdowns to the player.
 
         Use simple colors and shapes. Interactions should be simple - just taps and clicks (no swipes or complex gestures). Don't use any external packacges. dont follow the users cursor.
 
