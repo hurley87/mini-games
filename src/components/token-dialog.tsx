@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTrigger,
@@ -61,6 +61,31 @@ export default function TokenDialog({
   const [isCoinCreated, setIsCoinCreated] = useState(false);
   const [coinAddress, setCoinAddress] = useState<string>('');
   const [rewardPoolAddress, setRewardPoolAddress] = useState<string>('');
+  const [isPoolFunded, setIsPoolFunded] = useState(false);
+
+  // Check for unpublished coin when component mounts
+  useEffect(() => {
+    const checkUnpublishedCoin = async () => {
+      try {
+        // Fetch the coin directly from the database without pool_initialized check
+        const response = await fetch(`/api/coins/${buildId}/unpublished`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.coin && !data.coin.pool_initialized) {
+            // Set the state to show the pool initialization screen
+            setCoinAddress(data.coin.coin_address);
+            setRewardPoolAddress(data.coin.wallet_address);
+            setIsCoinCreated(true);
+            setOpen(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking unpublished coin:', error);
+      }
+    };
+
+    checkUnpublishedCoin();
+  }, [buildId]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -228,6 +253,24 @@ export default function TokenDialog({
 
       console.log('Transfer confirmed:', receipt);
 
+      // Update pool initialization status
+      try {
+        const response = await fetch(`/api/coins/${buildId}/pool-status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ poolInitialized: true }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to update pool status');
+        }
+      } catch (error) {
+        console.error('Error updating pool status:', error);
+      }
+
+      // Mark pool as funded
+      setIsPoolFunded(true);
+
       // Close the dialog after successful transfer
       setOpen(false);
 
@@ -242,8 +285,28 @@ export default function TokenDialog({
     }
   };
 
+  // Handle dialog open/close
+  const handleOpenChange = (newOpen: boolean) => {
+    // Prevent closing if coin is created but pool not funded
+    if (!newOpen && isCoinCreated && !isPoolFunded) {
+      return;
+    }
+
+    // Reset state when closing after successful pool funding
+    if (!newOpen && isPoolFunded) {
+      setIsCoinCreated(false);
+      setIsPoolFunded(false);
+      setCoinAddress('');
+      setRewardPoolAddress('');
+      setTitle('');
+      setSymbol('');
+    }
+
+    setOpen(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger>
         <Button className="bg-white text-black hover:bg-gray-100" size="lg">
           <Rocket className="mr-2 h-4 w-4" />
@@ -279,6 +342,13 @@ export default function TokenDialog({
                   later.
                 </p>
               </div>
+              {!isPoolFunded && (
+                <div className="bg-orange-900/20 border border-orange-700/50 rounded-lg p-3">
+                  <p className="text-sm text-orange-300 text-center">
+                    ⚠️ You must initialize the reward pool to complete the setup
+                  </p>
+                </div>
+              )}
               <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-2" />

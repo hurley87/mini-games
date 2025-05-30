@@ -20,7 +20,6 @@ interface CoinRewardsProps {
   coinAddress: string;
   walletAddress: string;
   symbol: string;
-  name: string;
 }
 
 // Use Base's public RPC endpoint
@@ -50,7 +49,6 @@ export default function CoinRewards({
   coinAddress,
   walletAddress,
   symbol,
-  name,
 }: CoinRewardsProps) {
   const [balance, setBalance] = useState<string>('0');
   const [isLoading, setIsLoading] = useState(true);

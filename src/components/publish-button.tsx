@@ -74,7 +74,6 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
             coinAddress={publishedCoin.address}
             walletAddress={publishedCoin.walletAddress}
             symbol={publishedCoin.symbol}
-            name={publishedCoin.name}
           />
           <Link
             href={`https://farcaster.xyz/~/compose?text=Check out my new game called ${publishedCoin.name} build with @minigames`}

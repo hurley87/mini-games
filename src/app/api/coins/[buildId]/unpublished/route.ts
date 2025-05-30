@@ -7,20 +7,12 @@ export async function GET(
 ) {
   try {
     const { buildId } = await params;
-    console.log('buildId', buildId);
     const coin = await getCoinByBuildId(buildId);
 
-    console.log('coin', coin);
-
-    // Only return the coin if the pool is initialized
-    if (coin && !coin.pool_initialized) {
-      return NextResponse.json({ coin: null });
-    }
-
+    // Return the coin regardless of pool_initialized status
     return NextResponse.json({ coin });
   } catch (error) {
-    console.error('Error fetching coin:', error);
-    console.log('request', request?.url);
+    console.error('Error fetching unpublished coin:', error);
     return NextResponse.json(
       { error: 'Failed to fetch coin data' },
       { status: 500 }
