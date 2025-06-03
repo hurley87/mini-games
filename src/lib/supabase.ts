@@ -26,6 +26,8 @@ type Build = {
   description: string;
   image: string;
   tutorial: string;
+  status?: string;
+  error_message?: string;
 };
 
 type Coin = {
@@ -118,6 +120,24 @@ export const updateBuildByThreadId = async (
     .from('builds')
     .update(updates)
     .eq('thread_id', threadId)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Build;
+};
+
+export const updateBuild = async (
+  id: string,
+  updates: Partial<Omit<Build, 'id' | 'created_at' | 'fid'>>
+) => {
+  const { data, error } = await supabase
+    .from('builds')
+    .update(updates)
+    .eq('id', id)
     .select()
     .single();
 

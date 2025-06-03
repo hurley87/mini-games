@@ -79,6 +79,7 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          description,
           fid,
           model,
         }),
@@ -91,12 +92,11 @@ export default function Home() {
         return;
       }
 
-      const build = data[0];
-
-      router.push(`/build/${build.id}`);
-
-      toast.success('Build request submitted successfully');
+      toast.success('Build created! Generation started...');
       setDescription(''); // Clear the textarea
+
+      // Trigger a refresh of the builds list
+      window.dispatchEvent(new CustomEvent('refreshBuilds'));
     } catch (error) {
       console.error('Error creating build', error);
       toast.error(

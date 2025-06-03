@@ -437,7 +437,7 @@ export default function TokenDialog({
                     <ul className="space-y-1 text-gray-500">
                       <li>• Initial purchase: {PURCHASE_START_PRICE} ETH</li>
                       <li>• Deployed on Base network</li>
-                      <li>• Instant tradability</li>
+                      <li>• Earn fees from trades</li>
                     </ul>
                   </div>
                 </div>

@@ -5,6 +5,7 @@ import {
   getCreatorByFID,
   insertBuild,
   uploadImageFromUrl,
+  updateBuild,
 } from '@/lib/supabase';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
@@ -91,6 +92,80 @@ const getActionPrompt = (description: string) => {
 Generate a build for a mini game based on the following description: ${description}`;
 };
 
+// Background processing function
+async function processBuildGeneration(
+  buildId: string,
+  description: string,
+  model: string,
+  fid: number
+) {
+  try {
+    // Create a new thread
+    const thread = await openaiSDK.beta.threads.create();
+
+    // Update build with thread_id and status
+    await updateBuild(buildId, {
+      thread_id: thread.id,
+      status: 'generating_content',
+    });
+
+    // Generate content using AI
+    const { object: agentResponse } = await generateObject({
+      model: openai(model),
+      schema: buildSchema,
+      mode: 'json',
+      system: getSystemPrompt(),
+      prompt: getActionPrompt(description),
+    });
+
+    const validatedResponse = buildSchema.parse(agentResponse);
+
+    // Update build with generated content
+    await updateBuild(buildId, {
+      title: validatedResponse.title,
+      html: validatedResponse.html,
+      tutorial: validatedResponse.tutorial,
+      status: 'generating_image',
+    });
+
+    // Generate an image based on the description
+    const image = await openaiSDK.images.generate({
+      prompt: `Create a square, text-free digital illustration inspired by the game description below.
+        Use a bold, minimalist art style with flat shapes, soft lighting, and strong visual contrast.
+        Focus on capturing the core mechanic, visual tone, and atmosphere of the game.
+        Avoid realistic detail or clutter. Do not include any words or letters in the image.
+        The image should look like a logo or visual identity — clean, iconic, and immediately readable.
+        IMPORTANT: The illustration must fill the entire canvas edge-to-edge without any borders, padding, or empty space.
+        Design the elements to extend all the way to the edges of the frame for a full-bleed appearance.
+
+        Game description:
+        ${description}`,
+      n: 1,
+      size: '1024x1024',
+      response_format: 'url',
+      model: 'dall-e-3',
+    });
+
+    const imageUrl = image.data?.[0]?.url ?? '';
+    const publicImageUrl = imageUrl ? await uploadImageFromUrl(imageUrl) : '';
+
+    // Final update with image and completion status
+    await updateBuild(buildId, {
+      image: publicImageUrl,
+      status: 'completed',
+    });
+  } catch (error) {
+    console.error('Error processing build generation:', error);
+
+    // Update build with error status
+    await updateBuild(buildId, {
+      status: 'failed',
+      error_message:
+        error instanceof Error ? error.message : 'Unknown error occurred',
+    });
+  }
+}
+
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
@@ -121,55 +196,27 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create a new thread
-    const thread = await openaiSDK.beta.threads.create();
-
-    const { object: agentResponse } = await generateObject({
-      model: openai(model),
-      schema: buildSchema,
-      mode: 'json',
-      system: getSystemPrompt(),
-      prompt: getActionPrompt(description),
-    });
-
-    const validatedResponse = buildSchema.parse(agentResponse);
-
-    console.log('agentResponse', validatedResponse);
-
-    // Generate an image based on the description
-    const image = await openaiSDK.images.generate({
-      prompt: `Create a square, text-free digital illustration inspired by the game description below.
-        Use a bold, minimalist art style with flat shapes, soft lighting, and strong visual contrast.
-        Focus on capturing the core mechanic, visual tone, and atmosphere of the game.
-        Avoid realistic detail or clutter. Do not include any words or letters in the image.
-        The image should look like a logo or visual identity — clean, iconic, and immediately readable.
-        IMPORTANT: The illustration must fill the entire canvas edge-to-edge without any borders, padding, or empty space.
-        Design the elements to extend all the way to the edges of the frame for a full-bleed appearance.
-
-        Game description:
-        ${description}`,
-      n: 1,
-      size: '1024x1024',
-      response_format: 'url',
-      model: 'dall-e-3',
-    });
-    const imageUrl = image.data?.[0]?.url ?? '';
-    const publicImageUrl = imageUrl ? await uploadImageFromUrl(imageUrl) : '';
-
+    // Create build immediately with pending status
     const build = await insertBuild({
-      title: validatedResponse.title,
-      html: validatedResponse.html,
+      title: `Generating game...`, // Temporary title
+      html: '', // Will be filled later
       description,
       model,
       fid,
-      thread_id: thread.id,
-      image: publicImageUrl,
-      tutorial: validatedResponse.tutorial,
+      thread_id: '', // Will be filled later
+      image: '', // Will be filled later
+      tutorial: '', // Will be filled later
+      status: 'pending',
     });
+
+    // Start background processing without awaiting
+    processBuildGeneration(build[0].id, description, model, fid).catch(
+      console.error
+    );
 
     return NextResponse.json({
       success: true,
-      message: 'Build request received',
+      message: 'Build created and generation started',
       data: build,
     });
   } catch (error) {
