@@ -20,6 +20,7 @@ const createBuildSchema = z.object({
 const buildSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   html: z.string().min(1, 'HTML is required'),
+  tutorial: z.string().min(1, 'Tutorial is required'),
 });
 
 const getSystemPrompt = () => {
@@ -82,7 +83,8 @@ const getActionPrompt = (description: string) => {
         Return your response as a JSON object with the following structure:
         {
           "title": "The title of the game",
-          "html": "The complete HTML code for the game"
+          "html": "The complete HTML code for the game",
+          "tutorial": "A brief, clear description of how to play the game (2-3 sentences max)"
         }
 
 ⸻
@@ -162,6 +164,7 @@ export async function POST(request: Request) {
       fid,
       thread_id: thread.id,
       image: publicImageUrl,
+      tutorial: validatedResponse.tutorial,
     });
 
     return NextResponse.json({

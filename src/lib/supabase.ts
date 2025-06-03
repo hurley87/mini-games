@@ -25,6 +25,7 @@ type Build = {
   model: string;
   description: string;
   image: string;
+  tutorial: string;
 };
 
 type Coin = {
