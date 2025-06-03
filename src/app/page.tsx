@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { FloatingBubbles } from '@/components/floating-bubbles';
 import { ChevronDown } from 'lucide-react';
@@ -22,7 +21,6 @@ export default function Home() {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [model, setModel] = useState('gpt-4.1');
-  const router = useRouter();
   const fid = user?.farcaster?.fid;
   const { login } = useLogin({
     onComplete: async (params) => {
@@ -85,7 +83,7 @@ export default function Home() {
         }),
       });
 
-      const { data, success, message } = await response.json();
+      const { success, message } = await response.json();
 
       if (!success) {
         toast.error(message);

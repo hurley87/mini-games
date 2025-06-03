@@ -99,6 +99,9 @@ async function processBuildGeneration(
   model: string,
   fid: number
 ) {
+  console.log('Processing build generation for buildId:', buildId);
+  console.log('Fid:', fid);
+
   try {
     // Create a new thread
     const thread = await openaiSDK.beta.threads.create();
