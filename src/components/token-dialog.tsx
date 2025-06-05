@@ -149,13 +149,10 @@ export default function TokenDialog({
 
           toast.success('Switched to Base network');
           setIsWrongChain(false);
-        } catch (switchError: any) {
-          // Handle specific error cases
-          if (switchError?.code === 4902) {
-            // Chain not added to wallet
-            toast.error('Please add Base network to your wallet');
-            throw new Error('Base network not found in wallet');
-          }
+        } catch (switchError) {
+          console.log('switchError', switchError);
+          toast.error('Please add Base network to your wallet');
+          setIsWrongChain(true);
           throw switchError;
         }
       }
