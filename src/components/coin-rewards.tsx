@@ -113,7 +113,7 @@ export default function CoinRewards({
           size="lg"
         >
           <Coins className="w-4 h-4 mr-2" />
-          {isLoading ? '...' : `${balance} ${symbol}`}
+          {isLoading ? '...' : `${balance} $${symbol.toUpperCase()}`}
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-[#2a2a2a] max-w-md">
@@ -126,7 +126,7 @@ export default function CoinRewards({
         <div className="py-6 space-y-6">
           <div className="text-center">
             <div className="text-3xl font-bold text-white mb-2">
-              {balance} {symbol}
+              {balance} ${symbol.toUpperCase()}
             </div>
             <div className="text-sm text-[#adadad]">
               Current reward pool balance

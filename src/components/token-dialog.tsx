@@ -30,6 +30,7 @@ import {
   ArrowRight,
   Loader2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!;
 
@@ -54,6 +55,8 @@ export default function TokenDialog({
     | undefined;
   const wallet = wallets.find((w) => w.address === address) || wallets[0];
 
+  console.log('wallet', wallet);
+
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [symbol, setSymbol] = useState('');
@@ -62,6 +65,105 @@ export default function TokenDialog({
   const [coinAddress, setCoinAddress] = useState<string>('');
   const [rewardPoolAddress, setRewardPoolAddress] = useState<string>('');
   const [isPoolFunded, setIsPoolFunded] = useState(false);
+  const [isWrongChain, setIsWrongChain] = useState(false);
+
+  // Helper function to check if wallet is on Base chain
+  const checkChain = async () => {
+    if (!wallet) return;
+
+    try {
+      const provider = await wallet.getEthereumProvider();
+      if (!provider) return;
+
+      const chainId = await provider.request({ method: 'eth_chainId' });
+      const currentChainId = parseInt(chainId as string, 16);
+
+      setIsWrongChain(currentChainId !== base.id);
+    } catch (error) {
+      console.error('Error checking chain:', error);
+    }
+  };
+
+  // Check chain on mount and when wallet changes
+  useEffect(() => {
+    checkChain();
+
+    // Set up chain change listener
+    const setupChainListener = async () => {
+      if (!wallet) return;
+
+      try {
+        const provider = await wallet.getEthereumProvider();
+        if (!provider || !provider.on) return;
+
+        const handleChainChanged = () => {
+          checkChain();
+        };
+
+        provider.on('chainChanged', handleChainChanged);
+
+        // Cleanup listener on unmount
+        return () => {
+          provider.removeListener('chainChanged', handleChainChanged);
+        };
+      } catch (error) {
+        console.error('Error setting up chain listener:', error);
+      }
+    };
+
+    setupChainListener();
+  }, [wallet]);
+
+  // Helper function to ensure wallet is on Base chain
+  const ensureBaseChain = async () => {
+    if (!wallet) {
+      throw new Error('No wallet connected');
+    }
+
+    try {
+      const provider = await wallet.getEthereumProvider();
+      if (!provider) {
+        throw new Error('Unable to get wallet provider');
+      }
+
+      // Check current chain
+      const chainId = await provider.request({ method: 'eth_chainId' });
+      const currentChainId = parseInt(chainId as string, 16);
+
+      // Base chain ID is 8453
+      if (currentChainId !== base.id) {
+        console.log('Switching to Base chain...');
+
+        try {
+          await wallet.switchChain(base.id);
+          // Wait a bit for the chain switch to complete
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          // Verify the switch was successful
+          const newChainId = await provider.request({ method: 'eth_chainId' });
+          const verifiedChainId = parseInt(newChainId as string, 16);
+
+          if (verifiedChainId !== base.id) {
+            throw new Error('Failed to switch to Base chain');
+          }
+
+          toast.success('Switched to Base network');
+          setIsWrongChain(false);
+        } catch (switchError: any) {
+          // Handle specific error cases
+          if (switchError?.code === 4902) {
+            // Chain not added to wallet
+            toast.error('Please add Base network to your wallet');
+            throw new Error('Base network not found in wallet');
+          }
+          throw switchError;
+        }
+      }
+    } catch (error) {
+      console.error('Error switching chain:', error);
+      throw error;
+    }
+  };
 
   // Check for unpublished coin when component mounts
   useEffect(() => {
@@ -92,6 +194,9 @@ export default function TokenDialog({
     setIsLoading(true);
 
     try {
+      // Ensure wallet is on Base chain
+      await ensureBaseChain();
+
       const res = await fetch('/api/create-metadata', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -170,6 +275,11 @@ export default function TokenDialog({
       }
     } catch (err) {
       console.error('Error creating token', err);
+      if (err instanceof Error && err.message.includes('chain')) {
+        toast.error('Please switch to Base network to continue');
+      } else {
+        toast.error('Error creating token');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -186,6 +296,9 @@ export default function TokenDialog({
     setIsLoading(true);
 
     try {
+      // Ensure wallet is on Base chain
+      await ensureBaseChain();
+
       const provider = await wallet.getEthereumProvider();
 
       if (!provider) {
@@ -280,6 +393,11 @@ export default function TokenDialog({
       }
     } catch (error) {
       console.error('Error funding reward pool:', error);
+      if (error instanceof Error && error.message.includes('chain')) {
+        toast.error('Please switch to Base network to continue');
+      } else {
+        toast.error('Error funding reward pool');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -328,6 +446,13 @@ export default function TokenDialog({
               </DialogDescription>
             </DialogHeader>
             <div className="py-6 space-y-6">
+              {isWrongChain && (
+                <div className="bg-orange-900/20 border border-orange-700/50 rounded-lg p-3">
+                  <p className="text-sm text-orange-300 text-center">
+                    ⚠️ Please switch to Base network to continue
+                  </p>
+                </div>
+              )}
               <div className="bg-[#1a1a1a] rounded-lg p-4 border border-gray-800">
                 <div className="flex items-center mb-3">
                   <Sparkles className="h-5 w-5 text-yellow-500 mr-2" />
@@ -345,7 +470,7 @@ export default function TokenDialog({
               {!isPoolFunded && (
                 <div className="bg-orange-900/20 border border-orange-700/50 rounded-lg p-3">
                   <p className="text-sm text-orange-300 text-center">
-                    ⚠️ You must initialize the reward pool to complete the setup
+                    ⚠️ You must initialize the reward pool to launch
                   </p>
                 </div>
               )}
@@ -396,6 +521,13 @@ export default function TokenDialog({
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+              {isWrongChain && (
+                <div className="bg-orange-900/20 border border-orange-700/50 rounded-lg p-3">
+                  <p className="text-sm text-orange-300 text-center">
+                    ⚠️ Please switch to Base network to continue
+                  </p>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">
                   Token Name
