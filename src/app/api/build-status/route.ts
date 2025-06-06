@@ -15,6 +15,8 @@ export async function GET(request: Request) {
 
     const build = await getBuild(buildId);
 
+    console.log('build', build);
+
     return NextResponse.json({
       success: true,
       data: build,
