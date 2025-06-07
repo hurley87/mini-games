@@ -15,6 +15,7 @@ interface PublishButtonProps {
 export default function PublishButton({ buildId }: PublishButtonProps) {
   const { user, linkWallet } = usePrivy();
   const [publishedCoin, setPublishedCoin] = useState<{
+    id: string;
     address: string;
     name: string;
     symbol: string;
@@ -33,6 +34,7 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
 
       if (data.coin) {
         setPublishedCoin({
+          id: data.coin.id,
           address: data.coin.coin_address,
           name: data.coin.name,
           symbol: data.coin.symbol,
@@ -76,7 +78,11 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
             symbol={publishedCoin.symbol}
           />
           <Link
-            href={`https://farcaster.xyz/~/compose?text=Check out my new game called ${publishedCoin.name} build with @minigames`}
+            href={`https://farcaster.xyz/~/compose?text=${encodeURIComponent(
+              `Check out this new game I created!`
+            )}&embeds[]=${encodeURIComponent(
+              `https://app.minigames.studio/coins/${publishedCoin.id}`
+            )}`}
             target="_blank"
           >
             <Button
