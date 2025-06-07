@@ -5,6 +5,8 @@ import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
+export const maxDuration = 300;
+
 // Helper function to wait for a run to complete
 async function waitForRunCompletion(threadId: string, runId: string) {
   let run: unknown;
