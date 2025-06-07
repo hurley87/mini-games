@@ -423,7 +423,10 @@ export default function TokenDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger>
-        <Button className="bg-white text-black hover:bg-gray-100" size="lg">
+        <Button
+          className="bg-white text-black hover:bg-gray-100 cursor-pointer"
+          size="lg"
+        >
           <Rocket className="mr-2 h-4 w-4" />
           Launch Game
         </Button>

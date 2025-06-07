@@ -1,5 +1,6 @@
 import BuildClient from '@/components/build-client';
 import BuildOwnerCheck from '@/components/build-owner-check';
+import EditableTitle from '@/components/editable-title';
 import PublishButton from '@/components/publish-button';
 import { Button } from '@/components/ui/button';
 import { getBuild } from '@/lib/supabase';
@@ -48,7 +49,7 @@ export default async function BuildPage({ params }: BuildPageProps) {
             />
           )}
           <div className="ml-2">
-            <h1 className="text-sm font-medium">{build.title}</h1>
+            <EditableTitle buildId={id} initialTitle={build.title} />
           </div>
 
           <div className="ml-auto flex items-center gap-2">
