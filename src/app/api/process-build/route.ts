@@ -186,6 +186,9 @@ export async function POST(request: Request) {
 
     const { buildId, description, model, fid } = validatedData;
 
+    console.log('Processing build generation for buildId:', buildId);
+    console.log('Fid:', fid);
+
     // Process the build generation
     const result = await processBuildGeneration(
       buildId,

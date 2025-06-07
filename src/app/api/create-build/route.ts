@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     // Trigger background processing via separate endpoint
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 
-    fetch(`${baseUrl}/api/process-build`, {
+    await fetch(`${baseUrl}/api/process-build`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
