@@ -8,6 +8,7 @@ import { AssistantStreamEvent } from 'openai/resources/beta/assistants/assistant
 import { RequiredActionFunctionToolCall } from 'openai/resources/beta/threads/runs/runs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
 
 type MessageApiResponse = {
   role: 'user' | 'assistant';
@@ -217,6 +218,8 @@ const Chat = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!userInput.trim()) return;
+    // toast: "Updating your game..."
+    toast.info('This might take a couple of minutes ...');
     sendMessage(userInput);
     setMessageState((prev) => ({
       ...prev,
