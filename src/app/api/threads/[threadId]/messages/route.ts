@@ -9,7 +9,8 @@ export const runtime = 'nodejs';
 async function waitForRunCompletion(threadId: string, runId: string) {
   let run: unknown;
   let attempts = 0;
-  const maxAttempts = 10;
+  const maxAttempts = 30; // Increased from 10
+  const baseDelay = 1000; // 1 second base delay
 
   do {
     run = await openai.beta.threads.runs.retrieve(threadId, runId);
@@ -28,20 +29,94 @@ async function waitForRunCompletion(threadId: string, runId: string) {
       if (
         status === 'completed' ||
         status === 'failed' ||
-        status === 'cancelled'
+        status === 'cancelled' ||
+        status === 'expired'
       ) {
         console.log(`Run ${runId} final status: ${status}`);
-        break;
+        return run;
       }
     }
     attempts++;
     if (attempts >= maxAttempts) {
       console.warn(`Run ${runId} did not complete within expected time`);
-      break;
+      return run;
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Progressive delay: 1s, 2s, 3s, etc. up to 5s max
+    const delay = Math.min(baseDelay * attempts, 5000);
+    await new Promise((resolve) => setTimeout(resolve, delay));
   } while (true);
-  return run;
+}
+
+// Helper function to get all active runs
+async function getActiveRuns(threadId: string) {
+  const runs = await openai.beta.threads.runs.list(threadId);
+  return runs.data.filter(
+    (run) =>
+      typeof run.status === 'string' &&
+      (run.status === 'in_progress' ||
+        run.status === 'queued' ||
+        run.status === 'requires_action')
+  );
+}
+
+// Helper function to cancel all active runs
+async function cancelAllActiveRuns(threadId: string) {
+  const activeRuns = await getActiveRuns(threadId);
+
+  if (activeRuns.length === 0) {
+    console.log('No active runs to cancel');
+    return;
+  }
+
+  console.log(
+    `Found ${activeRuns.length} active runs to cancel:`,
+    activeRuns.map((r) => ({ id: r.id, status: r.status }))
+  );
+
+  // Cancel all active runs
+  const cancelPromises = activeRuns.map(async (run) => {
+    try {
+      console.log(`Cancelling run ${run.id} with status ${run.status}`);
+      await openai.beta.threads.runs.cancel(threadId, run.id);
+      console.log(`Cancellation request sent for run: ${run.id}`);
+      return run.id;
+    } catch (error) {
+      console.error(`Failed to send cancel request for run ${run.id}:`, error);
+      return null;
+    }
+  });
+
+  const cancelResults = await Promise.all(cancelPromises);
+  const successfullyCancelled = cancelResults.filter((id) => id !== null);
+
+  console.log(
+    `Sent cancellation requests for ${successfullyCancelled.length} runs`
+  );
+
+  // Wait for all cancelled runs to complete
+  const completionPromises = successfullyCancelled.map(async (runId) => {
+    if (runId) {
+      try {
+        const completedRun = await waitForRunCompletion(threadId, runId);
+        if (
+          typeof completedRun === 'object' &&
+          completedRun !== null &&
+          'status' in completedRun
+        ) {
+          const status = (completedRun as { status: string }).status;
+          console.log(`Run ${runId} finished with status: ${status}`);
+          return { runId, status };
+        }
+      } catch (error) {
+        console.error(`Error waiting for run ${runId} completion:`, error);
+        return { runId, status: 'error' };
+      }
+    }
+    return null;
+  });
+
+  const completionResults = await Promise.all(completionPromises);
+  console.log('All cancellation operations completed:', completionResults);
 }
 
 // Send a new message to a thread
@@ -55,67 +130,16 @@ export async function POST(
 
     console.log('Processing message for thread:', threadId);
 
-    // Check for active runs
-    const runs = await openai.beta.threads.runs.list(threadId);
-    console.log(
-      'Current runs:',
-      runs.data.map((r) => ({ id: r.id, status: r.status }))
-    );
+    // Cancel any active runs first
+    await cancelAllActiveRuns(threadId);
 
-    const activeRun = runs.data.find(
-      (run) =>
-        typeof run.status === 'string' &&
-        (run.status === 'in_progress' || run.status === 'queued')
-    );
-
-    // If there's an active run, cancel it and wait for completion
-    if (activeRun) {
-      console.log(
-        'Found active run:',
-        activeRun.id,
-        'with status:',
-        activeRun.status
-      );
-
-      try {
-        await openai.beta.threads.runs.cancel(threadId, activeRun.id);
-        console.log('Cancellation request sent for run:', activeRun.id);
-
-        const cancelledRun = await waitForRunCompletion(threadId, activeRun.id);
-        if (
-          typeof cancelledRun === 'object' &&
-          cancelledRun !== null &&
-          'status' in cancelledRun &&
-          typeof (cancelledRun as { status: string }).status === 'string'
-        ) {
-          const status = (cancelledRun as { status: string }).status;
-          console.log('Run cancellation completed:', status);
-          if (
-            status !== 'cancelled' &&
-            status !== 'completed' &&
-            status !== 'failed'
-          ) {
-            throw new Error(
-              `Run ${activeRun.id} could not be properly cancelled. Final status: ${status}`
-            );
-          }
-        }
-      } catch (cancelError: unknown) {
-        console.error('Error during run cancellation:', cancelError);
-        throw new Error(
-          `Failed to cancel active run: ${
-            cancelError instanceof Error ? cancelError.message : cancelError
-          }`
-        );
-      }
-    }
-
-    // Add a small delay after cancellation to ensure system consistency
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Add a delay to ensure system consistency
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Add the message with retry logic
     let retryCount = 0;
-    const maxRetries = 3;
+    const maxRetries = 5; // Increased retries
+    let lastError: unknown;
 
     while (retryCount < maxRetries) {
       try {
@@ -125,58 +149,83 @@ export async function POST(
           }/${maxRetries})`
         );
 
-        // Verify no active runs before creating message
-        const currentRuns = await openai.beta.threads.runs.list(threadId);
-        const hasActiveRun = currentRuns.data.some(
-          (run) =>
-            typeof run.status === 'string' &&
-            (run.status === 'in_progress' || run.status === 'queued')
+        // Double-check for active runs before creating message
+        const remainingActiveRuns = await getActiveRuns(threadId);
+
+        if (remainingActiveRuns.length > 0) {
+          console.log(
+            'Still found active runs:',
+            remainingActiveRuns.map((r) => ({ id: r.id, status: r.status }))
+          );
+
+          // Try to cancel them again
+          await cancelAllActiveRuns(threadId);
+          throw new Error(
+            `Still have ${remainingActiveRuns.length} active runs after cancellation`
+          );
+        }
+
+        // Create the message
+        const messageResponse = await openai.beta.threads.messages.create(
+          threadId,
+          {
+            role: 'user',
+            content: content,
+          }
         );
 
-        if (hasActiveRun) {
-          throw new Error('Active run detected before message creation');
-        }
-
-        await openai.beta.threads.messages.create(threadId, {
-          role: 'user',
-          content: content,
-        });
-        console.log('Message created successfully');
-        break;
+        console.log('Message created successfully:', messageResponse.id);
+        break; // Success, exit the retry loop
       } catch (error: unknown) {
-        if (error && typeof error === 'object' && 'message' in error) {
-          console.error(
-            `Message creation attempt ${retryCount + 1} failed:`,
-            (error as { message: string }).message
-          );
-        } else {
-          console.error(
-            `Message creation attempt ${retryCount + 1} failed:`,
-            error
-          );
-        }
-        if (
+        lastError = error;
+        console.error(
+          `Message creation attempt ${retryCount + 1} failed:`,
+          error
+        );
+
+        // Check if this is the specific "active run" error
+        const isActiveRunError =
           error &&
           typeof error === 'object' &&
-          'status' in error &&
-          (error as { status?: number }).status === 400 &&
           'message' in error &&
           typeof (error as { message: string }).message === 'string' &&
-          (error as { message: string }).message.includes('active run')
-        ) {
+          (error as { message: string }).message
+            .toLowerCase()
+            .includes('active run');
+
+        if (isActiveRunError) {
           retryCount++;
-          if (retryCount === maxRetries) {
-            throw new Error('Failed to add message after multiple retries');
+          if (retryCount >= maxRetries) {
+            throw new Error(
+              `Failed to add message after ${maxRetries} retries due to persistent active runs. ` +
+                `Last error: ${(error as { message: string }).message}`
+            );
           }
-          const delay = 1000 * Math.pow(2, retryCount); // Exponential backoff
-          console.log(`Waiting ${delay}ms before retry ${retryCount + 1}`);
+
+          // Exponential backoff with jitter
+          const baseDelay = 2000;
+          const jitter = Math.random() * 1000;
+          const delay = baseDelay * Math.pow(2, retryCount - 1) + jitter;
+
+          console.log(
+            `Active run detected, waiting ${Math.round(delay)}ms before retry ${
+              retryCount + 1
+            }`
+          );
+
+          // Try to cancel active runs again before retry
+          await cancelAllActiveRuns(threadId);
           await new Promise((resolve) => setTimeout(resolve, delay));
         } else {
+          // For non-active-run errors, fail immediately
           throw error;
         }
       }
     }
 
+    console.log('lastError', lastError);
+
+    // Get the build and create the stream
     const build = await getBuild(buildId);
     const html = build.html;
 
