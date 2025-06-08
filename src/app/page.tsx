@@ -15,6 +15,7 @@ import Header from '@/components/header';
 import { FloatingBubbles } from '@/components/floating-bubbles';
 import { ChevronDown } from 'lucide-react';
 import { useLogin, usePrivy } from '@privy-io/react-auth';
+import WhitelistCheck from '@/components/whitelist-check';
 
 export default function Home() {
   const { ready, authenticated, user } = usePrivy();
@@ -140,10 +141,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] text-white flex flex-col">
-      <Header />
-      <main className="flex-1 flex flex-col items-center pt-16 p-4">
-        <div className="w-full max-w-3xl">
+    <WhitelistCheck>
+      <div className="min-h-screen bg-[#1a1a1a] text-white flex flex-col">
+        <Header />
+        <main className="flex-1 flex flex-col items-center pt-16 p-4">
+          <div className="w-full max-w-3xl">
           <h1 className="text-3xl font-semibold text-center mb-8">
             What game are we building next?
           </h1>
@@ -209,5 +211,6 @@ export default function Home() {
         </div>
       </main>
     </div>
+    </WhitelistCheck>
   );
 }
