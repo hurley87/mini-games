@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getCreatorByFID, insertBuild } from '@/lib/supabase';
+import { getCreatorByFID, insertBuild, updateBuild } from '@/lib/supabase';
 
 const createBuildSchema = z.object({
   description: z.string().min(1, 'Description is required'),
@@ -53,19 +53,52 @@ export async function POST(request: Request) {
 
     // Trigger background processing via separate endpoint
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const payload = {
+      buildId: build[0].id,
+      description,
+      model,
+      fid,
+    };
 
-    fetch(`${baseUrl}/api/process-build.background`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        buildId: build[0].id,
-        description,
-        model,
-        fid,
-      }),
-    }).catch(console.error); // Fire and forget
+    const maxRetries = 3;
+    let attempt = 0;
+    let succeeded = false;
+    let lastError: unknown = null;
+
+    while (attempt < maxRetries && !succeeded) {
+      try {
+        const res = await fetch(`${baseUrl}/api/process-build.background`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Request failed with status ${res.status}`);
+        }
+
+        succeeded = true;
+      } catch (err) {
+        lastError = err;
+        attempt += 1;
+      }
+    }
+
+    if (!succeeded) {
+      await updateBuild(build[0].id, {
+        status: 'failed',
+        error_message:
+          lastError instanceof Error
+            ? lastError.message
+            : 'Failed to reach process-build endpoint',
+      });
+      return NextResponse.json(
+        { success: false, message: 'Failed to start build processing' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
