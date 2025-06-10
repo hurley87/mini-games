@@ -423,13 +423,10 @@ export default function TokenDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger>
-        <Button
-          className="bg-white text-black hover:bg-gray-100 cursor-pointer"
-          size="lg"
-        >
+        <div className="bg-white text-black hover:bg-gray-100 cursor-pointer flex items-center justify-center px-4 py-2 rounded-md">
           <Rocket className="mr-2 h-4 w-4" />
           Launch Game
-        </Button>
+        </div>
       </DialogTrigger>
       <DialogContent className="bg-[#2a2a2a] border-gray-800">
         {isCoinCreated ? (
