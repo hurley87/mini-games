@@ -16,9 +16,11 @@ import { FloatingBubbles } from '@/components/floating-bubbles';
 import { ChevronDown } from 'lucide-react';
 import { useLogin, usePrivy } from '@privy-io/react-auth';
 import WhitelistCheck from '@/components/whitelist-check';
+import { BuildProvider, useBuilds } from '@/lib/build-context';
 
-export default function Home() {
+function HomeContent() {
   const { ready, authenticated, user } = usePrivy();
+  const { addBuild } = useBuilds();
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [model, setModel] = useState('gpt-4.1');
@@ -84,7 +86,7 @@ export default function Home() {
         }),
       });
 
-      const { success, message } = await response.json();
+      const { success, message, data } = await response.json();
 
       if (!success) {
         toast.error(message);
@@ -94,8 +96,34 @@ export default function Home() {
       toast.success('Build created! Generation started...');
       setDescription(''); // Clear the textarea
 
-      // Trigger a refresh of the builds list
-      window.dispatchEvent(new CustomEvent('refreshBuilds'));
+      if (data && Array.isArray(data)) {
+        const build = data[0];
+        addBuild({
+          id: build.id,
+          title: build.title,
+          html: build.html,
+          created_at: build.created_at,
+          model: build.model,
+          image: build.image,
+          isPublished: false,
+          status: build.status,
+          error_message: build.error_message,
+          coin: null,
+        });
+      } else if (data) {
+        addBuild({
+          id: data.id,
+          title: data.title,
+          html: data.html,
+          created_at: data.created_at,
+          model: data.model,
+          image: data.image,
+          isPublished: false,
+          status: data.status,
+          error_message: data.error_message,
+          coin: null,
+        });
+      }
     } catch (error) {
       console.error('Error creating build', error);
       toast.error(
@@ -212,5 +240,13 @@ export default function Home() {
       </main>
     </div>
     </WhitelistCheck>
+  );
+}
+
+export default function Home() {
+  return (
+    <BuildProvider>
+      <HomeContent />
+    </BuildProvider>
   );
 }
