@@ -5,6 +5,7 @@ import DeleteBuildButton from '@/components/delete-build-button';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 import {
   Loader2,
   CheckCircle,
@@ -82,10 +83,13 @@ export default function BuildList() {
   const [builds, setBuilds] = useState<Build[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = usePrivy();
+  const fid = user?.farcaster?.fid;
 
   const fetchBuilds = useCallback(async () => {
+    if (!fid) return;
     try {
-      const response = await fetch('/api/builds');
+      const response = await fetch(`/api/builds?fid=${fid}`);
       if (!response.ok) {
         throw new Error('Failed to fetch builds');
       }
@@ -96,7 +100,7 @@ export default function BuildList() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [fid]);
 
   const pollBuildStatus = useCallback(async (buildId: string) => {
     try {
@@ -117,6 +121,7 @@ export default function BuildList() {
   }, []);
 
   useEffect(() => {
+    if (!fid) return;
     fetchBuilds();
 
     // Listen for refresh events from the main page
@@ -126,7 +131,7 @@ export default function BuildList() {
 
     window.addEventListener('refreshBuilds', handleRefresh);
     return () => window.removeEventListener('refreshBuilds', handleRefresh);
-  }, [fetchBuilds]);
+  }, [fetchBuilds, fid]);
 
   // Poll for builds that are still processing
   useEffect(() => {

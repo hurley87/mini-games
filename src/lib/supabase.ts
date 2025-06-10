@@ -90,6 +90,20 @@ export const getBuilds = async () => {
   return data as Build[];
 };
 
+export const getBuildsByFid = async (fid: number) => {
+  const { data, error } = await supabase
+    .from('builds')
+    .select('*')
+    .eq('fid', fid)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Build[];
+};
+
 export const getBuild = async (id: string) => {
   const { data, error } = await supabase
     .from('builds')
