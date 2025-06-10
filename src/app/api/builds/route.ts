@@ -5,11 +5,12 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const fidParam = searchParams.get('fid');
+    let fid: number | null = null;
 
     // Validate fid parameter if provided
     if (fidParam !== null) {
-      const fid = Number(fidParam);
-      if (isNaN(fid) || !Number.isInteger(fid) || fid < 0) {
+      fid = Number(fidParam);
+      if (isNaN(fid) || !Number.isInteger(fid) || fid <= 0) {
         return NextResponse.json(
           { error: 'Invalid fid parameter. Must be a positive integer.' },
           { status: 400 }
@@ -17,9 +18,7 @@ export async function GET(request: Request) {
       }
     }
 
-    const builds = fidParam
-      ? await getBuildsByFid(Number(fidParam))
-      : await getBuilds();
+    const builds = fid !== null ? await getBuildsByFid(fid) : await getBuilds();
 
     // Fetch coin data for each build
     const buildsWithCoins = await Promise.all(

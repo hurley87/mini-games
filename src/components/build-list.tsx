@@ -87,7 +87,9 @@ export default function BuildList() {
   const fid = user?.farcaster?.fid;
 
   const fetchBuilds = useCallback(async () => {
-    if (!fid) {
+    if (fid === undefined || fid === null) {
+      setBuilds([]);
+      setError(null);
       setIsLoading(false);
       return;
     }
@@ -98,6 +100,7 @@ export default function BuildList() {
       }
       const data = await response.json();
       setBuilds(data);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
