@@ -2,7 +2,7 @@
  * Whitelist configuration for Farcaster usernames.
  * Usernames are stored in lowercase to make comparison case-insensitive.
  */
-export const WHITELISTED_USERNAMES = ['hurls'];
+export const WHITELISTED_USERNAMES = ['hurls', 'garrett'];
 
 /**
  * Determine if a given username is included in the whitelist.
