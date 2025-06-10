@@ -15,6 +15,13 @@ export async function GET(request: Request) {
 
     const build = await getBuild(buildId);
 
+    if (!build) {
+      return NextResponse.json(
+        { success: false, message: 'Build not found' },
+        { status: 404 }
+      );
+    }
+
     // Fetch coin data to match the structure from /api/builds
     const coin = await getCoinByBuildId(build.id);
     const buildWithCoin = {
