@@ -6,6 +6,17 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const fidParam = searchParams.get('fid');
 
+    // Validate fid parameter if provided
+    if (fidParam !== null) {
+      const fid = Number(fidParam);
+      if (isNaN(fid) || !Number.isInteger(fid) || fid < 0) {
+        return NextResponse.json(
+          { error: 'Invalid fid parameter. Must be a positive integer.' },
+          { status: 400 }
+        );
+      }
+    }
+
     const builds = fidParam
       ? await getBuildsByFid(Number(fidParam))
       : await getBuilds();

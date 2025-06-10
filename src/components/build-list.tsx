@@ -87,7 +87,10 @@ export default function BuildList() {
   const fid = user?.farcaster?.fid;
 
   const fetchBuilds = useCallback(async () => {
-    if (!fid) return;
+    if (!fid) {
+      setIsLoading(false);
+      return;
+    }
     try {
       const response = await fetch(`/api/builds?fid=${fid}`);
       if (!response.ok) {
@@ -121,7 +124,6 @@ export default function BuildList() {
   }, []);
 
   useEffect(() => {
-    if (!fid) return;
     fetchBuilds();
 
     // Listen for refresh events from the main page
