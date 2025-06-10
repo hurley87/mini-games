@@ -63,7 +63,8 @@ const getStatusInfo = (status?: string) => {
 };
 
 export default function BuildList() {
-  const { builds, isLoading, error, refreshBuilds } = useBuilds();
+  const { builds, isLoading, error, refreshBuilds, updateProcessingBuilds } =
+    useBuilds();
 
   useEffect(() => {
     const processingBuilds = builds.filter(
@@ -72,12 +73,14 @@ export default function BuildList() {
 
     if (processingBuilds.length === 0) return;
 
+    const processingBuildIds = processingBuilds.map((build) => build.id);
+
     const interval = setInterval(() => {
-      refreshBuilds();
+      updateProcessingBuilds(processingBuildIds);
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [builds, refreshBuilds]);
+  }, [builds, updateProcessingBuilds]);
 
   if (isLoading) {
     return (

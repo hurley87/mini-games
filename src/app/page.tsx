@@ -93,45 +93,41 @@ function HomeContent() {
         return;
       }
 
-      toast.success('Build created! Generation started...');
-      setDescription(''); // Clear the textarea
-
+      // Extract build data from response
+      let buildData;
       if (data && Array.isArray(data)) {
         if (data.length > 0) {
-          const build = data[0];
-          addBuild({
-            id: build.id,
-            title: build.title,
-            html: build.html,
-            created_at: build.created_at,
-            model: build.model,
-            image: build.image,
-            isPublished: false,
-            status: build.status,
-            error_message: build.error_message,
-            coin: null,
-          });
+          buildData = data[0];
         } else {
           console.warn('API returned an empty array for build data');
           toast.error('No build data received from server');
+          return;
         }
       } else if (data) {
-        addBuild({
-          id: data.id,
-          title: data.title,
-          html: data.html,
-          created_at: data.created_at,
-          model: data.model,
-          image: data.image,
-          isPublished: false,
-          status: data.status,
-          error_message: data.error_message,
-          coin: null,
-        });
+        buildData = data;
       } else {
         console.warn('No build data received from API');
         toast.error('No build data received from server');
+        return;
       }
+
+      // Only show success message and clear input after validating build data
+      toast.success('Build created! Generation started...');
+      setDescription('');
+
+      // Add build with actual API values, not hardcoded ones
+      addBuild({
+        id: buildData.id,
+        title: buildData.title,
+        html: buildData.html,
+        created_at: buildData.created_at,
+        model: buildData.model,
+        image: buildData.image,
+        isPublished: buildData.isPublished ?? false,
+        status: buildData.status,
+        error_message: buildData.error_message,
+        coin: buildData.coin ?? null,
+      });
     } catch (error) {
       console.error('Error creating build', error);
       toast.error(

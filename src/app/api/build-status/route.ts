@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getBuild } from '@/lib/supabase';
+import { getBuild, getCoinByBuildId } from '@/lib/supabase';
 
 export async function GET(request: Request) {
   try {
@@ -15,11 +15,23 @@ export async function GET(request: Request) {
 
     const build = await getBuild(buildId);
 
-    console.log('build', build);
+    // Fetch coin data to match the structure from /api/builds
+    const coin = await getCoinByBuildId(build.id);
+    const buildWithCoin = {
+      ...build,
+      isPublished: !!coin,
+      coin: coin
+        ? {
+            address: coin.coin_address,
+            name: coin.name,
+            symbol: coin.symbol,
+          }
+        : null,
+    };
 
     return NextResponse.json({
       success: true,
-      data: build,
+      data: buildWithCoin,
     });
   } catch (error) {
     console.error('Error fetching build status:', error);
