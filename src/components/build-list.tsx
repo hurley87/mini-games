@@ -87,12 +87,19 @@ export default function BuildList() {
   const fid = user?.farcaster?.fid;
 
   const fetchBuilds = useCallback(async () => {
-    if (fid === undefined || fid === null) {
+    // If user is still authenticating, keep loading
+    if (fid === undefined) {
+      return;
+    }
+
+    // If user is authenticated but has no valid farcaster account, show empty state
+    if (fid === null || !Number.isInteger(fid) || fid <= 0) {
       setBuilds([]);
       setError(null);
       setIsLoading(false);
       return;
     }
+
     try {
       const response = await fetch(`/api/builds?fid=${fid}`);
       if (!response.ok) {
