@@ -224,6 +224,12 @@ function HomeContent() {
                     >
                       gpt-4o-mini
                     </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setModel('o3-pro')}
+                      className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
+                    >
+                      o3-pro
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Button
