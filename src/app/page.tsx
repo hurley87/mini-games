@@ -16,9 +16,11 @@ import { FloatingBubbles } from '@/components/floating-bubbles';
 import { ChevronDown } from 'lucide-react';
 import { useLogin, usePrivy } from '@privy-io/react-auth';
 import WhitelistCheck from '@/components/whitelist-check';
+import { BuildProvider, useBuilds } from '@/lib/build-context';
 
-export default function Home() {
+function HomeContent() {
   const { ready, authenticated, user } = usePrivy();
+  const { addBuild } = useBuilds();
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [model, setModel] = useState('gpt-4.1');
@@ -84,18 +86,48 @@ export default function Home() {
         }),
       });
 
-      const { success, message } = await response.json();
+      const { success, message, data } = await response.json();
 
       if (!success) {
         toast.error(message);
         return;
       }
 
-      toast.success('Build created! Generation started...');
-      setDescription(''); // Clear the textarea
+      // Extract build data from response
+      let buildData;
+      if (data && Array.isArray(data)) {
+        if (data.length > 0) {
+          buildData = data[0];
+        } else {
+          console.warn('API returned an empty array for build data');
+          toast.error('No build data received from server');
+          return;
+        }
+      } else if (data) {
+        buildData = data;
+      } else {
+        console.warn('No build data received from API');
+        toast.error('No build data received from server');
+        return;
+      }
 
-      // Trigger a refresh of the builds list
-      window.dispatchEvent(new CustomEvent('refreshBuilds'));
+      // Only show success message and clear input after validating build data
+      toast.success('Build created! Generation started...');
+      setDescription('');
+
+      // Add build with actual API values, not hardcoded ones
+      addBuild({
+        id: buildData.id,
+        title: buildData.title,
+        html: buildData.html,
+        created_at: buildData.created_at,
+        model: buildData.model,
+        image: buildData.image,
+        isPublished: buildData.isPublished ?? false,
+        status: buildData.status,
+        error_message: buildData.error_message,
+        coin: buildData.coin ?? null,
+      });
     } catch (error) {
       console.error('Error creating build', error);
       toast.error(
@@ -146,71 +178,79 @@ export default function Home() {
         <Header />
         <main className="flex-1 flex flex-col items-center pt-16 p-4">
           <div className="w-full max-w-3xl">
-          <h1 className="text-3xl font-semibold text-center mb-8">
-            What game are we building next?
-          </h1>
+            <h1 className="text-3xl font-semibold text-center mb-8">
+              What game are we building next?
+            </h1>
 
-          {/* Input area */}
-          <div className="bg-[#2a2a2a] rounded-lg overflow-hidden mb-6">
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your game idea"
-              className="border-none bg-transparent min-h-[120px] p-4 text-white resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              disabled={isSubmitting}
-            />
-            <div className="flex items-center justify-between p-3 border-t border-gray-800">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="flex items-center gap-2 text-sm cursor-pointer bg-gray-700 rounded-full"
+            {/* Input area */}
+            <div className="bg-[#2a2a2a] rounded-lg overflow-hidden mb-6">
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe your game idea"
+                className="border-none bg-transparent min-h-[120px] p-4 text-white resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                disabled={isSubmitting}
+              />
+              <div className="flex items-center justify-between p-3 border-t border-gray-800">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="flex items-center gap-2 text-sm cursor-pointer bg-gray-700 rounded-full"
+                    >
+                      Model: {model}
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="bg-[#2a2a2a] border-gray-800 text-white"
                   >
-                    Model: {model}
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="bg-[#2a2a2a] border-gray-800 text-white"
+                    <DropdownMenuItem
+                      onClick={() => setModel('gpt-4.1')}
+                      className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
+                    >
+                      gpt-4.1
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setModel('gpt-4o')}
+                      className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
+                    >
+                      gpt-4o
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setModel('gpt-4o-mini')}
+                      className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
+                    >
+                      gpt-4o-mini
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className=" cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || !user}
                 >
-                  <DropdownMenuItem
-                    onClick={() => setModel('gpt-4.1')}
-                    className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
-                  >
-                    gpt-4.1
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setModel('gpt-4o')}
-                    className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
-                  >
-                    gpt-4o
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setModel('gpt-4o-mini')}
-                    className="hover:bg-[#3a3a3a] focus:bg-[#3a3a3a] cursor-pointer"
-                  >
-                    gpt-4o-mini
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button
-                size="lg"
-                variant="secondary"
-                className=" cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleSubmit}
-                disabled={isSubmitting || !user}
-              >
-                {isSubmitting ? 'Building...' : 'Build Game'}
-              </Button>
+                  {isSubmitting ? 'Building...' : 'Build Game'}
+                </Button>
+              </div>
             </div>
-          </div>
 
-          {/* Games list */}
-          <GameList />
-        </div>
-      </main>
-    </div>
+            {/* Games list */}
+            <GameList />
+          </div>
+        </main>
+      </div>
     </WhitelistCheck>
+  );
+}
+
+export default function Home() {
+  return (
+    <BuildProvider>
+      <HomeContent />
+    </BuildProvider>
   );
 }

@@ -4,8 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import DeleteBuildButton from '@/components/delete-build-button';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
-import { useEffect, useState, useCallback } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
+import { useEffect } from 'react';
+import { useBuilds } from '@/lib/build-context';
 import {
   Loader2,
   CheckCircle,
@@ -14,23 +14,6 @@ import {
   Image,
   Code,
 } from 'lucide-react';
-
-type Build = {
-  id: string;
-  title: string;
-  html: string;
-  created_at: string;
-  model?: string;
-  image?: string;
-  isPublished: boolean;
-  status?: string;
-  error_message?: string;
-  coin?: {
-    address: string;
-    name: string;
-    symbol: string;
-  } | null;
-};
 
 const getStatusInfo = (status?: string) => {
   switch (status) {
@@ -80,72 +63,9 @@ const getStatusInfo = (status?: string) => {
 };
 
 export default function BuildList() {
-  const [builds, setBuilds] = useState<Build[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { user } = usePrivy();
-  const fid = user?.farcaster?.fid;
+  const { builds, isLoading, error, refreshBuilds, updateProcessingBuilds } =
+    useBuilds();
 
-  const fetchBuilds = useCallback(async () => {
-    // If user is still authenticating, keep loading
-    if (fid === undefined) {
-      return;
-    }
-
-    // If user is authenticated but has no valid farcaster account, show empty state
-    if (fid === null || !Number.isInteger(fid) || fid <= 0) {
-      setBuilds([]);
-      setError(null);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/builds?fid=${fid}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch builds');
-      }
-      const data = await response.json();
-      setBuilds(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fid]);
-
-  const pollBuildStatus = useCallback(async (buildId: string) => {
-    try {
-      const response = await fetch(`/api/build-status?buildId=${buildId}`);
-      if (!response.ok) return;
-
-      const { data } = await response.json();
-      if (!data) return;
-
-      setBuilds((prevBuilds) =>
-        prevBuilds.map((build) =>
-          build.id === buildId ? { ...build, ...data } : build
-        )
-      );
-    } catch (error) {
-      console.error('Error polling build status:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchBuilds();
-
-    // Listen for refresh events from the main page
-    const handleRefresh = () => {
-      fetchBuilds();
-    };
-
-    window.addEventListener('refreshBuilds', handleRefresh);
-    return () => window.removeEventListener('refreshBuilds', handleRefresh);
-  }, [fetchBuilds, fid]);
-
-  // Poll for builds that are still processing
   useEffect(() => {
     const processingBuilds = builds.filter(
       (build) => build.status && !['completed', 'failed'].includes(build.status)
@@ -153,14 +73,14 @@ export default function BuildList() {
 
     if (processingBuilds.length === 0) return;
 
+    const processingBuildIds = processingBuilds.map((build) => build.id);
+
     const interval = setInterval(() => {
-      processingBuilds.forEach((build) => {
-        pollBuildStatus(build.id);
-      });
-    }, 2000); // Poll every 2 seconds
+      updateProcessingBuilds(processingBuildIds);
+    }, 2000);
 
     return () => clearInterval(interval);
-  }, [builds, pollBuildStatus]);
+  }, [builds, updateProcessingBuilds]);
 
   if (isLoading) {
     return (
@@ -265,7 +185,7 @@ export default function BuildList() {
                   Live
                 </Badge>
               )}
-              <DeleteBuildButton id={build.id} onDeleted={fetchBuilds} />
+              <DeleteBuildButton id={build.id} onDeleted={refreshBuilds} />
             </div>
           </div>
         );
