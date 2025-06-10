@@ -5,7 +5,7 @@ import DeleteBuildButton from '@/components/delete-build-button';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { useBuilds, type Build } from '@/lib/build-context';
+import { useBuilds } from '@/lib/build-context';
 import {
   Loader2,
   CheckCircle,
@@ -14,7 +14,6 @@ import {
   Image,
   Code,
 } from 'lucide-react';
-
 
 const getStatusInfo = (status?: string) => {
   switch (status) {
@@ -79,7 +78,6 @@ export default function BuildList() {
 
     return () => clearInterval(interval);
   }, [builds, refreshBuilds]);
-
 
   if (isLoading) {
     return (
