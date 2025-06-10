@@ -1,9 +1,24 @@
-import { getBuilds, getCoinByBuildId } from '@/lib/supabase';
+import { getBuilds, getBuildsByFid, getCoinByBuildId } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const builds = await getBuilds();
+    const { searchParams } = new URL(request.url);
+    const fidParam = searchParams.get('fid');
+    let fid: number | null = null;
+
+    // Validate fid parameter if provided
+    if (fidParam !== null) {
+      fid = Number(fidParam);
+      if (isNaN(fid) || !Number.isInteger(fid) || fid <= 0) {
+        return NextResponse.json(
+          { error: 'Invalid fid parameter. Must be a positive integer.' },
+          { status: 400 }
+        );
+      }
+    }
+
+    const builds = fid !== null ? await getBuildsByFid(fid) : await getBuilds();
 
     // Fetch coin data for each build
     const buildsWithCoins = await Promise.all(
