@@ -74,7 +74,7 @@ function HomeContent() {
         body: JSON.stringify({
           description,
           fid,
-          model: 'gpt-4o',
+          model: 'gpt-4.1',
         }),
       });
 
