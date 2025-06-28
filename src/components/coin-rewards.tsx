@@ -10,11 +10,10 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useState, useEffect } from 'react';
-import { Coins, Copy, Check, ExternalLink } from 'lucide-react';
+import { Coins, Copy, Check } from 'lucide-react';
 import { createPublicClient, http, Address } from 'viem';
 import { base } from 'viem/chains';
 import { formatEther } from 'viem';
-import Link from 'next/link';
 
 interface CoinRewardsProps {
   coinAddress: string;
@@ -113,7 +112,7 @@ export default function CoinRewards({
           size="lg"
         >
           <Coins className="w-4 h-4 mr-2" />
-          {isLoading ? '...' : `${balance} $${symbol.toUpperCase()}`}
+          Rewards
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-[#2a2a2a] max-w-md">
@@ -157,22 +156,6 @@ export default function CoinRewards({
             <div className="text-xs text-[#adadad]">
               {`This is your game's reward pool address where players can receive
               tokens.`}
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-[#30363d]">
-            <Link
-              href={`https://zora.co/coin/base:${coinAddress}`}
-              target="_blank"
-              className="block"
-            >
-              <Button variant="outline" className="w-full" size="lg">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Trade ${symbol}
-              </Button>
-            </Link>
-            <div className="text-xs text-[#adadad] text-center mt-2">
-              Trade your token on Zora
             </div>
           </div>
         </div>

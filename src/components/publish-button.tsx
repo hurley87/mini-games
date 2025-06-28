@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, useCallback } from 'react';
-import { Share2 } from 'lucide-react';
+import { ExternalLink, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePrivy } from '@privy-io/react-auth';
 import TokenDialog from './token-dialog';
@@ -78,6 +78,20 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
             symbol={publishedCoin.symbol}
           />
           <Link
+            href={`https://zora.co/coin/base:${publishedCoin.address}`}
+            target="_blank"
+            className="block cursor-pointer"
+          >
+            <Button
+              className="h-10 bg-transparent cursor-pointer"
+              variant="outline"
+              size="lg"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Trade
+            </Button>
+          </Link>
+          <Link
             href={`https://farcaster.xyz/~/compose?text=${encodeURIComponent(
               `Check out this new game I created!`
             )}&embeds[]=${encodeURIComponent(
@@ -86,8 +100,8 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
             target="_blank"
           >
             <Button
-              className="bg-white cursor-pointer"
-              variant="secondary"
+              className="cursor-pointer text-black"
+              variant="outline"
               size="lg"
             >
               <Share2 className="w-4 h-4 mr-2" />
