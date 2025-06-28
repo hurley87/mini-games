@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { Trash2, RotateCcw, Eye, History, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { useVersions, BuildVersion } from '@/hooks/use-versions';
+import { useVersions } from '@/hooks/use-versions';
 
 interface VersionsListProps {
   buildId: string;

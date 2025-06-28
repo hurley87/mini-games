@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBuildVersion, deleteBuildVersion, getBuild } from '@/lib/supabase';
+import { getBuildVersion, deleteBuildVersion } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
@@ -54,6 +54,7 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error deleting build version:', error);
+    console.log('request', request);
     return NextResponse.json(
       { success: false, message: 'Internal server error' },
       { status: 500 }
