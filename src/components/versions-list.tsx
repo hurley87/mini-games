@@ -4,7 +4,14 @@ import { useState, forwardRef, useImperativeHandle } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
-import { Trash2, RotateCcw, Eye, History, Loader2, RefreshCw } from 'lucide-react';
+import {
+  Trash2,
+  RotateCcw,
+  Eye,
+  History,
+  Loader2,
+  RefreshCw,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useVersions } from '@/hooks/use-versions';
 
@@ -20,23 +27,36 @@ export interface VersionsListRef {
 const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
   ({ buildId, onVersionRestored }, ref) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [processingVersionId, setProcessingVersionId] = useState<string | null>(null);
-    
-    const { versions, isLoading, error, fetchVersions, deleteVersion, restoreVersion } = useVersions(buildId);
+    const [processingVersionId, setProcessingVersionId] = useState<
+      string | null
+    >(null);
+
+    const {
+      versions,
+      isLoading,
+      error,
+      fetchVersions,
+      deleteVersion,
+      restoreVersion,
+    } = useVersions(buildId);
 
     useImperativeHandle(ref, () => ({
       refreshVersions: fetchVersions,
     }));
 
     const handleDeleteVersion = async (versionId: string) => {
-      if (!confirm('Are you sure you want to delete this version? This action cannot be undone.')) {
+      if (
+        !confirm(
+          'Are you sure you want to delete this version? This action cannot be undone.'
+        )
+      ) {
         return;
       }
 
       try {
         setProcessingVersionId(versionId);
         const result = await deleteVersion(versionId);
-        
+
         if (result.success) {
           toast.success('Version deleted successfully');
         } else {
@@ -47,15 +67,22 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
       }
     };
 
-    const handleRestoreVersion = async (versionId: string, versionNumber: number) => {
-      if (!confirm(`Are you sure you want to restore to version ${versionNumber}? This will create a new version of the current build.`)) {
+    const handleRestoreVersion = async (
+      versionId: string,
+      versionNumber: number
+    ) => {
+      if (
+        !confirm(
+          `Are you sure you want to restore to version ${versionNumber}? This will create a new version of the current build.`
+        )
+      ) {
         return;
       }
 
       try {
         setProcessingVersionId(versionId);
         const result = await restoreVersion(versionId);
-        
+
         if (result.success) {
           toast.success(result.message || 'Version restored successfully');
           if (onVersionRestored) {
@@ -88,7 +115,11 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
     }
 
     return (
-      <div className={`${isCollapsed ? 'w-12' : 'w-64'} bg-[#1a1a1a] border-r border-[#30363d] transition-all duration-200 flex flex-col`}>
+      <div
+        className={`${
+          isCollapsed ? 'w-12' : 'w-64'
+        } bg-[#1a1a1a] border-r border-[#30363d] transition-all duration-200 flex flex-col h-full`}
+      >
         {/* Header */}
         <div className="p-3 border-b border-[#30363d] flex items-center justify-between">
           {!isCollapsed && (
@@ -110,7 +141,9 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
                 className="h-6 w-6 text-gray-400 hover:text-white"
                 title="Refresh versions"
               >
-                <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`}
+                />
               </Button>
             )}
             <Button
@@ -119,7 +152,11 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
               onClick={handleToggleCollapse}
               className="h-6 w-6 text-gray-400 hover:text-white"
             >
-              {isCollapsed ? <Eye className="h-3 w-3" /> : <History className="h-3 w-3" />}
+              {isCollapsed ? (
+                <Eye className="h-3 w-3" />
+              ) : (
+                <History className="h-3 w-3" />
+              )}
             </Button>
           </div>
         </div>
@@ -131,12 +168,14 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
                 {error}
               </div>
             )}
-            
+
             {versions.length === 0 ? (
               <div className="text-center text-gray-400 text-sm py-8">
                 <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 No versions yet
-                <p className="text-xs mt-1">Versions will appear when you update your build</p>
+                <p className="text-xs mt-1">
+                  Versions will appear when you update your build
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -148,7 +187,10 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                          <Badge
+                            variant="outline"
+                            className="text-xs px-1.5 py-0.5 text-white"
+                          >
                             v{version.version_number}
                           </Badge>
                         </div>
@@ -156,7 +198,9 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
                           {version.title}
                         </h4>
                         <p className="text-xs text-gray-400 mt-1">
-                          {formatDistanceToNow(new Date(version.created_at), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(version.created_at), {
+                            addSuffix: true,
+                          })}
                         </p>
                       </div>
                     </div>
@@ -166,9 +210,14 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleRestoreVersion(version.id, version.version_number)}
+                        onClick={() =>
+                          handleRestoreVersion(
+                            version.id,
+                            version.version_number
+                          )
+                        }
                         disabled={processingVersionId === version.id}
-                        className="h-6 w-6 text-gray-400 hover:text-green-400"
+                        className="h-6 w-6 text-gray-400 hover:text-green-400 cursor-pointer hover:bg-transparent"
                         title="Restore this version"
                       >
                         {processingVersionId === version.id ? (
@@ -182,7 +231,7 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
                         size="icon"
                         onClick={() => handleDeleteVersion(version.id)}
                         disabled={processingVersionId === version.id}
-                        className="h-6 w-6 text-gray-400 hover:text-red-400"
+                        className="h-6 w-6 text-gray-400 hover:text-red-400 cursor-pointer hover:bg-transparent"
                         title="Delete this version"
                       >
                         {processingVersionId === version.id ? (
@@ -192,13 +241,6 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
                         )}
                       </Button>
                     </div>
-
-                    {/* Description */}
-                    {version.description && (
-                      <p className="text-xs text-gray-500 mt-2 italic">
-                        {version.description}
-                      </p>
-                    )}
                   </div>
                 ))}
               </div>
