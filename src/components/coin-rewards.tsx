@@ -69,7 +69,6 @@ export default function CoinRewards({
 
   // Form state for editing
   const [formConfig, setFormConfig] = useState<CoinConfig>(coinConfig);
-  const [hasChanges, setHasChanges] = useState(false);
 
   // Fetch RPC URL from server
   useEffect(() => {
@@ -168,7 +167,6 @@ export default function CoinRewards({
         coinConfig[key as keyof CoinConfig] !==
         formConfig[key as keyof CoinConfig]
     );
-    setHasChanges(changed);
   }, [coinConfig, formConfig]);
 
   const copyToClipboard = async () => {
@@ -222,7 +220,6 @@ export default function CoinRewards({
 
       if (response.ok) {
         setCoinConfig(formConfig);
-        setHasChanges(false);
       } else {
         console.error('Failed to save coin configuration');
       }
@@ -231,11 +228,6 @@ export default function CoinRewards({
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleCancel = () => {
-    setFormConfig(coinConfig);
-    setHasChanges(false);
   };
 
   const ConfigInput = ({
