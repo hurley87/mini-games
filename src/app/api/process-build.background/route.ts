@@ -4,6 +4,7 @@ import OpenAI from 'openai';
 import { updateBuild, uploadImageFromUrl } from '@/lib/supabase';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
+import { validateAndFixHtml } from '@/lib/html-validator';
 
 const openaiSDK = new OpenAI();
 
@@ -118,10 +119,36 @@ async function processBuildGeneration(
 
     const validatedResponse = buildSchema.parse(agentResponse);
 
-    // Update build with generated content
+    // Validate and potentially fix the generated HTML
+    const htmlValidation = validateAndFixHtml(validatedResponse.html);
+    
+    if (!htmlValidation.isValid && !htmlValidation.fixedHtml) {
+      console.error(`AI-generated HTML validation failed for buildId ${buildId}:`, htmlValidation.errors);
+      
+      // Update build with error status
+      await updateBuild(buildId, {
+        status: 'failed',
+        error_message: `HTML validation failed: ${htmlValidation.errors.join(', ')}`,
+      });
+
+      return {
+        success: false,
+        message: `HTML validation failed: ${htmlValidation.errors.join(', ')}`,
+      };
+    }
+
+    // Use fixed HTML if available, otherwise use original
+    const finalHtml = htmlValidation.fixedHtml || validatedResponse.html;
+    
+    // Log any warnings or fixes that were applied
+    if (htmlValidation.warnings.length > 0) {
+      console.warn(`AI-generated HTML warnings for buildId ${buildId}:`, htmlValidation.warnings);
+    }
+
+    // Update build with validated/fixed content
     await updateBuild(buildId, {
       title: validatedResponse.title,
-      html: validatedResponse.html,
+      html: finalHtml,
       tutorial: validatedResponse.tutorial,
       status: 'generating_image',
     });

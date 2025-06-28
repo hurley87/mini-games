@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { updateBuildByThreadId, getBuildByThreadId, createBuildVersion } from '@/lib/supabase';
+import { updateBuildByThreadId, getBuildByThreadId } from '@/lib/supabase';
+import { validateAndFixHtml } from '@/lib/html-validator';
 
 // Define the schema for the request body
 const updateBuildSchema = z.object({
@@ -19,6 +20,30 @@ export async function POST(request: Request) {
     const validatedData = updateBuildSchema.parse(body);
     const { threadId, title, html } = validatedData;
 
+    // Validate and potentially fix HTML before saving
+    const htmlValidation = validateAndFixHtml(html);
+    
+    if (!htmlValidation.isValid && !htmlValidation.fixedHtml) {
+      console.error(`HTML validation failed for threadId ${threadId}:`, htmlValidation.errors);
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: 'HTML validation failed', 
+          errors: htmlValidation.errors,
+          warnings: htmlValidation.warnings
+        },
+        { status: 400 }
+      );
+    }
+
+    // Use fixed HTML if available, otherwise use original
+    const finalHtml = htmlValidation.fixedHtml || html;
+    
+    // Log any warnings or fixes that were applied
+    if (htmlValidation.warnings.length > 0) {
+      console.warn(`HTML warnings for threadId ${threadId}:`, htmlValidation.warnings);
+    }
+
     // Get the build to check ownership
     const build = await getBuildByThreadId(threadId);
 
@@ -29,7 +54,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create a version of the current build before updating
     await createBuildVersion(
       build.id,
       build.title,
@@ -38,10 +62,9 @@ export async function POST(request: Request) {
       `Version created before update at ${new Date().toISOString()}`
     );
 
-    // Update the build
     const updatedBuild = await updateBuildByThreadId(threadId, {
       title,
-      html,
+      html: finalHtml,
     });
 
     return NextResponse.json({
