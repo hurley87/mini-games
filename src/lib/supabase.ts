@@ -42,6 +42,11 @@ type Coin = {
   wallet_id: string;
   chain_type: string;
   pool_initialized?: boolean;
+  duration?: number;
+  max_points?: number;
+  token_multiplier?: number;
+  premium_threshold?: number;
+  max_plays?: number;
 };
 
 export const supabase = createClient(
@@ -289,6 +294,33 @@ export const updateCoinPoolStatus = async (
   const { data, error } = await supabase
     .from('coins')
     .update({ pool_initialized: poolInitialized })
+    .eq('build_id', buildId)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Coin;
+};
+
+export const updateCoin = async (
+  buildId: string,
+  updates: Partial<
+    Pick<
+      Coin,
+      | 'duration'
+      | 'max_points'
+      | 'token_multiplier'
+      | 'premium_threshold'
+      | 'max_plays'
+    >
+  >
+) => {
+  const { data, error } = await supabase
+    .from('coins')
+    .update(updates)
     .eq('build_id', buildId)
     .select()
     .single();

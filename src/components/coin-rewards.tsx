@@ -19,7 +19,7 @@ interface CoinRewardsProps {
   coinAddress: string;
   walletAddress: string;
   symbol: string;
-  buildId?: string;
+  buildId: string;
 }
 
 interface CoinConfig {
@@ -27,7 +27,7 @@ interface CoinConfig {
   max_points: number;
   token_multiplier: number;
   premium_threshold: number;
-  max_players: number;
+  max_plays: number;
 }
 
 // Utility function to format numbers in human-readable format
@@ -64,7 +64,7 @@ export default function CoinRewards({
     max_points: 50,
     token_multiplier: 1000,
     premium_threshold: 100000,
-    max_players: 10,
+    max_plays: 10,
   });
 
   // Form state for editing
@@ -93,6 +93,7 @@ export default function CoinRewards({
   // Fetch coin configuration
   useEffect(() => {
     const fetchCoinConfig = async () => {
+      console.log('buildId', buildId);
       if (!buildId) return;
 
       setIsLoading(true);
@@ -100,13 +101,16 @@ export default function CoinRewards({
         const response = await fetch(`/api/coins/${buildId}`);
         if (response.ok) {
           const data = await response.json();
+          console.log('data', data);
+
           const config = {
-            duration: data.duration || 30,
-            max_points: data.max_points || 50,
-            token_multiplier: data.token_multiplier || 1000,
-            premium_threshold: data.premium_threshold || 100000,
-            max_players: data.max_players || 10,
+            duration: data.coin.duration || 30,
+            max_points: data.coin.max_points || 50,
+            token_multiplier: data.coin.token_multiplier || 1000,
+            premium_threshold: data.coin.premium_threshold || 100000,
+            max_plays: data.coin.max_plays || 10,
           };
+          console.log('config', config);
           setCoinConfig(config);
           setFormConfig(config);
         }
@@ -129,10 +133,6 @@ export default function CoinRewards({
           chain: base,
           transport: http(rpcUrl),
         });
-
-        console.log('coinAddress', coinAddress);
-        console.log('walletAddress', walletAddress);
-        console.log('rpcUrl', rpcUrl);
 
         const balanceResult = await publicClient.readContract({
           address: coinAddress as Address,
@@ -202,8 +202,8 @@ export default function CoinRewards({
       config.token_multiplier <= 1000000 &&
       config.premium_threshold >= 1 &&
       config.premium_threshold <= 10000000 &&
-      config.max_players >= 1 &&
-      config.max_players <= 100
+      config.max_plays >= 1 &&
+      config.max_plays <= 100
     );
   };
 
@@ -287,7 +287,7 @@ export default function CoinRewards({
       </DialogTrigger>
       <DialogContent className="bg-[#2a2a2a] max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-white">Coin Management</DialogTitle>
+          <DialogTitle className="text-white">Game Rewards</DialogTitle>
           <DialogDescription className="text-[#adadad]">
             View your rewards and configure coin settings
           </DialogDescription>
@@ -349,7 +349,7 @@ export default function CoinRewards({
                 </Button>
               </div>
               <div className="text-xs text-[#adadad]">
-                {`This is your game's reward pool address where players can receive
+                {`This is your game's reward pool address where plays can receive
                 tokens.`}
               </div>
             </div>
@@ -371,7 +371,6 @@ export default function CoinRewards({
                     field="duration"
                     min={0}
                     max={60}
-                    suffix="seconds"
                   />
 
                   <ConfigInput
@@ -379,7 +378,6 @@ export default function CoinRewards({
                     field="max_points"
                     min={1}
                     max={100}
-                    suffix="points"
                   />
 
                   <ConfigInput
@@ -394,45 +392,31 @@ export default function CoinRewards({
                     field="premium_threshold"
                     min={1}
                     max={10000000}
-                    suffix="tokens"
                   />
 
                   <ConfigInput
-                    label="Maximum Players"
-                    field="max_players"
+                    label="Maximum Daily Plays"
+                    field="max_plays"
                     min={1}
                     max={100}
-                    suffix="players"
                   />
                 </div>
 
                 {/* Action Buttons */}
-                {hasChanges && (
-                  <div className="flex gap-3 pt-4 border-t border-[#30363d]">
-                    <Button
-                      onClick={handleCancel}
-                      variant="ghost"
-                      className="flex-1"
-                      disabled={isSaving}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleSave}
-                      className="flex-1"
-                      disabled={isSaving || !validateConfig(formConfig)}
-                    >
-                      {isSaving ? (
-                        'Saving...'
-                      ) : (
-                        <>
-                          <Save className="w-4 h-4 mr-2" />
-                          Save Changes
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
+                <Button
+                  onClick={handleSave}
+                  className="flex-1 w-full bg-white text-black cursor-pointer hover:bg-white/90 border-none"
+                  disabled={isSaving || !validateConfig(formConfig)}
+                >
+                  {isSaving ? (
+                    'Saving...'
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
               </>
             )}
           </div>

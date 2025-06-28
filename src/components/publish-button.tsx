@@ -76,6 +76,7 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
             coinAddress={publishedCoin.address}
             walletAddress={publishedCoin.walletAddress}
             symbol={publishedCoin.symbol}
+            buildId={buildId}
           />
           <Link
             href={`https://zora.co/coin/base:${publishedCoin.address}`}
