@@ -21,14 +21,6 @@ interface CoinRewardsProps {
   symbol: string;
 }
 
-// Use Base's public RPC endpoint
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
-
-const publicClient = createPublicClient({
-  chain: base,
-  transport: http(RPC_URL),
-});
-
 // Utility function to format numbers in human-readable format
 const formatNumber = (num: number): string => {
   if (num >= 1_000_000_000) {
@@ -51,12 +43,37 @@ export default function CoinRewards({
   const [balance, setBalance] = useState<string>('0');
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
+  const [rpcUrl, setRpcUrl] = useState<string | null>(null);
+
+  // Fetch RPC URL from server
+  useEffect(() => {
+    const fetchRpcUrl = async () => {
+      try {
+        const response = await fetch('/api/rpc-url');
+        if (response.ok) {
+          const data = await response.json();
+          setRpcUrl(data.rpcUrl);
+        } else {
+          console.error('Failed to fetch RPC URL');
+        }
+      } catch (error) {
+        console.error('Error fetching RPC URL:', error);
+      }
+    };
+
+    fetchRpcUrl();
+  }, []);
 
   useEffect(() => {
     const fetchBalance = async () => {
-      if (!walletAddress || !coinAddress) return;
+      if (!walletAddress || !coinAddress || !rpcUrl) return;
 
       try {
+        const publicClient = createPublicClient({
+          chain: base,
+          transport: http(rpcUrl),
+        });
+
         const balanceResult = await publicClient.readContract({
           address: coinAddress as Address,
           abi: [
@@ -82,7 +99,7 @@ export default function CoinRewards({
     };
 
     fetchBalance();
-  }, [coinAddress, walletAddress]);
+  }, [coinAddress, walletAddress, rpcUrl]);
 
   const copyToClipboard = async () => {
     try {
