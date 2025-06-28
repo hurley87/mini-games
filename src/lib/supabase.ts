@@ -1,6 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 
+// Define custom error types for better error handling
+interface CustomError extends Error {
+  code?: string;
+}
+
 type Creators = {
   fid: number;
   bio: string;
@@ -28,6 +33,17 @@ type Build = {
   tutorial: string;
   status?: string;
   error_message?: string;
+};
+
+type BuildVersion = {
+  id: string;
+  build_id: string;
+  version_number: number;
+  title: string;
+  html: string;
+  created_at: string;
+  created_by_fid: number;
+  description: string;
 };
 
 type Coin = {
@@ -117,6 +133,13 @@ export const getBuild = async (id: string) => {
     .single();
 
   if (error) {
+    if (error.code === 'PGRST116') {
+      // PGRST116 is the "no rows returned" error - throw a specific not found error
+      const notFoundError: CustomError = new Error('Build not found');
+      notFoundError.code = 'BUILD_NOT_FOUND';
+      throw notFoundError;
+    }
+    // For all other errors, throw the original error (server errors)
     throw error;
   }
 
@@ -330,4 +353,96 @@ export const updateCoin = async (
   }
 
   return data as Coin;
+};
+
+// Add version control functions
+export const createBuildVersion = async (
+  buildId: string,
+  title: string,
+  html: string,
+  fid: number,
+  description: string = ''
+) => {
+  const { data, error } = await supabase.rpc('create_build_version_atomic', {
+    p_build_id: buildId,
+    p_title: title,
+    p_html: html,
+    p_created_by_fid: fid,
+    p_description: description,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data as BuildVersion;
+};
+
+export const getBuildVersions = async (buildId: string) => {
+  const { data, error } = await supabase
+    .from('build_versions')
+    .select('*')
+    .eq('build_id', buildId)
+    .order('version_number', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data as BuildVersion[];
+};
+
+export const getBuildVersion = async (versionId: string) => {
+  const { data, error } = await supabase
+    .from('build_versions')
+    .select('*')
+    .eq('id', versionId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // PGRST116 is the "no rows returned" error - throw a specific not found error
+      const notFoundError: CustomError = new Error('Version not found');
+      notFoundError.code = 'VERSION_NOT_FOUND';
+      throw notFoundError;
+    }
+    // For all other errors, throw the original error (server errors)
+    throw error;
+  }
+
+  return data as BuildVersion;
+};
+
+export const deleteBuildVersion = async (versionId: string) => {
+  const { error } = await supabase
+    .from('build_versions')
+    .delete()
+    .eq('id', versionId);
+
+  if (error) {
+    throw error;
+  }
+};
+
+export const restoreBuildFromVersion = async (
+  buildId: string,
+  versionId: string
+) => {
+  const version = await getBuildVersion(versionId);
+
+  const { data, error } = await supabase
+    .from('builds')
+    .update({
+      title: version.title,
+      html: version.html,
+    })
+    .eq('id', buildId)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Build;
 };

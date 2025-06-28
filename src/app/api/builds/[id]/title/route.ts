@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { updateBuild, getBuild } from '@/lib/supabase';
+import { updateBuild, getBuild, createBuildVersion } from '@/lib/supabase';
 
 const updateTitleSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title too long'),
@@ -26,6 +26,15 @@ export async function PATCH(
         { status: 404 }
       );
     }
+
+    // Create a version of the current build before updating title
+    await createBuildVersion(
+      id,
+      build.title,
+      build.html,
+      build.fid,
+      `Version created before title update at ${new Date().toISOString()}`
+    );
 
     // Update the build title
     const updatedBuild = await updateBuild(id, { title });
