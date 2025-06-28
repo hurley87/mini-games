@@ -52,10 +52,11 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
           isPreviewExpanded ? 'hidden' : ''
         }`}
       >
-        <div className="border-b border-[#30363d] p-2">
+        <div className="border-b border-[#30363d] p-3 flex items-center justify-between min-h-[48px]">
           <h2 className="text-sm font-medium text-white flex items-center gap-2">
             <MessageCircle className="h-4 w-4" /> Build Chat
           </h2>
+          <div className="h-6 w-6"></div>
         </div>
         <div className="flex-1 overflow-y-auto">
           <Chat
@@ -70,9 +71,9 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
       <div
         className={`${
           isPreviewExpanded ? 'w-full' : 'w-full md:w-2/5'
-        } flex-shrink-0 h-full flex flex-col`}
+        } flex-shrink-0 h-full flex flex-col border-r border-[#30363d]`}
       >
-        <div className="border-b border-[#30363d] p-2 flex items-center justify-between">
+        <div className="border-b border-[#30363d] p-3 flex items-center justify-between">
           <h2 className="text-sm font-medium text-white flex items-center gap-2">
             <MonitorPlay className="h-4 w-4" /> Game Preview
           </h2>
