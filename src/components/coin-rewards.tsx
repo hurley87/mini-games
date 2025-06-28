@@ -160,15 +160,6 @@ export default function CoinRewards({
     fetchBalance();
   }, [coinAddress, walletAddress, rpcUrl]);
 
-  // Check for changes
-  useEffect(() => {
-    const changed = Object.keys(coinConfig).some(
-      (key) =>
-        coinConfig[key as keyof CoinConfig] !==
-        formConfig[key as keyof CoinConfig]
-    );
-  }, [coinConfig, formConfig]);
-
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(walletAddress);
