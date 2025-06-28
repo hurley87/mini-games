@@ -22,8 +22,7 @@ interface CoinRewardsProps {
 }
 
 // Use Base's public RPC endpoint
-const RPC_URL =
-  'https://greatest-nameless-morning.base-mainnet.quiknode.pro/69dd30f00e9ea35f66f016d444e403c4df57f8bd/';
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
 
 const publicClient = createPublicClient({
   chain: base,
@@ -50,7 +49,6 @@ export default function CoinRewards({
   symbol,
 }: CoinRewardsProps) {
   const [balance, setBalance] = useState<string>('0');
-  const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -59,7 +57,6 @@ export default function CoinRewards({
       if (!walletAddress || !coinAddress) return;
 
       try {
-        setIsLoading(true);
         const balanceResult = await publicClient.readContract({
           address: coinAddress as Address,
           abi: [
@@ -81,8 +78,6 @@ export default function CoinRewards({
       } catch (error) {
         console.error('Error fetching balance:', error);
         setBalance('0');
-      } finally {
-        setIsLoading(false);
       }
     };
 
