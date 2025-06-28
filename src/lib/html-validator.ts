@@ -113,13 +113,25 @@ export function validateAndFixHtml(html: string): FixableHtmlResult {
   const fixAttempts: string[] = [];
 
   try {
-    // Fix missing html/body tags
+    // Fix missing DOCTYPE first
+    if (!fixedHtml.includes('<!DOCTYPE html>')) {
+      fixedHtml = '<!DOCTYPE html>\n' + fixedHtml;
+    }
+
+    // Fix missing html tags
     if (!fixedHtml.includes('<html')) {
-      if (!fixedHtml.includes('<!DOCTYPE html>')) {
-        fixedHtml = '<!DOCTYPE html>\n' + fixedHtml;
+      // Extract DOCTYPE if present to keep it outside html tags
+      const doctypeMatch = fixedHtml.match(/<!DOCTYPE html>\s*/i);
+      let doctype = '';
+      let content = fixedHtml;
+
+      if (doctypeMatch) {
+        doctype = doctypeMatch[0];
+        content = fixedHtml.replace(/<!DOCTYPE html>\s*/i, '');
       }
-      if (!fixedHtml.startsWith('<html')) {
-        fixedHtml = '<html>\n' + fixedHtml + '\n</html>';
+
+      if (!content.startsWith('<html')) {
+        fixedHtml = doctype + '<html>\n' + content + '\n</html>';
         fixAttempts.push('Added missing <html> tags');
       }
     }
@@ -128,8 +140,15 @@ export function validateAndFixHtml(html: string): FixableHtmlResult {
       // Find where to insert body tag
       const headMatch = fixedHtml.match(/<\/head>/i);
       if (headMatch) {
-        fixedHtml =
-          fixedHtml.replace(/<\/head>/i, '</head>\n<body>\n') + '\n</body>';
+        fixedHtml = fixedHtml.replace(/<\/head>/i, '</head>\n<body>\n');
+
+        // Insert </body> before </html> if it exists, otherwise append to end
+        const htmlCloseMatch = fixedHtml.match(/<\/html>/i);
+        if (htmlCloseMatch) {
+          fixedHtml = fixedHtml.replace(/<\/html>/i, '</body>\n</html>');
+        } else {
+          fixedHtml = fixedHtml + '\n</body>';
+        }
       } else {
         const htmlMatch = fixedHtml.match(/<html[^>]*>/i);
         if (htmlMatch) {
@@ -395,7 +414,7 @@ function fixBasicUnclosedTags(html: string): string {
   const selfClosingTags = ['br', 'hr', 'img', 'input', 'meta', 'link'];
 
   selfClosingTags.forEach((tag) => {
-    const regex = new RegExp(`<${tag}([^>]*[^/])>`, 'gi');
+    const regex = new RegExp(`<${tag}([^>]*)(?<!/)>`, 'gi');
     fixed = fixed.replace(regex, `<${tag}$1/>`);
   });
 
