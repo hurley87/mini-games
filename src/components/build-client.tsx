@@ -5,7 +5,13 @@ import Chat from '@/components/chat';
 import { GameRenderer } from '@/components/game/game-renderer';
 import VersionsList, { VersionsListRef } from '@/components/versions-list';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, MessageCircle, MonitorPlay, Maximize2, Minimize2 } from 'lucide-react';
+import {
+  RefreshCw,
+  MessageCircle,
+  MonitorPlay,
+  Maximize2,
+  Minimize2,
+} from 'lucide-react';
 
 interface BuildClientProps {
   buildId: string;
@@ -32,15 +38,19 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
       className={`flex h-screen overflow-hidden w-full max-w-screen-xl mx-auto border-l border-[#30363d] flex-col md:flex-row`}
     >
       {/* Versions sidebar */}
-      <VersionsList
-        ref={versionsListRef}
-        buildId={buildId}
-        onVersionRestored={handleVersionRestored}
-      />
+      <div className={`${isPreviewExpanded ? 'hidden' : ''}`}>
+        <VersionsList
+          ref={versionsListRef}
+          buildId={buildId}
+          onVersionRestored={handleVersionRestored}
+        />
+      </div>
 
       {/* Chat sidebar */}
       <div
-        className={`flex-1 min-w-0 border-r border-[#30363d] flex flex-col h-full ${isPreviewExpanded ? 'hidden' : ''}`}
+        className={`flex-1 min-w-0 border-r border-[#30363d] flex flex-col h-full ${
+          isPreviewExpanded ? 'hidden' : ''
+        }`}
       >
         <div className="border-b border-[#30363d] p-2">
           <h2 className="text-sm font-medium text-white flex items-center gap-2">
@@ -58,7 +68,9 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
 
       {/* Main content */}
       <div
-        className={`${isPreviewExpanded ? 'w-full' : 'w-2/5'} flex-shrink-0 h-full flex flex-col`}
+        className={`${
+          isPreviewExpanded ? 'w-full' : 'w-full md:w-2/5'
+        } flex-shrink-0 h-full flex flex-col`}
       >
         <div className="border-b border-[#30363d] p-2 flex items-center justify-between">
           <h2 className="text-sm font-medium text-white flex items-center gap-2">
