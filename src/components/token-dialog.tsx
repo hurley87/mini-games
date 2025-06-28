@@ -32,14 +32,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!;
-
 const PURCHASE_START_PRICE = '0.001';
-
-const publicClient = createPublicClient({
-  chain: base,
-  transport: http(RPC_URL),
-});
 
 export default function TokenDialog({
   buildId,
@@ -66,6 +59,26 @@ export default function TokenDialog({
   const [rewardPoolAddress, setRewardPoolAddress] = useState<string>('');
   const [isPoolFunded, setIsPoolFunded] = useState(false);
   const [isWrongChain, setIsWrongChain] = useState(false);
+  const [rpcUrl, setRpcUrl] = useState<string | null>(null);
+
+  // Fetch RPC URL from server
+  useEffect(() => {
+    const fetchRpcUrl = async () => {
+      try {
+        const response = await fetch('/api/rpc-url');
+        if (response.ok) {
+          const data = await response.json();
+          setRpcUrl(data.rpcUrl);
+        } else {
+          console.error('Failed to fetch RPC URL');
+        }
+      } catch (error) {
+        console.error('Error fetching RPC URL:', error);
+      }
+    };
+
+    fetchRpcUrl();
+  }, []);
 
   // Helper function to check if wallet is on Base chain
   const checkChain = async () => {
@@ -230,6 +243,15 @@ export default function TokenDialog({
           transport: custom(provider),
         });
 
+        if (!rpcUrl) {
+          throw new Error('RPC URL not available');
+        }
+
+        const publicClient = createPublicClient({
+          chain: base,
+          transport: http(rpcUrl),
+        });
+
         const result = await createCoin(coinParams, walletClient, publicClient);
 
         const coinDeployment = getCoinCreateFromLogs(result.receipt);
@@ -310,6 +332,15 @@ export default function TokenDialog({
         transport: custom(provider),
       });
 
+      if (!rpcUrl) {
+        throw new Error('RPC URL not available');
+      }
+
+      const publicClient = createPublicClient({
+        chain: base,
+        transport: http(rpcUrl),
+      });
+
       // Get the token balance from user's wallet
       const balance = await publicClient.readContract({
         address: coinAddress as Address,
@@ -352,6 +383,7 @@ export default function TokenDialog({
         functionName: 'transfer',
         args: [rewardPoolAddress as Address, balance],
         account: address as Address,
+        chain: base,
       });
 
       console.log('Transfer transaction hash:', transferHash);
