@@ -12,6 +12,10 @@ export function Providers(props: { children: ReactNode }) {
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
       config={{
         loginMethods: ['farcaster'],
+        embeddedWallets: {
+          createOnLogin: 'users-without-wallets',
+          showWalletUIs: false,
+        },
       }}
     >
       <QueryClientProvider client={queryClient}>
