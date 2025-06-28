@@ -6,6 +6,15 @@ import {
   createBuildVersion,
 } from '@/lib/supabase';
 
+// Define custom error type for error handling
+interface CustomError extends Error {
+  code?: string;
+}
+
+function isCustomError(error: unknown): error is CustomError {
+  return error instanceof Error && 'code' in error;
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; versionId: string }> }
@@ -18,10 +27,15 @@ export async function POST(
     try {
       build = await getBuild(buildId);
     } catch (error) {
-      return NextResponse.json(
-        { success: false, message: 'Build not found' },
-        { status: 404 }
-      );
+      // Check if it's a specific "not found" error
+      if (isCustomError(error) && error.code === 'BUILD_NOT_FOUND') {
+        return NextResponse.json(
+          { success: false, message: 'Build not found' },
+          { status: 404 }
+        );
+      }
+      // For other errors, let them bubble up to the outer catch block
+      throw error;
     }
 
     // Get the version and validate it belongs to the specified build
@@ -29,11 +43,15 @@ export async function POST(
     try {
       version = await getBuildVersion(versionId);
     } catch (error) {
-      // If version not found, return 404
-      return NextResponse.json(
-        { success: false, message: 'Version not found' },
-        { status: 404 }
-      );
+      // Check if it's a specific "not found" error
+      if (isCustomError(error) && error.code === 'VERSION_NOT_FOUND') {
+        return NextResponse.json(
+          { success: false, message: 'Version not found' },
+          { status: 404 }
+        );
+      }
+      // For other errors, let them bubble up to the outer catch block
+      throw error;
     }
 
     // Validate that the version belongs to the specified build

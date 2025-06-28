@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBuildVersion, deleteBuildVersion } from '@/lib/supabase';
+import { getBuildVersion, deleteBuildVersion, getBuild } from '@/lib/supabase';
+
+// Define custom error type for error handling
+interface CustomError extends Error {
+  code?: string;
+}
+
+function isCustomError(error: unknown): error is CustomError {
+  return error instanceof Error && 'code' in error;
+}
 
 export async function GET(
   request: NextRequest,
@@ -8,16 +17,33 @@ export async function GET(
   try {
     const { id: buildId, versionId } = await params;
 
-    // Get the version and validate it belongs to the specified build
+    // First, validate that the build exists
+    try {
+      await getBuild(buildId);
+    } catch (error) {
+      if (isCustomError(error) && error.code === 'BUILD_NOT_FOUND') {
+        return NextResponse.json(
+          { success: false, message: 'Build not found' },
+          { status: 404 }
+        );
+      }
+      // For database errors or other server errors, let them bubble up
+      throw error;
+    }
+
+    // Get the version and validate it exists
     let version;
     try {
       version = await getBuildVersion(versionId);
     } catch (error) {
-      // If version not found, return 404
-      return NextResponse.json(
-        { success: false, message: 'Version not found' },
-        { status: 404 }
-      );
+      if (isCustomError(error) && error.code === 'VERSION_NOT_FOUND') {
+        return NextResponse.json(
+          { success: false, message: 'Version not found' },
+          { status: 404 }
+        );
+      }
+      // For database errors or other server errors, let them bubble up
+      throw error;
     }
 
     // Validate that the version belongs to the specified build
@@ -48,16 +74,33 @@ export async function DELETE(
   try {
     const { id: buildId, versionId } = await params;
 
-    // Get the version and validate it belongs to the specified build
+    // First, validate that the build exists
+    try {
+      await getBuild(buildId);
+    } catch (error) {
+      if (isCustomError(error) && error.code === 'BUILD_NOT_FOUND') {
+        return NextResponse.json(
+          { success: false, message: 'Build not found' },
+          { status: 404 }
+        );
+      }
+      // For database errors or other server errors, let them bubble up
+      throw error;
+    }
+
+    // Get the version and validate it exists
     let version;
     try {
       version = await getBuildVersion(versionId);
     } catch (error) {
-      // If version not found, return 404
-      return NextResponse.json(
-        { success: false, message: 'Version not found' },
-        { status: 404 }
-      );
+      if (isCustomError(error) && error.code === 'VERSION_NOT_FOUND') {
+        return NextResponse.json(
+          { success: false, message: 'Version not found' },
+          { status: 404 }
+        );
+      }
+      // For database errors or other server errors, let them bubble up
+      throw error;
     }
 
     // Validate that the version belongs to the specified build

@@ -1,6 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 
+// Define custom error types for better error handling
+interface CustomError extends Error {
+  code?: string;
+}
+
 type Creators = {
   fid: number;
   bio: string;
@@ -128,6 +133,13 @@ export const getBuild = async (id: string) => {
     .single();
 
   if (error) {
+    if (error.code === 'PGRST116') {
+      // PGRST116 is the "no rows returned" error - throw a specific not found error
+      const notFoundError: CustomError = new Error('Build not found');
+      notFoundError.code = 'BUILD_NOT_FOUND';
+      throw notFoundError;
+    }
+    // For all other errors, throw the original error (server errors)
     throw error;
   }
 
@@ -388,6 +400,13 @@ export const getBuildVersion = async (versionId: string) => {
     .single();
 
   if (error) {
+    if (error.code === 'PGRST116') {
+      // PGRST116 is the "no rows returned" error - throw a specific not found error
+      const notFoundError: CustomError = new Error('Version not found');
+      notFoundError.code = 'VERSION_NOT_FOUND';
+      throw notFoundError;
+    }
+    // For all other errors, throw the original error (server errors)
     throw error;
   }
 
