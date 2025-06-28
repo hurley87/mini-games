@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { restoreBuildFromVersion, getBuildVersion, getBuild, createBuildVersion } from '@/lib/supabase';
+import {
+  restoreBuildFromVersion,
+  getBuildVersion,
+  getBuild,
+  createBuildVersion,
+} from '@/lib/supabase';
 
 export async function POST(
   request: NextRequest,
@@ -9,19 +14,32 @@ export async function POST(
     const { id: buildId, versionId } = await params;
 
     // Verify the build exists
-    const build = await getBuild(buildId);
-    if (!build) {
+    let build;
+    try {
+      build = await getBuild(buildId);
+    } catch (error) {
       return NextResponse.json(
         { success: false, message: 'Build not found' },
         { status: 404 }
       );
     }
 
-    // Verify the version exists
-    const version = await getBuildVersion(versionId);
-    if (!version) {
+    // Get the version and validate it belongs to the specified build
+    let version;
+    try {
+      version = await getBuildVersion(versionId);
+    } catch (error) {
+      // If version not found, return 404
       return NextResponse.json(
         { success: false, message: 'Version not found' },
+        { status: 404 }
+      );
+    }
+
+    // Validate that the version belongs to the specified build
+    if (version.build_id !== buildId) {
+      return NextResponse.json(
+        { success: false, message: 'Version not found for this build' },
         { status: 404 }
       );
     }
@@ -32,7 +50,9 @@ export async function POST(
       build.title,
       build.html,
       build.fid,
-      `Version created before restoring to v${version.version_number} at ${new Date().toISOString()}`
+      `Version created before restoring to v${
+        version.version_number
+      } at ${new Date().toISOString()}`
     );
 
     // Restore the build from the version

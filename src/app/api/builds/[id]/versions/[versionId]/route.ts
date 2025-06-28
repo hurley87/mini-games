@@ -6,12 +6,24 @@ export async function GET(
   { params }: { params: Promise<{ id: string; versionId: string }> }
 ) {
   try {
-    const { versionId } = await params;
+    const { id: buildId, versionId } = await params;
 
-    const version = await getBuildVersion(versionId);
-    if (!version) {
+    // Get the version and validate it belongs to the specified build
+    let version;
+    try {
+      version = await getBuildVersion(versionId);
+    } catch (error) {
+      // If version not found, return 404
       return NextResponse.json(
         { success: false, message: 'Version not found' },
+        { status: 404 }
+      );
+    }
+
+    // Validate that the version belongs to the specified build
+    if (version.build_id !== buildId) {
+      return NextResponse.json(
+        { success: false, message: 'Version not found for this build' },
         { status: 404 }
       );
     }
@@ -34,13 +46,24 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; versionId: string }> }
 ) {
   try {
-    const { versionId } = await params;
+    const { id: buildId, versionId } = await params;
 
-    // Verify the version exists
-    const version = await getBuildVersion(versionId);
-    if (!version) {
+    // Get the version and validate it belongs to the specified build
+    let version;
+    try {
+      version = await getBuildVersion(versionId);
+    } catch (error) {
+      // If version not found, return 404
       return NextResponse.json(
         { success: false, message: 'Version not found' },
+        { status: 404 }
+      );
+    }
+
+    // Validate that the version belongs to the specified build
+    if (version.build_id !== buildId) {
+      return NextResponse.json(
+        { success: false, message: 'Version not found for this build' },
         { status: 404 }
       );
     }

@@ -351,34 +351,19 @@ export const createBuildVersion = async (
   fid: number,
   description: string = ''
 ) => {
-  const { data, error } = await supabase.rpc('get_next_version_number', {
+  const { data, error } = await supabase.rpc('create_build_version_atomic', {
     p_build_id: buildId,
+    p_title: title,
+    p_html: html,
+    p_created_by_fid: fid,
+    p_description: description,
   });
 
   if (error) {
     throw error;
   }
 
-  const versionNumber = data as number;
-
-  const { data: versionData, error: versionError } = await supabase
-    .from('build_versions')
-    .insert({
-      build_id: buildId,
-      version_number: versionNumber,
-      title,
-      html,
-      created_by_fid: fid,
-      description,
-    })
-    .select()
-    .single();
-
-  if (versionError) {
-    throw versionError;
-  }
-
-  return versionData as BuildVersion;
+  return data as BuildVersion;
 };
 
 export const getBuildVersions = async (buildId: string) => {
@@ -425,7 +410,7 @@ export const restoreBuildFromVersion = async (
   versionId: string
 ) => {
   const version = await getBuildVersion(versionId);
-  
+
   const { data, error } = await supabase
     .from('builds')
     .update({
