@@ -54,7 +54,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error deleting build version:', error);
-    console.log('request', request);
     return NextResponse.json(
       { success: false, message: 'Internal server error' },
       { status: 500 }
