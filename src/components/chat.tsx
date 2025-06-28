@@ -8,6 +8,7 @@ import { AssistantStreamEvent } from 'openai/resources/beta/assistants/assistant
 import { RequiredActionFunctionToolCall } from 'openai/resources/beta/threads/runs/runs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import SuggestionChips from '@/components/suggestion-chips';
 import { toast } from 'sonner';
 
 type MessageApiResponse = {
@@ -75,6 +76,13 @@ const Chat = ({
     error: null,
   });
   const [inputDisabled, setInputDisabled] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const suggestions = [
+    'Change colors',
+    'Add more power-ups',
+    'Make it harder',
+  ];
 
   // Fetch existing messages when component mounts
   useEffect(() => {
@@ -365,10 +373,15 @@ const Chat = ({
         <Textarea
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setShowSuggestions(false)}
           placeholder="What would you like to update?"
           className="flex-grow min-h-[48px] max-h-32 px-4 py-2 mr-2.5 rounded-md border-none bg-transparent text-[#c9d1d9] focus-visible:ring-0 focus-visible:ring-offset-0 resize-none placeholder:text-gray-400 disabled:opacity-60"
           disabled={inputDisabled}
         />
+        {showSuggestions && (
+          <SuggestionChips suggestions={suggestions} onSelect={setUserInput} />
+        )}
         <div className="flex justify-end">
           <Button
             type="submit"
