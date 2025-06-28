@@ -30,6 +30,17 @@ type Build = {
   error_message?: string;
 };
 
+type BuildVersion = {
+  id: string;
+  build_id: string;
+  version_number: number;
+  title: string;
+  html: string;
+  created_at: string;
+  created_by_fid: number;
+  description: string;
+};
+
 type Coin = {
   name: string;
   image: string;
@@ -330,4 +341,104 @@ export const updateCoin = async (
   }
 
   return data as Coin;
+};
+
+// Add version control functions
+export const createBuildVersion = async (
+  buildId: string,
+  title: string,
+  html: string,
+  fid: number,
+  description: string = ''
+) => {
+  const { data, error } = await supabase.rpc('get_next_version_number', {
+    p_build_id: buildId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  const versionNumber = data as number;
+
+  const { data: versionData, error: versionError } = await supabase
+    .from('build_versions')
+    .insert({
+      build_id: buildId,
+      version_number: versionNumber,
+      title,
+      html,
+      created_by_fid: fid,
+      description,
+    })
+    .select()
+    .single();
+
+  if (versionError) {
+    throw versionError;
+  }
+
+  return versionData as BuildVersion;
+};
+
+export const getBuildVersions = async (buildId: string) => {
+  const { data, error } = await supabase
+    .from('build_versions')
+    .select('*')
+    .eq('build_id', buildId)
+    .order('version_number', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data as BuildVersion[];
+};
+
+export const getBuildVersion = async (versionId: string) => {
+  const { data, error } = await supabase
+    .from('build_versions')
+    .select('*')
+    .eq('id', versionId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as BuildVersion;
+};
+
+export const deleteBuildVersion = async (versionId: string) => {
+  const { error } = await supabase
+    .from('build_versions')
+    .delete()
+    .eq('id', versionId);
+
+  if (error) {
+    throw error;
+  }
+};
+
+export const restoreBuildFromVersion = async (
+  buildId: string,
+  versionId: string
+) => {
+  const version = await getBuildVersion(versionId);
+  
+  const { data, error } = await supabase
+    .from('builds')
+    .update({
+      title: version.title,
+      html: version.html,
+    })
+    .eq('id', buildId)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Build;
 };

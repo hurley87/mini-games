@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { updateBuildByThreadId, getBuildByThreadId } from '@/lib/supabase';
+import { updateBuildByThreadId, getBuildByThreadId, createBuildVersion } from '@/lib/supabase';
 
 // Define the schema for the request body
 const updateBuildSchema = z.object({
@@ -28,6 +28,15 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
+
+    // Create a version of the current build before updating
+    await createBuildVersion(
+      build.id,
+      build.title,
+      build.html,
+      build.fid,
+      `Version created before update at ${new Date().toISOString()}`
+    );
 
     // Update the build
     const updatedBuild = await updateBuildByThreadId(threadId, {

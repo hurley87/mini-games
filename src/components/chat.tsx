@@ -191,7 +191,7 @@ const Chat = ({
 
     const data = await response.json();
     if (data.success) {
-      appendMessage('assistant', 'Game updated successfully!');
+      appendMessage('assistant', 'Game updated successfully! A new version has been saved.');
       if (onBuildUpdated) {
         onBuildUpdated();
       }
