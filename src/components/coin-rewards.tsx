@@ -57,7 +57,7 @@ export default function CoinRewards({
   const [activeTab, setActiveTab] = useState<'rewards' | 'config'>('rewards');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Coin configuration state
   const [coinConfig, setCoinConfig] = useState<CoinConfig>({
     duration: 30,
@@ -66,7 +66,7 @@ export default function CoinRewards({
     premium_threshold: 100000,
     max_players: 10,
   });
-  
+
   // Form state for editing
   const [formConfig, setFormConfig] = useState<CoinConfig>(coinConfig);
   const [hasChanges, setHasChanges] = useState(false);
@@ -94,7 +94,7 @@ export default function CoinRewards({
   useEffect(() => {
     const fetchCoinConfig = async () => {
       if (!buildId) return;
-      
+
       setIsLoading(true);
       try {
         const response = await fetch(`/api/coins/${buildId}`);
@@ -130,6 +130,10 @@ export default function CoinRewards({
           transport: http(rpcUrl),
         });
 
+        console.log('coinAddress', coinAddress);
+        console.log('walletAddress', walletAddress);
+        console.log('rpcUrl', rpcUrl);
+
         const balanceResult = await publicClient.readContract({
           address: coinAddress as Address,
           abi: [
@@ -160,7 +164,9 @@ export default function CoinRewards({
   // Check for changes
   useEffect(() => {
     const changed = Object.keys(coinConfig).some(
-      key => coinConfig[key as keyof CoinConfig] !== formConfig[key as keyof CoinConfig]
+      (key) =>
+        coinConfig[key as keyof CoinConfig] !==
+        formConfig[key as keyof CoinConfig]
     );
     setHasChanges(changed);
   }, [coinConfig, formConfig]);
@@ -180,7 +186,7 @@ export default function CoinRewards({
   };
 
   const handleConfigChange = (field: keyof CoinConfig, value: number) => {
-    setFormConfig(prev => ({
+    setFormConfig((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -188,11 +194,16 @@ export default function CoinRewards({
 
   const validateConfig = (config: CoinConfig): boolean => {
     return (
-      config.duration >= 0 && config.duration <= 60 &&
-      config.max_points >= 1 && config.max_points <= 100 &&
-      config.token_multiplier >= 1 && config.token_multiplier <= 1000000 &&
-      config.premium_threshold >= 1 && config.premium_threshold <= 10000000 &&
-      config.max_players >= 1 && config.max_players <= 100
+      config.duration >= 0 &&
+      config.duration <= 60 &&
+      config.max_points >= 1 &&
+      config.max_points <= 100 &&
+      config.token_multiplier >= 1 &&
+      config.token_multiplier <= 1000000 &&
+      config.premium_threshold >= 1 &&
+      config.premium_threshold <= 10000000 &&
+      config.max_players >= 1 &&
+      config.max_players <= 100
     );
   };
 
@@ -227,36 +238,37 @@ export default function CoinRewards({
     setHasChanges(false);
   };
 
-  const ConfigInput = ({ 
-    label, 
-    field, 
-    min, 
-    max, 
-    suffix = '' 
-  }: { 
-    label: string; 
-    field: keyof CoinConfig; 
-    min: number; 
-    max: number; 
+  const ConfigInput = ({
+    label,
+    field,
+    min,
+    max,
+    suffix = '',
+  }: {
+    label: string;
+    field: keyof CoinConfig;
+    min: number;
+    max: number;
     suffix?: string;
   }) => (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-white block">
-        {label}
-      </label>
+      <label className="text-sm font-medium text-white block">{label}</label>
       <div className="flex items-center gap-2">
         <input
           type="number"
           min={min}
           max={max}
           value={formConfig[field]}
-          onChange={(e) => handleConfigChange(field, parseInt(e.target.value) || min)}
+          onChange={(e) =>
+            handleConfigChange(field, parseInt(e.target.value) || min)
+          }
           className="flex-1 px-3 py-2 bg-[#1a1a1a] border border-[#30363d] rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {suffix && <span className="text-sm text-[#adadad]">{suffix}</span>}
       </div>
       <div className="text-xs text-[#adadad]">
-        Range: {min} - {max}{suffix}
+        Range: {min} - {max}
+        {suffix}
       </div>
     </div>
   );
@@ -287,7 +299,7 @@ export default function CoinRewards({
             variant={activeTab === 'rewards' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveTab('rewards')}
-            className="flex-1"
+            className="flex-1 border text-white cursor-pointer"
           >
             <Coins className="w-4 h-4 mr-2" />
             Rewards
@@ -296,7 +308,7 @@ export default function CoinRewards({
             variant={activeTab === 'config' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveTab('config')}
-            className="flex-1"
+            className="flex-1 border text-white cursor-pointer"
           >
             <Settings className="w-4 h-4 mr-2" />
             Config
@@ -348,7 +360,9 @@ export default function CoinRewards({
         {activeTab === 'config' && (
           <div className="py-6 space-y-6">
             {isLoading ? (
-              <div className="text-center text-[#adadad]">Loading configuration...</div>
+              <div className="text-center text-[#adadad]">
+                Loading configuration...
+              </div>
             ) : (
               <>
                 <div className="space-y-4">
@@ -359,7 +373,7 @@ export default function CoinRewards({
                     max={60}
                     suffix="seconds"
                   />
-                  
+
                   <ConfigInput
                     label="Maximum Points"
                     field="max_points"
@@ -367,14 +381,14 @@ export default function CoinRewards({
                     max={100}
                     suffix="points"
                   />
-                  
+
                   <ConfigInput
                     label="Token Multiplier"
                     field="token_multiplier"
                     min={1}
                     max={1000000}
                   />
-                  
+
                   <ConfigInput
                     label="Premium Threshold"
                     field="premium_threshold"
@@ -382,7 +396,7 @@ export default function CoinRewards({
                     max={10000000}
                     suffix="tokens"
                   />
-                  
+
                   <ConfigInput
                     label="Maximum Players"
                     field="max_players"
