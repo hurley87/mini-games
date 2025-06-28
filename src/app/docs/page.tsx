@@ -225,6 +225,15 @@ export default function CreatorDocs() {
             your token.
           </p>
         </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold mb-2">Version History</h2>
+          <p className="text-zinc-300">
+            Every build automatically stores a version whenever you make
+            changes. Use the sidebar on the build page to view, restore or
+            delete previous versions of your game.
+          </p>
+        </section>
       </main>
     </div>
   );
