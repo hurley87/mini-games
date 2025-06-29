@@ -4,7 +4,6 @@ import OpenAI from 'openai';
 import { updateBuild, uploadImageFromUrl } from '@/lib/supabase';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
-import { validateAndFixHtml } from '@/lib/html-validator';
 
 const openaiSDK = new OpenAI();
 

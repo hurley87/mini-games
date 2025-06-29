@@ -1,6 +1,5 @@
 import { getBuild } from '@/lib/supabase';
 import { NextRequest, NextResponse } from 'next/server';
-import { validateHtml, createErrorFallbackHtml } from '@/lib/html-validator';
 
 export async function GET(
   request: NextRequest,

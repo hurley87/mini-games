@@ -5,7 +5,6 @@ import {
   getBuildByThreadId,
   createBuildVersion,
 } from '@/lib/supabase';
-import { validateAndFixHtml } from '@/lib/html-validator';
 
 // Define the schema for the request body
 const updateBuildSchema = z.object({
