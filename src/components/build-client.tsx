@@ -35,10 +35,14 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
 
   return (
     <div
-      className={`flex h-screen overflow-hidden w-full max-w-screen-xl mx-auto border-l border-[#30363d] flex-col md:flex-row`}
+      className={`flex h-screen overflow-hidden w-full border-l border-[#30363d] flex-col md:flex-row`}
     >
       {/* Versions sidebar */}
-      <div className={`${isPreviewExpanded ? 'hidden' : ''}`}>
+      <div
+        className={`${
+          isPreviewExpanded ? 'hidden' : 'flex-1'
+        } min-w-0 border-r border-[#30363d] flex flex-col h-full`}
+      >
         <VersionsList
           ref={versionsListRef}
           buildId={buildId}
@@ -48,9 +52,9 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
 
       {/* Chat sidebar */}
       <div
-        className={`flex-1 min-w-0 border-r border-[#30363d] flex flex-col h-full ${
-          isPreviewExpanded ? 'hidden' : ''
-        }`}
+        className={`${
+          isPreviewExpanded ? 'hidden' : 'flex-1'
+        } min-w-0 border-r border-[#30363d] flex flex-col h-full`}
       >
         <div className="border-b border-[#30363d] p-3 flex items-center justify-between min-h-[48px]">
           <h2 className="text-sm font-medium text-white flex items-center gap-2">
@@ -70,8 +74,8 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
       {/* Main content */}
       <div
         className={`${
-          isPreviewExpanded ? 'w-full' : 'w-full md:w-2/5'
-        } flex-shrink-0 h-full flex flex-col border-r border-[#30363d]`}
+          isPreviewExpanded ? 'w-full' : 'flex-1'
+        } min-w-0 h-full flex flex-col border-r border-[#30363d]`}
       >
         <div className="border-b border-[#30363d] p-3 flex items-center justify-between">
           <h2 className="text-sm font-medium text-white flex items-center gap-2">

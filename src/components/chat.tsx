@@ -8,7 +8,9 @@ import { AssistantStreamEvent } from 'openai/resources/beta/assistants/assistant
 import { RequiredActionFunctionToolCall } from 'openai/resources/beta/threads/runs/runs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { Sparkles, Palette, Zap, Target, Music, Gamepad2 } from 'lucide-react';
 
 type MessageApiResponse = {
   role: 'user' | 'assistant';
@@ -62,6 +64,35 @@ type ChatProps = {
   onBuildUpdated?: () => void;
 };
 
+// Quick suggestions data
+const quickSuggestions = [
+  {
+    text: 'Change colors',
+    icon: Palette,
+    description: 'Update the color scheme',
+  },
+  {
+    text: 'Add more power-ups',
+    icon: Zap,
+    description: 'Include exciting power-ups',
+  },
+  {
+    text: 'Make it harder',
+    icon: Target,
+    description: 'Increase the difficulty',
+  },
+  {
+    text: 'Add animations',
+    icon: Sparkles,
+    description: 'Make it more dynamic',
+  },
+  {
+    text: 'Change controls',
+    icon: Gamepad2,
+    description: 'Modify game controls',
+  },
+];
+
 const Chat = ({
   functionCallHandler = () => Promise.resolve(''),
   buildId,
@@ -75,6 +106,8 @@ const Chat = ({
     error: null,
   });
   const [inputDisabled, setInputDisabled] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   // Fetch existing messages when component mounts
   useEffect(() => {
@@ -191,7 +224,10 @@ const Chat = ({
 
     const data = await response.json();
     if (data.success) {
-      appendMessage('assistant', 'Game updated successfully! A new version has been saved.');
+      appendMessage(
+        'assistant',
+        'Game updated successfully! A new version has been saved.'
+      );
       if (onBuildUpdated) {
         onBuildUpdated();
       }
@@ -227,7 +263,50 @@ const Chat = ({
     }));
     setUserInput('');
     setInputDisabled(true);
+    setShowSuggestions(false);
     scrollToBottom();
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setUserInput(suggestion);
+    setShowSuggestions(false);
+    setIsInputFocused(true);
+  };
+
+  const handleInputFocus = () => {
+    setIsInputFocused(true);
+    if (!userInput.trim()) {
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleInputBlur = () => {
+    setIsInputFocused(false);
+    // Small delay to allow clicking on suggestions
+    setTimeout(() => {
+      if (!isInputFocused) {
+        setShowSuggestions(false);
+      }
+    }, 150);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setUserInput(value);
+
+    // Hide suggestions when user starts typing
+    if (value.trim()) {
+      setShowSuggestions(false);
+    } else if (isInputFocused) {
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Escape' && showSuggestions) {
+      setShowSuggestions(false);
+      e.preventDefault();
+    }
   };
 
   /* Stream Event Handlers */
@@ -358,36 +437,70 @@ const Chat = ({
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col w-full p-2.5 bg-[#1a1a1a] border-t border-gray-800"
-      >
-        <Textarea
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          placeholder="What would you like to update?"
-          className="flex-grow min-h-[48px] max-h-32 px-4 py-2 mr-2.5 rounded-md border-none bg-transparent text-[#c9d1d9] focus-visible:ring-0 focus-visible:ring-offset-0 resize-none placeholder:text-gray-400 disabled:opacity-60"
-          disabled={inputDisabled}
-        />
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            size="lg"
-            variant="secondary"
-            className="px-6 bg-gray-500 hover:bg-gray-300 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={inputDisabled}
-          >
-            {inputDisabled ? (
-              <span className="flex items-center gap-2">
-                <span className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin" />
-                Updating ...
+      <div className="relative">
+        {/* Quick Suggestions */}
+        {showSuggestions && !inputDisabled && (
+          <div className="absolute bottom-full left-0 right-0 p-2.5 bg-[#1a1a1a] border-t border-gray-800">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="h-4 w-4 text-blue-400" />
+              <span className="text-sm font-medium text-gray-300">
+                Quick Suggestions
               </span>
-            ) : (
-              'Update'
-            )}
-          </Button>
-        </div>
-      </form>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {quickSuggestions.map((suggestion, index) => {
+                const IconComponent = suggestion.icon;
+                return (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-blue-600/20 hover:text-blue-300 transition-colors duration-200 bg-gray-700/50 text-gray-300 border-gray-600 text-sm py-1.5 px-3 flex items-center gap-2"
+                    onClick={() => handleSuggestionClick(suggestion.text)}
+                    title={suggestion.description}
+                  >
+                    <IconComponent className="h-3 w-3" />
+                    {suggestion.text}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col w-full p-2.5 bg-[#1a1a1a] border-t border-gray-800"
+        >
+          <Textarea
+            value={userInput}
+            onChange={handleInputChange}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            onKeyDown={handleKeyDown}
+            placeholder="What would you like to update?"
+            className="flex-grow min-h-[48px] max-h-32 px-4 py-2 mr-2.5 rounded-md border-none bg-transparent text-[#c9d1d9] focus-visible:ring-0 focus-visible:ring-offset-0 resize-none placeholder:text-gray-400 disabled:opacity-60"
+            disabled={inputDisabled}
+          />
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              size="lg"
+              variant="secondary"
+              className="px-6 bg-gray-500 hover:bg-gray-300 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={inputDisabled}
+            >
+              {inputDisabled ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin" />
+                  Updating ...
+                </span>
+              ) : (
+                'Update'
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

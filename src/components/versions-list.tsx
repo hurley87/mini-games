@@ -106,7 +106,7 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
 
     if (isLoading && versions.length === 0) {
       return (
-        <div className="w-64 bg-[#1a1a1a] border-r border-[#30363d] p-4">
+        <div className="w-full bg-[#1a1a1a] p-4 flex flex-col h-full">
           <div className="flex items-center justify-center h-32">
             <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
           </div>
@@ -116,12 +116,12 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
 
     return (
       <div
-        className={`${
-          isCollapsed ? 'w-12' : 'w-64'
-        } bg-[#1a1a1a] border-r border-[#30363d] transition-all duration-200 flex flex-col h-full`}
+        className={`w-full bg-[#1a1a1a] transition-all duration-200 flex flex-col h-full ${
+          isCollapsed ? 'items-center' : ''
+        }`}
       >
         {/* Header */}
-        <div className="p-3 border-b border-[#30363d] flex items-center justify-between">
+        <div className="p-3 border-b border-[#30363d] flex items-center justify-between min-h-[48px]">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
               <History className="h-4 w-4 text-gray-400" />
@@ -131,7 +131,11 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
               </Badge>
             </div>
           )}
-          <div className="flex items-center gap-1">
+          <div
+            className={`flex items-center gap-1 ${
+              isCollapsed ? 'mx-auto' : ''
+            }`}
+          >
             {!isCollapsed && (
               <Button
                 variant="ghost"
@@ -151,6 +155,7 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
               size="icon"
               onClick={handleToggleCollapse}
               className="h-6 w-6 text-gray-400 hover:text-white"
+              title={isCollapsed ? 'Expand versions' : 'Collapse versions'}
             >
               {isCollapsed ? (
                 <Eye className="h-3 w-3" />
