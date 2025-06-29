@@ -125,7 +125,7 @@ export default function TokenDialog({
     };
 
     setupChainListener();
-  }, [wallet]);
+  }, [wallet, checkChain]);
 
   // Helper function to ensure wallet is on Base chain
   const ensureBaseChain = async () => {

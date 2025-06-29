@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Sparkles, Palette, Zap, Target, Music, Gamepad2 } from 'lucide-react';
+import { Sparkles, Palette, Zap, Target, Gamepad2 } from 'lucide-react';
 
 type MessageApiResponse = {
   role: 'user' | 'assistant';
