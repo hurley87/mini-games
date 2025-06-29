@@ -68,7 +68,7 @@ export async function POST(
       build.title,
       build.html,
       build.fid,
-      `Restored to version ${version.version_number} (${version.title})`
+      `Restored to version ${version.version_number}`
     );
 
     // Restore the build from the version
