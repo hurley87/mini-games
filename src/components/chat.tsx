@@ -108,6 +108,7 @@ const Chat = ({
   const [inputDisabled, setInputDisabled] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const currentPromptRef = useRef<string>(''); // Track current user prompt using ref to avoid closure issues
 
   // Fetch existing messages when component mounts
   useEffect(() => {
@@ -209,6 +210,7 @@ const Chat = ({
         threadId,
         html,
         title,
+        prompt: currentPromptRef.current, // Pass the user's original prompt
       }),
     });
 
@@ -256,6 +258,7 @@ const Chat = ({
     if (!userInput.trim()) return;
     // toast: "Updating your game..."
     toast.info('This might take a couple of minutes ...');
+    currentPromptRef.current = userInput; // Store the user's prompt
     sendMessage(userInput);
     setMessageState((prev) => ({
       ...prev,
@@ -271,6 +274,20 @@ const Chat = ({
     setUserInput(suggestion);
     setShowSuggestions(false);
     setIsInputFocused(true);
+    // Auto-submit suggestion and store as prompt
+    setTimeout(() => {
+      currentPromptRef.current = suggestion;
+      toast.info('This might take a couple of minutes ...');
+      sendMessage(suggestion);
+      setMessageState((prev) => ({
+        ...prev,
+        messages: [...prev.messages, { role: 'user', text: suggestion }],
+      }));
+      setUserInput('');
+      setInputDisabled(true);
+      setShowSuggestions(false);
+      scrollToBottom();
+    }, 100);
   };
 
   const handleInputFocus = () => {

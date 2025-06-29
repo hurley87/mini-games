@@ -199,8 +199,8 @@ const VersionsList = forwardRef<VersionsListRef, VersionsListProps>(
                             v{version.version_number}
                           </Badge>
                         </div>
-                        <h4 className="text-sm font-medium text-white truncate">
-                          {version.title}
+                        <h4 className="text-sm font-medium text-white truncate pt-2">
+                          {version.description}
                         </h4>
                         <p className="text-xs text-gray-400 mt-1">
                           {formatDistanceToNow(new Date(version.created_at), {

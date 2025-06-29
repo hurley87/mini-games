@@ -12,6 +12,7 @@ const updateBuildSchema = z.object({
   threadId: z.string().min(1, 'Thread ID is required'),
   title: z.string().min(1, 'Title is required'),
   html: z.string().min(1, 'HTML is required'),
+  prompt: z.string().optional(), // Add user prompt field
 });
 
 export async function POST(request: Request) {
@@ -22,7 +23,11 @@ export async function POST(request: Request) {
 
     // Validate the request body
     const validatedData = updateBuildSchema.parse(body);
-    const { threadId, title, html } = validatedData;
+    const { threadId, title, html, prompt } = validatedData;
+
+    console.log('prompt', prompt);
+    console.log('title', title);
+    console.log('prompt', prompt);
 
     // Validate and potentially fix HTML before saving
     const htmlValidation = validateAndFixHtml(html);
@@ -69,7 +74,7 @@ export async function POST(request: Request) {
       build.title,
       build.html,
       build.fid,
-      `Version created before update at ${new Date().toISOString()}`
+      prompt || `Update at ${new Date().toISOString()}`
     );
 
     const updatedBuild = await updateBuildByThreadId(threadId, {

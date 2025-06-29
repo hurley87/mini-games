@@ -33,7 +33,7 @@ export async function PATCH(
       build.title,
       build.html,
       build.fid,
-      `Version created before title update at ${new Date().toISOString()}`
+      `Title changed from "${build.title}" to "${title}"`
     );
 
     // Update the build title

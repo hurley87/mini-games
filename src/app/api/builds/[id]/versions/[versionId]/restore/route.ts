@@ -68,9 +68,7 @@ export async function POST(
       build.title,
       build.html,
       build.fid,
-      `Version created before restoring to v${
-        version.version_number
-      } at ${new Date().toISOString()}`
+      `Restored to version ${version.version_number} (${version.title})`
     );
 
     // Restore the build from the version
