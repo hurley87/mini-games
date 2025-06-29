@@ -28,26 +28,7 @@ export async function GET(
 
   const html = build.html;
 
-  // Validate HTML before serving
-  const validation = validateHtml(html);
-  
-  if (!validation.isValid) {
-    console.error(`HTML validation failed for build ${id}:`, validation.errors);
-    
-    // Serve a fallback error page instead of broken HTML
-    const errorMessage = `Validation errors: ${validation.errors.join(', ')}`;
-    const fallbackHtml = createErrorFallbackHtml(errorMessage);
-    
-    return new Response(fallbackHtml, {
-      headers: { 'Content-Type': 'text/html' },
-      status: 200, // Still return 200 to avoid iframe errors
-    });
-  }
-
-  // Log warnings if any
-  if (validation.warnings.length > 0) {
-    console.warn(`HTML validation warnings for build ${id}:`, validation.warnings);
-  }
+  // HTML validation disabled - serving HTML directly
 
   return new Response(html, {
     headers: { 'Content-Type': 'text/html' },

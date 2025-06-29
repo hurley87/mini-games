@@ -29,35 +29,8 @@ export async function POST(request: Request) {
     console.log('title', title);
     console.log('prompt', prompt);
 
-    // Validate and potentially fix HTML before saving
-    const htmlValidation = validateAndFixHtml(html);
-
-    if (!htmlValidation.isValid && !htmlValidation.fixedHtml) {
-      console.error(
-        `HTML validation failed for threadId ${threadId}:`,
-        htmlValidation.errors
-      );
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'HTML validation failed',
-          errors: htmlValidation.errors,
-          warnings: htmlValidation.warnings,
-        },
-        { status: 400 }
-      );
-    }
-
-    // Use fixed HTML if available, otherwise use original
-    const finalHtml = htmlValidation.fixedHtml || html;
-
-    // Log any warnings or fixes that were applied
-    if (htmlValidation.warnings.length > 0) {
-      console.warn(
-        `HTML warnings for threadId ${threadId}:`,
-        htmlValidation.warnings
-      );
-    }
+    // HTML validation disabled - using original HTML directly
+    const finalHtml = html;
 
     // Get the build to check ownership
     const build = await getBuildByThreadId(threadId);
