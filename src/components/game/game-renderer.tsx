@@ -12,13 +12,7 @@ export function GameRenderer({ id, refreshKey }: GameRendererProps) {
   const [loading, setLoading] = useState(true);
   const { user } = usePrivy();
   const address = user?.farcaster?.fid;
-
-  // Debug logs
-  console.log('Game ID:', id);
-  console.log('Wallet Address:', address);
-
   const iframeUrl = `/api/embed/${id}?userId=${address}&gameId=${id}&refresh=${refreshKey}`;
-  console.log('Iframe URL:', iframeUrl);
 
   useEffect(() => {
     setLoading(true);

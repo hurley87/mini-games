@@ -576,7 +576,7 @@
 
 "@hey-api/client-fetch@^0.8.3":
   version "0.8.4"
-  resolved "https://registry.npmjs.org/@hey-api/client-fetch/-/client-fetch-0.8.4.tgz"
+  resolved "https://registry.npmjs.org/@hey-api/client-fetch/-/client-fetch-0.8.4.tgz#2dc2d368b4dd2137789f46adcae68ccd04ea2adb"
   integrity sha512-SWtUjVEFIUdiJGR2NiuF0njsSrSdTe7WHWkp3BLH3DEl2bRhiflOnBo29NSDdrY90hjtTQiTQkBxUgGOF29Xzg==
 
 "@humanfs/core@^0.19.1":
@@ -3026,22 +3026,27 @@
     "@walletconnect/window-getters" "^1.0.1"
     tslib "1.14.1"
 
-"@zoralabs/coins-sdk@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.npmjs.org/@zoralabs/coins-sdk/-/coins-sdk-0.1.1.tgz"
-  integrity sha512-bi0fSZnARUk1AHBn0/Wcke1CIFabVJ/nAIJBb4iOv2VCIWqDY5lEkLq4JgLOJfluUwrGljdbS4w9ONMWarRUWA==
+"@zoralabs/coins-sdk@^0.2.5":
+  version "0.2.5"
+  resolved "https://registry.npmjs.org/@zoralabs/coins-sdk/-/coins-sdk-0.2.5.tgz#5c7f3106208b3bc3087ed2f795d95258dfeab59d"
+  integrity sha512-M3tiT+ZNWFvoXH0ws8OPJ4jQzVysbo8qd4ilgiRTohMkz5ZSjkoE2wJAZ49t0WE/y0qRWne+ZHfmIxsnxtK+og==
   dependencies:
     "@hey-api/client-fetch" "^0.8.3"
-    "@zoralabs/protocol-deployments" "^0.5.5"
+    "@zoralabs/protocol-deployments" "^0.6.1"
 
-"@zoralabs/protocol-deployments@^0.5.5":
-  version "0.5.5"
-  resolved "https://registry.npmjs.org/@zoralabs/protocol-deployments/-/protocol-deployments-0.5.5.tgz"
-  integrity sha512-jRZtMIVBNoIf5TcsaXSgoUY3RDeH0tPLhqv1Oxf/cecVqfPKR5PjX+y92wgbGFBFTj/UqqAJCgyMUFa9yB/m5A==
+"@zoralabs/protocol-deployments@^0.6.1":
+  version "0.6.1"
+  resolved "https://registry.npmjs.org/@zoralabs/protocol-deployments/-/protocol-deployments-0.6.1.tgz#99b193cbd759d6bb8e2cebf1282e8dff66687aa5"
+  integrity sha512-iDO5EhLrqDw0keudRq9omuSdvHG852de5/apY2p7QLBDxitQuJ/6/jOaq2WB4B6GPVUh2fTd5+CdoSsbJhJv5g==
 
 abitype@1.0.8, abitype@^1.0.6:
   version "1.0.8"
   resolved "https://registry.npmjs.org/abitype/-/abitype-1.0.8.tgz"
+  integrity sha512-ZeiI6h3GnW06uYDLx0etQtX/p8E24UaHHBj57RSjK7YBFe7iuVn07EDpOeP451D06sF27VOz9JJPlIKJmXgkEg==
+
+abitype@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.npmjs.org/abitype/-/abitype-1.0.8.tgz#3554f28b2e9d6e9f35eb59878193eabd1b9f46ba"
   integrity sha512-ZeiI6h3GnW06uYDLx0etQtX/p8E24UaHHBj57RSjK7YBFe7iuVn07EDpOeP451D06sF27VOz9JJPlIKJmXgkEg==
 
 abort-controller@^3.0.0:

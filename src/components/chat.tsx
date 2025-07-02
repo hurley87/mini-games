@@ -64,32 +64,32 @@ type ChatProps = {
   onBuildUpdated?: () => void;
 };
 
-// Quick suggestions data
+// Quick suggestions data - focused on smaller, specific changes
 const quickSuggestions = [
   {
-    text: 'Change colors',
+    text: 'Change the background color',
     icon: Palette,
-    description: 'Update the color scheme',
+    description: 'Update just the background color',
   },
   {
-    text: 'Add more power-ups',
+    text: 'Make it faster',
     icon: Zap,
-    description: 'Include exciting power-ups',
+    description: 'Increase game speed',
   },
   {
-    text: 'Make it harder',
+    text: 'Make it easier',
     icon: Target,
-    description: 'Increase the difficulty',
+    description: 'Reduce the difficulty',
   },
   {
-    text: 'Add animations',
+    text: 'Add particle effects',
     icon: Sparkles,
-    description: 'Make it more dynamic',
+    description: 'Add simple visual effects',
   },
   {
-    text: 'Change controls',
+    text: 'Change the font size',
     icon: Gamepad2,
-    description: 'Modify game controls',
+    description: 'Adjust text size',
   },
 ];
 
@@ -192,9 +192,59 @@ const Chat = ({
     }[]
   ) => {
     if (toolCallOutputs.length === 0) return;
-    const args = JSON.parse(toolCallOutputs[0].args);
+
+    let args;
+    try {
+      args = JSON.parse(toolCallOutputs[0].args);
+    } catch (error) {
+      console.error('Error parsing tool call arguments:', error);
+      const jsonString = toolCallOutputs[0].args;
+      console.error('JSON length:', jsonString.length);
+      console.error(
+        'JSON preview (first 500 chars):',
+        jsonString.substring(0, 500)
+      );
+      console.error(
+        'JSON ending (last 500 chars):',
+        jsonString.substring(Math.max(0, jsonString.length - 500))
+      );
+
+      // Check if this looks like a truncation issue
+      const isLikelyTruncated =
+        jsonString.length > 8000 && !jsonString.trim().endsWith('}');
+
+      if (isLikelyTruncated) {
+        appendMessage(
+          'assistant',
+          '⚠️ **Code Too Large**: The generated game code was too large and got truncated during processing.\n\n**Try these approaches:**\n- Ask for smaller, specific changes (e.g., "change the background color to blue")\n- Focus on one feature at a time\n- Use simpler requests like "make it easier" or "add a sound effect"\n\nLarger modifications work better when broken into steps!'
+        );
+      } else {
+        appendMessage(
+          'assistant',
+          'Sorry, there was an error processing the request. The response data was malformed. Please try again with a different request.'
+        );
+      }
+      setInputDisabled(false);
+      return;
+    }
+
     const title = args.title;
     const html = args.html;
+
+    // Validate that we have the required fields
+    if (!title || !html) {
+      console.error('Missing required fields in tool call arguments:', {
+        title,
+        html,
+      });
+      appendMessage(
+        'assistant',
+        'Sorry, there was an error processing the request. Missing required data. Please try again.'
+      );
+      setInputDisabled(false);
+      return;
+    }
+
     // Show creating game message immediately
     appendMessage('assistant', 'Updating your game...');
 

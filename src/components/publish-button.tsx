@@ -50,12 +50,6 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
     fetchPublishedCoin();
   }, [fetchPublishedCoin]);
 
-  // Callback to handle successful pool funding
-  const handlePoolFunded = useCallback(() => {
-    // Refetch the coin data to update the UI
-    fetchPublishedCoin();
-  }, [fetchPublishedCoin]);
-
   if (!hasWallet) {
     return (
       <div className="flex items-center gap-2">
@@ -69,7 +63,7 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
   return (
     <div className="flex items-center gap-2">
       {!publishedCoin ? (
-        <TokenDialog buildId={buildId} onPoolFunded={handlePoolFunded} />
+        <TokenDialog buildId={buildId} />
       ) : (
         <div className="flex items-center gap-2">
           <CoinRewards

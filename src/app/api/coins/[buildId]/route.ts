@@ -1,5 +1,22 @@
-import { getCoinByBuildId, updateCoin } from '@/lib/supabase';
+import {
+  getCoinByBuildId,
+  updateCoin,
+  getBuild,
+  getCreatorByFID,
+  insertCoin,
+} from '@/lib/supabase';
+import { ipfsService } from '@/lib/pinata';
 import { NextResponse } from 'next/server';
+import { privateKeyToAccount } from 'viem/accounts';
+import { Address, createPublicClient, createWalletClient, http } from 'viem';
+import { base } from 'viem/chains';
+import {
+  createCoin,
+  DeployCurrency,
+  validateMetadataURIContent,
+  ValidMetadataURI,
+} from '@zoralabs/coins-sdk';
+import { PrivyClient } from '@privy-io/server-auth';
 
 export async function GET(
   request: Request,
@@ -139,6 +156,244 @@ export async function PATCH(
     console.error('Error updating coin:', error);
     return NextResponse.json(
       { error: 'Failed to update coin configuration' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ buildId: string }> }
+) {
+  try {
+    const { buildId } = await params;
+    const formData = await request.json();
+
+    // Console log all the form data
+    console.log('=== Form Data Received ===');
+    console.log('Build ID:', buildId);
+    console.log('Form Data:', JSON.stringify(formData, null, 2));
+    console.log('========================');
+
+    // Extract individual fields
+    const {
+      title,
+      symbol,
+      duration,
+      max_points,
+      token_multiplier,
+      premium_threshold,
+      max_plays,
+      ...otherData
+    } = formData;
+
+    console.log('Token Name:', title);
+    console.log('Token Symbol:', symbol);
+    console.log('Game Configuration:');
+    console.log('  - Duration:', duration);
+    console.log('  - Max Points:', max_points);
+    console.log('  - Token Multiplier:', token_multiplier);
+    console.log('  - Premium Threshold:', premium_threshold);
+    console.log('  - Max Plays:', max_plays);
+
+    // Validate required fields
+    if (!title || !symbol) {
+      return NextResponse.json(
+        { error: 'Title and symbol are required' },
+        { status: 400 }
+      );
+    }
+
+    // Get build data
+    const build = await getBuild(buildId);
+    if (!build) {
+      return NextResponse.json(
+        { success: false, error: 'Build not found' },
+        { status: 404 }
+      );
+    }
+
+    const buildFid = build.fid;
+    const creator = await getCreatorByFID(buildFid);
+    const username = creator?.username;
+
+    // Create description with username
+    const description = `Mini Game created by @${username} on Farcaster`;
+
+    // // Ensure build image is an IPFS URI
+    let imageUri = build.image;
+    if (imageUri && !imageUri.startsWith('ipfs://')) {
+      try {
+        console.log('Converting image to IPFS URI:', imageUri);
+        // Generate a filename based on the title
+        const imageFileName = `${title
+          .replace(/\s+/g, '-')
+          .toLowerCase()}-image`;
+        // Upload the image to IPFS
+        imageUri = await ipfsService.pinImageFromUrl(imageUri, imageFileName);
+        console.log('Image uploaded to IPFS:', imageUri);
+      } catch (error) {
+        console.error('Failed to upload image to IPFS:', error);
+        // Continue with the original URI if IPFS upload fails
+        console.warn('Using original image URI due to IPFS upload failure');
+      }
+    }
+
+    // Upload HTML content to IPFS
+    console.log('Uploading HTML content to IPFS...');
+    const htmlUri = await ipfsService.pinHtmlContent(
+      build.html,
+      `${title.replace(/\s+/g, '-').toLowerCase()}.html`
+    );
+    console.log('HTML uploaded to IPFS:', htmlUri);
+
+    // Create and upload EIP-7572 compliant metadata
+    console.log('Creating EIP-7572 metadata...');
+    const uri = await ipfsService.pinGameMetadata(
+      title,
+      description,
+      imageUri || '', // Fallback to empty string if no image
+      htmlUri
+    );
+
+    console.log('Metadata uploaded to IPFS:', uri);
+
+    // Create a Privy client
+    const privy = new PrivyClient(
+      process.env.PRIVY_APP_ID!,
+      process.env.PRIVY_APP_SECRET!
+    );
+
+    const wallet = await privy.walletApi.createWallet({
+      chainType: 'ethereum',
+    });
+
+    const walletId = wallet.id;
+    const walletAddress = wallet.address as `0x${string}`;
+
+    console.log('Wallet:', wallet);
+    console.log('Wallet address:', walletAddress);
+    console.log('Wallet id', walletId);
+
+    const privateKey = process.env.PRIVATE_KEY;
+    const account = privateKeyToAccount(privateKey as `0x${string}`);
+
+    const rpcUrl = process.env.RPC_URL;
+    const chain = base;
+
+    const publicClient = createPublicClient({
+      chain,
+      transport: http(rpcUrl),
+    });
+
+    const walletClient = createWalletClient({
+      account,
+      chain,
+      transport: http(rpcUrl),
+    });
+
+    try {
+      await validateMetadataURIContent(uri as ValidMetadataURI);
+      console.log('Metadata URI content is valid');
+    } catch (error) {
+      console.error('Error creating coin:', error);
+      throw error;
+    }
+
+    const coinParams = {
+      name: title,
+      symbol,
+      uri: uri as ValidMetadataURI,
+      platformReferrer: '0x227cfb1d6fa4def9adb9e33c976127295228ea72' as Address,
+      payoutRecipient: walletAddress as Address,
+      chainId: base.id,
+      currency: DeployCurrency.ETH,
+    };
+
+    console.log('coinParams', coinParams);
+
+    try {
+      const result = await createCoin(coinParams, walletClient, publicClient, {
+        gasMultiplier: 120, // Optional: Add 20% buffer to gas (defaults to 100%)
+        // account: customAccount, // Optional: Override the wallet client account
+      });
+
+      console.log('Transaction hash:', result.hash);
+      console.log('Coin address:', result.address);
+      console.log('Deployment details:', result.deployment);
+
+      const coin_address = result.address as `0x${string}`;
+
+      const coin = await insertCoin({
+        build_id: buildId,
+        fid: buildFid,
+        wallet_address: walletAddress,
+        wallet_id: walletId,
+        chain_type: 'ethereum',
+        name: title,
+        symbol,
+        image: build.image || '',
+        coin_address,
+        duration,
+        max_points,
+        token_multiplier,
+        premium_threshold,
+        max_plays,
+      });
+
+      console.log('Coin inserted:', coin);
+    } catch (error) {
+      console.error('Error creating coin:', error);
+      throw error;
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Coin metadata created successfully',
+      uri,
+      htmlUri: '',
+      username,
+      buildFid,
+      gameConfig: {
+        duration,
+        max_points,
+        token_multiplier,
+        premium_threshold,
+        max_plays,
+      },
+      metadata: {
+        version: 'eip-7572',
+        name: title,
+        description,
+        image: build.image || '',
+        animation_url: htmlUri,
+        content: {
+          mime: 'text/html',
+          uri: htmlUri,
+        },
+        properties: {
+          category: 'game',
+        },
+      },
+      receivedData: {
+        buildId,
+        title,
+        symbol,
+        duration,
+        max_points,
+        token_multiplier,
+        premium_threshold,
+        max_plays,
+        ...otherData,
+      },
+    });
+  } catch (error) {
+    console.error('Error creating coin metadata:', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to create coin metadata',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
