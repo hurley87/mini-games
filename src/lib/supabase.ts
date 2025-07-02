@@ -47,6 +47,7 @@ type BuildVersion = {
 };
 
 type Coin = {
+  id: string;
   name: string;
   image: string;
   symbol: string;
@@ -238,7 +239,7 @@ export const getTokenByBuildId = async (buildId: string) => {
   return data as Coin | null;
 };
 
-export const insertCoin = async (coin: Omit<Coin, 'updated_at'>) => {
+export const insertCoin = async (coin: Omit<Coin, 'id' | 'updated_at'>) => {
   try {
     // Validate required fields
     if (
@@ -304,6 +305,20 @@ export const getCoinByBuildId = async (buildId: string) => {
 
   if (error && error.code !== 'PGRST116') {
     // PGRST116 is the "no rows returned" error
+    throw error;
+  }
+
+  return data as Coin | null;
+};
+
+export const getCoin = async (coinId: string) => {
+  const { data, error } = await supabase
+    .from('coins')
+    .select('*')
+    .eq('id', coinId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
     throw error;
   }
 
