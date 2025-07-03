@@ -69,7 +69,7 @@ export default async function Home() {
                     href={`/coins/${coin.id}`}
                     className="bg-white text-black w-full px-6 py-2 rounded-lg font-semibold transition-colors text-center"
                   >
-                    Play
+                    Practise
                   </Link>
                 </div>
               </div>

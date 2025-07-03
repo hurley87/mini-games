@@ -131,7 +131,7 @@ export function GameWithTimer({ id, coin }: GameWithTimerProps) {
               className="bg-white text-black hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 mx-auto"
             >
               <Play className="w-5 h-5" />
-              Start Game
+              Start Practise
             </Button>
           </div>
         </div>
