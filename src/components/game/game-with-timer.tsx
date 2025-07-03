@@ -196,7 +196,7 @@ export function GameWithTimer({ id, coin }: GameWithTimerProps) {
                 {coin.max_points ? `/${coin.max_points}` : ''}
               </div>
               <p className="text-sm text-[#adadad]">
-                You've earned {score} {coin.symbol} tokens!
+                You&apos;ve earned {score} {coin.symbol} tokens!
               </p>
             </div>
 
