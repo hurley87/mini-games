@@ -1,7 +1,7 @@
 import { GameWithTimer } from '@/components/game/game-with-timer';
 import { Button } from '@/components/ui/button';
 import { getBuild, getCoin } from '@/lib/supabase';
-import { ChevronLeft, Share2 } from 'lucide-react';
+import { ChevronLeft, ExternalLink, Share2 } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import ContractAddressDisplay from '@/components/contract-address-display';
@@ -51,23 +51,38 @@ export default async function CoinPage({ params }: CoinPageProps) {
           <h1 className="ml-2 text-sm font-medium">Mini Games</h1>
         </div>
 
-        <Link
-          href={`https://farcaster.xyz/~/compose?text=${encodeURIComponent(
-            `Play ${coin.name}, earn $${coin.symbol}`
-          )}&embeds[]=${encodeURIComponent(
-            `https://app.minigames.studio/coins/${coin.id}`
-          )}`}
-          target="_blank"
-        >
-          <Button
-            variant="outline"
-            size="lg"
-            className="text-black bg-white cursor-pointer"
+        <div className="flex items-center gap-2">
+          <Link
+            href={`https://zora.co/coin/base:${coin.coin_address}`}
+            target="_blank"
           >
-            <Share2 className="w-4 h-4 mr-2" />
-            Earn ${coin.symbol} on Farcaster
-          </Button>
-        </Link>
+            <Button
+              variant="outline"
+              size="lg"
+              className="text-white bg-transparent border-white cursor-pointer"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Trade on Zora
+            </Button>
+          </Link>
+          <Link
+            href={`https://farcaster.xyz/~/compose?text=${encodeURIComponent(
+              `Play ${coin.name}, earn $${coin.symbol}`
+            )}&embeds[]=${encodeURIComponent(
+              `https://app.minigames.studio/coins/${coin.id}`
+            )}`}
+            target="_blank"
+          >
+            <Button
+              variant="outline"
+              size="lg"
+              className="text-black bg-white cursor-pointer"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Earn on Farcaster
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <main className="flex-1 flex items-center justify-center p-8 overflow-y-auto">
