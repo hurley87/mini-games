@@ -27,8 +27,6 @@ export async function GET(
 
   const html = build.html;
 
-  // HTML validation disabled - serving HTML directly
-
   return new Response(html, {
     headers: { 'Content-Type': 'text/html' },
   });

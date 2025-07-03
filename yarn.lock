@@ -3040,10 +3040,10 @@
     "@walletconnect/window-getters" "^1.0.1"
     tslib "1.14.1"
 
-"@zoralabs/coins-sdk@^0.2.5":
-  version "0.2.5"
-  resolved "https://registry.npmjs.org/@zoralabs/coins-sdk/-/coins-sdk-0.2.5.tgz#5c7f3106208b3bc3087ed2f795d95258dfeab59d"
-  integrity sha512-M3tiT+ZNWFvoXH0ws8OPJ4jQzVysbo8qd4ilgiRTohMkz5ZSjkoE2wJAZ49t0WE/y0qRWne+ZHfmIxsnxtK+og==
+"@zoralabs/coins-sdk@^0.2.8":
+  version "0.2.8"
+  resolved "https://registry.npmjs.org/@zoralabs/coins-sdk/-/coins-sdk-0.2.8.tgz#5ec1524b70a6067888429e40ab269db4bfc1ce1d"
+  integrity sha512-vni9qcdS6/9HUOue7SDir2wHn+SSSDmxfZhBcCzQWdK9NaW/+E5jCWXuQGFgBzKpLc4FN5ktJz36v92BADQE3g==
   dependencies:
     "@hey-api/client-fetch" "^0.8.3"
     "@zoralabs/protocol-deployments" "^0.6.1"

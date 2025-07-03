@@ -46,11 +46,19 @@ const getActionPrompt = (description: string) => {
         8. Use strict equality checks (=== and !==) instead of loose equality
         9. Initialize all variables with default values where appropriate
         
-        At the appropriate moment (such as when the game ends or points are earned), you must call:
+        SCORING SYSTEM:
+        You have access to two functions for communicating with the parent window:
         
-        window.awardPoints(score);
+        1. window.updateScore(score) - Call this during gameplay to update the score in real-time
+        2. window.awardPoints(score) - Call this at the end of the game to award final points
+        
+        Use these helper functions to ensure they exist before calling:
 
-        Do not call window.awardPoints(score) directly. Instead, check if it exists first. Use this helper function:
+        function tryUpdateScore(score) {
+          if (typeof window.updateScore === 'function') {
+            window.updateScore(score);
+          }
+        }
 
         function tryAwardPoints(score) {
           if (typeof window.awardPoints === 'function') {
@@ -60,16 +68,17 @@ const getActionPrompt = (description: string) => {
           }
         }
 
-        When the player earns points, call tryAwardPoints(score) instead of calling window.awardPoints(score) directly.
+        - Call tryUpdateScore(score) whenever the player's score changes during gameplay
+        - Call tryAwardPoints(score) when the game ends or points are earned for the final time
         
-        Pass the player's score as a number. Do not define or modify this function — it is already provided by the environment.
+        Pass the player's score as a number. Do not define or modify these functions — they are already provided by the environment.
 
         IMPORTANT UI REQUIREMENTS:
         - DO NOT display any text, numbers, scores, timers, or countdown elements anywhere on the screen
         - DO NOT show the player's score visually in the game
         - DO NOT display time remaining or any timer elements
         - The game should be purely visual with shapes, colors, and animations only
-        - Keep track of score internally for the tryAwardPoints function, but never display it
+        - Keep track of score internally for the scoring functions, but never display it
 
         All games must be playable in the browser.
 
