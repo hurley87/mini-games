@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogTrigger,
@@ -43,6 +44,7 @@ interface CreatedTokenData {
 }
 
 export default function TokenDialog({ buildId }: { buildId: string }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [symbol, setSymbol] = useState('');
@@ -227,7 +229,7 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
             coinsResult.walletAddress || coinsResult.coin?.wallet_address,
         });
 
-        setIsCoinCreated(true);
+        router.push(`/coins/${coinsResult.coin?.id}`);
         toast.success('Token created successfully!');
       } else {
         const errorResult = await coinsResponse.json();

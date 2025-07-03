@@ -54,7 +54,7 @@ type Coin = {
   coin_address: string;
   build_id: string;
   fid: number;
-  updated_at: string;
+  created_at: string;
   wallet_address: string;
   wallet_id: string;
   chain_type: string;
@@ -239,7 +239,7 @@ export const getTokenByBuildId = async (buildId: string) => {
   return data as Coin | null;
 };
 
-export const insertCoin = async (coin: Omit<Coin, 'id' | 'updated_at'>) => {
+export const insertCoin = async (coin: Omit<Coin, 'id' | 'created_at'>) => {
   try {
     // Validate required fields
     if (
@@ -326,17 +326,37 @@ export const getCoin = async (coinId: string) => {
 };
 
 export const getCoins = async () => {
-  const { data, error } = await supabase
+  // First get coins with builds
+  const { data: coinsData, error: coinsError } = await supabase
     .from('coins')
     .select('*, builds(title, description, image)')
-    .eq('pool_initialized', true)
-    .order('updated_at', { ascending: false });
+    .order('created_at', { ascending: false });
 
-  if (error) {
-    throw error;
+  if (coinsError) {
+    throw coinsError;
   }
 
-  return data as (Coin & { builds: Pick<Build, 'title' | 'description' | 'image'> | null })[];
+  // Then get creators for each coin
+  const coinsWithCreators = await Promise.all(
+    coinsData.map(async (coin) => {
+      const { data: creator, error: creatorError } = await supabase
+        .from('creators')
+        .select('username, pfp')
+        .eq('fid', coin.fid)
+        .single();
+
+      // Don't throw error if creator not found, just return null
+      return {
+        ...coin,
+        creators: creatorError ? null : creator,
+      };
+    })
+  );
+
+  return coinsWithCreators as (Coin & {
+    builds: Pick<Build, 'title' | 'description' | 'image'> | null;
+    creators: Pick<Creators, 'username' | 'pfp'> | null;
+  })[];
 };
 
 export const updateCoinPoolStatus = async (
