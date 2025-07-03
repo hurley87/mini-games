@@ -4,7 +4,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect } from 'react';
 import { GameRenderer } from './game-renderer';
 import { Button } from '@/components/ui/button';
-import { Play, Trophy, Clock } from 'lucide-react';
+import { Play, Trophy, Clock, LogIn } from 'lucide-react';
 
 interface GameWithTimerProps {
   id: string;
@@ -24,7 +24,7 @@ export function GameWithTimer({ id, coin }: GameWithTimerProps) {
   const [timeLeft, setTimeLeft] = useState(coin.duration || 60); // Default 60 seconds
   const [score, setScore] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
-  const { user } = usePrivy();
+  const { user, login } = usePrivy();
 
   // Timer effect
   useEffect(() => {
@@ -107,7 +107,14 @@ export function GameWithTimer({ id, coin }: GameWithTimerProps) {
     return (
       <div className="flex items-center justify-center h-[750px] w-[400px] bg-[#30363d] rounded-[30px] border-4 border-white">
         <div className="text-center text-white p-6">
-          <p className="text-lg mb-4">Connect your Farcaster account to play</p>
+          <p className="text-lg mb-6">Connect your Farcaster account to play</p>
+          <Button
+            onClick={login}
+            className="bg-white text-black hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 mx-auto"
+          >
+            <LogIn className="w-5 h-5" />
+            Connect Farcaster
+          </Button>
         </div>
       </div>
     );

@@ -109,8 +109,27 @@ export default function BuildList() {
     );
   }
 
+  if (builds.length === 0) {
+    return (
+      <div className="text-center py-16 bg-[#2a2a2a] rounded-lg border border-gray-700">
+        <div className="max-w-md mx-auto px-6">
+          <p className="text-gray-300 mb-8 leading-relaxed">
+            Before creating your first game, we recommend checking out our{' '}
+            <Link
+              href="/docs"
+              className="text-blue-400 hover:text-blue-300 underline font-semibold"
+            >
+              documentation
+            </Link>{' '}
+            to understand best practices and get inspired by examples.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-4 w-full pb-10">
       {builds.map((build) => {
         const statusInfo = getStatusInfo(build.status);
         const StatusIcon = statusInfo.icon;
