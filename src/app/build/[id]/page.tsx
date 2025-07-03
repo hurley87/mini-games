@@ -32,7 +32,7 @@ export default async function BuildPage({ params }: BuildPageProps) {
       <div className="flex flex-col h-screen bg-[#1a1a1a] text-[#c9d1d9] font-sans">
         {/* Header */}
         <header className="flex items-center p-3 border-b border-[#30363d]">
-          <Link href="/">
+          <Link href="/create">
             <Button
               variant="ghost"
               size="icon"

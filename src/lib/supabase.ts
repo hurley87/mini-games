@@ -325,6 +325,20 @@ export const getCoin = async (coinId: string) => {
   return data as Coin | null;
 };
 
+export const getCoins = async () => {
+  const { data, error } = await supabase
+    .from('coins')
+    .select('*, builds(title, description, image)')
+    .eq('pool_initialized', true)
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data as (Coin & { builds: Pick<Build, 'title' | 'description' | 'image'> | null })[];
+};
+
 export const updateCoinPoolStatus = async (
   buildId: string,
   poolInitialized: boolean
