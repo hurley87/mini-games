@@ -15,14 +15,11 @@
 ## 📋 Table of Contents
 
 - [Architecture Overview](#-architecture-overview)
-- [Core Technologies](#-core-technologies)
-- [System Architecture](#-system-architecture)
 - [Authentication System](#-authentication-system)
 - [AI Game Generation](#-ai-game-generation)
 - [Tokenization System](#-tokenization-system)
 - [API Reference](#-api-reference)
 - [Key Components](#-key-components)
-- [Deployment](#-deployment)
 - [Environment Variables](#-environment-variables)
 
 ## 🏗️ Architecture Overview
@@ -448,4 +445,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Mini Games Studio** - Empowering creators to build tokenized games that can be played on Zora and Farcaster.
+**Mini Games Studio** - Empowering creators to build tokenized games that can be traded on Zora and played on Farcaster.
