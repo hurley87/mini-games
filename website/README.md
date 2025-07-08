@@ -45,7 +45,6 @@ Mini Games Studio follows a modern full-stack architecture built on Next.js 15 w
 | **Storage** | Pinata (IPFS) | Decentralized file storage for game assets |
 | **Social** | Neynar SDK | Farcaster social features and user data |
 
-
 ### Key Features
 
 - **AI-Powered Game Generation**: GPT-4.1 creates complete HTML/CSS/JS games from natural language descriptions
@@ -60,7 +59,7 @@ Mini Games Studio follows a modern full-stack architecture built on Next.js 15 w
 
 ### Privy Integration
 
-The application uses **Privy** for Web3-native authentication with exclusive Farcaster login:
+The application uses **Privy** for authentication with Farcaster:
 
 ```typescript
 // src/app/providers.tsx
@@ -83,7 +82,6 @@ The application uses **Privy** for Web3-native authentication with exclusive Far
 3. **Build Ownership**: Users can only edit games they created
 4. **FID Authentication**: Farcaster ID (FID) used for all user identification
 
-
 ## 🤖 AI Game Generation
 
 ### OpenAI Integration
@@ -100,6 +98,7 @@ const { object: agentResponse } = await generateObject({
   prompt: getActionPrompt(description),
 });
 ```
+
 
 ### Game Generation Pipeline
 
@@ -245,11 +244,7 @@ Games generate compliant metadata stored on IPFS:
 
 **🎮 Zora Integration**: The EIP-7572 metadata standard makes games **directly playable on Zora**. When users view the token on Zora's platform, they can play the game inline without leaving the site. The `animation_url` and `content.uri` fields point to the IPFS-hosted HTML game, enabling Zora to render the interactive experience directly within the token's metadata view.
 
-### Token Configuration Interface
-
-The **Token Dialog** (`src/components/token-dialog.tsx`) provides a user-friendly interface for creators to configure all tokenization parameters:
-
-#### Configuration Process
+### Token Configuration
 
 1. **Launch Game**: Click "Launch Game" button on any completed build
 2. **Token Branding**: Set token name and symbol (e.g., "Space Credits" / "SPACE")
