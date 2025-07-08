@@ -47,29 +47,6 @@ Mini Games Studio follows a modern full-stack architecture built on Next.js 15 w
 | **Storage** | Pinata (IPFS) | Decentralized file storage for game assets |
 | **Social** | Neynar SDK | Farcaster social features and user data |
 
-## 🔧 System Architecture
-
-```mermaid
-graph TB
-    A[User Interface - Next.js] --> B[Authentication - Privy]
-    A --> C[AI Generation - OpenAI]
-    A --> D[Database - Supabase]
-    A --> E[IPFS Storage - Pinata]
-    A --> F[Blockchain - Base/Zora]
-    
-    B --> G[Farcaster Network]
-    C --> H[Game HTML/JS Generation]
-    D --> I[PostgreSQL Database]
-    E --> J[Decentralized Storage]
-    F --> K[Token Creation & Trading]
-    
-    subgraph "Core Data Flow"
-        L[Game Creation] --> M[AI Processing]
-        M --> N[Version Control]
-        N --> O[Tokenization]
-        O --> P[Farcaster Sharing]
-    end
-```
 
 ### Key Features
 
@@ -154,6 +131,7 @@ const { object: agentResponse } = await generateObject({
    - Streams real-time responses from the AI assistant
    - Calls `update_game` function tool with complete updated HTML
 
+
 ### OpenAI Assistants Integration
 
 The game update system leverages **OpenAI's Assistants SDK** to provide intelligent, context-aware modifications:
@@ -185,6 +163,7 @@ const stream = openai.beta.threads.runs.stream(threadId, {
 6. AI: Only modifies background, preserving all previous improvements
 
 This threading system enables a natural, conversational approach to game development where each modification is informed by the complete context of the user's creative process.
+
 
 ### Game Constraints
 
