@@ -247,6 +247,8 @@ Games generate compliant metadata stored on IPFS:
 }
 ```
 
+**🎮 Zora Integration**: The EIP-7572 metadata standard makes games **directly playable on Zora**. When users view the token on Zora's platform, they can play the game inline without leaving the site. The `animation_url` and `content.uri` fields point to the IPFS-hosted HTML game, enabling Zora to render the interactive experience directly within the token's metadata view.
+
 ## 🗄️ Database Schema
 
 ### Core Tables
