@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Chat from '@/components/chat';
 import { GameRenderer } from '@/components/game/game-renderer';
 import VersionsList, { VersionsListRef } from '@/components/versions-list';
@@ -18,9 +18,32 @@ interface BuildClientProps {
   threadId: string;
 }
 
+interface Build {
+  id: string;
+  title: string;
+  description: string;
+  html: string;
+  created_at: string;
+  fid: number;
+  thread_id: string;
+  model: string;
+  image?: string;
+  tutorial?: string;
+  status?: string;
+  error_message?: string;
+  isPublished?: boolean;
+  coin?: {
+    address: string;
+    name: string;
+    symbol: string;
+  } | null;
+}
+
 export default function BuildClient({ buildId, threadId }: BuildClientProps) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+  const [build, setBuild] = useState<Build | null>(null);
+  const [isLoadingBuild, setIsLoadingBuild] = useState(true);
   const versionsListRef = useRef<VersionsListRef>(null);
 
   const handleBuildUpdated = () => {
@@ -31,7 +54,36 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
 
   const handleVersionRestored = () => {
     setRefreshKey((prev) => prev + 1);
+    // Refresh build data when version is restored
+    fetchBuild();
   };
+
+  const fetchBuild = async () => {
+    try {
+      setIsLoadingBuild(true);
+      const response = await fetch(`/api/builds/${buildId}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch build');
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        setBuild(result.data);
+      } else {
+        console.error('Error fetching build:', result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching build:', error);
+    } finally {
+      setIsLoadingBuild(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBuild();
+  }, [buildId]);
 
   return (
     <div
@@ -62,6 +114,22 @@ export default function BuildClient({ buildId, threadId }: BuildClientProps) {
           </h2>
           <div className="h-6 w-6"></div>
         </div>
+
+        {/* Build Description - Fixed at top */}
+        {build && !isLoadingBuild && (
+          <div className="border-b border-[#30363d] p-3 bg-[#1a1a1a]">
+            <div className="mb-2">
+              <h3 className="text-xs font-medium text-gray-300 uppercase tracking-wide">
+                Original Prompt
+              </h3>
+            </div>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              {build.description}
+            </p>
+          </div>
+        )}
+
+        {/* Chat - Scrollable underneath description */}
         <div className="flex-1 overflow-y-auto">
           <Chat
             buildId={buildId}
