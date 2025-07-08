@@ -110,6 +110,10 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
     );
   };
 
+  const validateSymbol = (symbol: string): boolean => {
+    return symbol.length >= 3 && symbol.length <= 8;
+  };
+
   const resetDialogState = () => {
     setIsCoinCreated(false);
     setCreatedTokenData(null);
@@ -565,12 +569,22 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                     placeholder="e.g., SPACE"
                     value={symbol}
                     onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                    className="w-full rounded-md border border-[#30363d] bg-[#1a1a1a] px-4 py-3 text-white placeholder:text-gray-500 focus:border-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-600 transition-colors"
+                    className={`w-full rounded-md border bg-[#1a1a1a] px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 transition-colors ${
+                      symbol && !validateSymbol(symbol)
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/50'
+                        : 'border-[#30363d] focus:border-gray-600 focus:ring-gray-600'
+                    }`}
                     required
-                    maxLength={6}
+                    maxLength={8}
                   />
-                  <p className="text-xs text-gray-500">
-                    3-6 characters, typically uppercase
+                  <p
+                    className={`text-xs ${
+                      symbol && !validateSymbol(symbol)
+                        ? 'text-red-400'
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    3-8 characters, typically uppercase
                   </p>
                 </div>
               </div>
@@ -627,6 +641,7 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                     isLoading ||
                     !title ||
                     !symbol ||
+                    !validateSymbol(symbol) ||
                     !validateConfig(coinConfig)
                   }
                 >
