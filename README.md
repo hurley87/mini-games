@@ -20,11 +20,8 @@
 - [Authentication System](#-authentication-system)
 - [AI Game Generation](#-ai-game-generation)
 - [Tokenization System](#-tokenization-system)
-- [Database Schema](#-database-schema)
 - [API Reference](#-api-reference)
-- [Development Setup](#-development-setup)
 - [Key Components](#-key-components)
-- [Security Considerations](#-security-considerations)
 - [Deployment](#-deployment)
 - [Environment Variables](#-environment-variables)
 
@@ -246,10 +243,6 @@ Games generate compliant metadata stored on IPFS:
 
 **🎮 Zora Integration**: The EIP-7572 metadata standard makes games **directly playable on Zora**. When users view the token on Zora's platform, they can play the game inline without leaving the site. The `animation_url` and `content.uri` fields point to the IPFS-hosted HTML game, enabling Zora to render the interactive experience directly within the token's metadata view.
 
-### Token Configuration Interface
-
-The **Token Dialog** (`src/components/token-dialog.tsx`) provides a user-friendly interface for creators to configure all tokenization parameters:
-
 #### Configuration Process
 
 1. **Launch Game**: Click "Launch Game" button on any completed build
@@ -432,41 +425,6 @@ Create `.env.local` with required variables (see [Environment Variables](#enviro
 - React context for build state management
 - Real-time build updates and optimistic UI
 - Centralized build operations
-
-## 🔒 Security Considerations
-
-### Input Validation
-
-- **Zod Schemas**: All API inputs validated with TypeScript schemas
-- **HTML Sanitization**: Game HTML validated for security compliance
-- **User Authentication**: FID-based ownership verification for all operations
-
-### Sandboxing
-
-- **iframe Sandbox**: Games run in restricted iframe environment
-- **No External Dependencies**: Generated games cannot access external resources
-- **Limited DOM Access**: Games cannot manipulate parent window
-
-### API Security
-
-- **Authentication Gates**: All protected endpoints verify user identity
-- **Rate Limiting**: Background processing includes retry logic with limits
-- **Error Handling**: Sanitized error responses prevent information leakage
-
-### Blockchain Security
-
-- **Private Key Management**: Server-side key storage for token operations
-- **Transaction Validation**: All blockchain interactions validated before execution
-- **Wallet Isolation**: Each token gets dedicated wallet for security
-
-## 🚀 Deployment
-
-### Platform Requirements
-
-- **Vercel/Netlify**: Recommended for Next.js deployment
-- **Node.js 18+**: Runtime requirement
-- **PostgreSQL**: Database with Supabase or self-hosted
-- **IPFS Gateway**: Pinata or alternative IPFS service
 
 ## 🔧 Environment Variables
 
