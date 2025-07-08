@@ -2,7 +2,7 @@
 
 ![Mini Games Studio](https://img.shields.io/badge/Next.js-15-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![Tailwind](https://img.shields.io/badge/Tailwind-4.0-cyan) ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)
 
-**Mini Games Studio** is a Next.js application that enables users to create AI-generated 30-second web games and share them directly in the Farcaster social feed. Games can be tokenized using Zora Coins SDK, allowing communities to back their favorite creators with cryptocurrency rewards.
+**Mini Games Studio** enables users to create AI-generated web games and share them directly in Farcaster. Games can be tokenized using Zora Coins SDK, allowing communities to back their favorite game creators.
 
 ## 🚀 Quick Start
 
@@ -46,30 +46,6 @@ Mini Games Studio follows a modern full-stack architecture built on Next.js 15 w
 | **Blockchain** | Zora Coins SDK | Token creation and trading on Base |
 | **Storage** | Pinata (IPFS) | Decentralized file storage for game assets |
 | **Social** | Neynar SDK | Farcaster social features and user data |
-
-## 🔧 System Architecture
-
-```mermaid
-graph TB
-    A[User Interface - Next.js] --> B[Authentication - Privy]
-    A --> C[AI Generation - OpenAI]
-    A --> D[Database - Supabase]
-    A --> E[IPFS Storage - Pinata]
-    A --> F[Blockchain - Base/Zora]
-    
-    B --> G[Farcaster Network]
-    C --> H[Game HTML/JS Generation]
-    D --> I[PostgreSQL Database]
-    E --> J[Decentralized Storage]
-    F --> K[Token Creation & Trading]
-    
-    subgraph "Core Data Flow"
-        L[Game Creation] --> M[AI Processing]
-        M --> N[Version Control]
-        N --> O[Tokenization]
-        O --> P[Farcaster Sharing]
-    end
-```
 
 ### Key Features
 
@@ -191,12 +167,6 @@ This threading system enables a natural, conversational approach to game develop
 Games communicate with the parent window through predefined functions:
 
 ```javascript
-// Available in game environment
-function tryUpdateScore(score) {
-  if (typeof window.updateScore === 'function') {
-    window.updateScore(score);
-  }
-}
 
 function tryAwardPoints(score) {
   if (typeof window.awardPoints === 'function') {
@@ -300,86 +270,6 @@ The interface includes real-time validation ensuring:
 - Game duration aligns with platform constraints
 
 This configuration system allows creators to fine-tune their game's economy to match their community and monetization strategy.
-
-## �️ Database Schema
-
-### Core Tables
-
-#### builds
-```sql
-CREATE TABLE builds (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title TEXT NOT NULL,
-  html TEXT NOT NULL,
-  description TEXT,
-  model TEXT,
-  fid BIGINT NOT NULL,
-  thread_id TEXT,
-  image TEXT,
-  tutorial TEXT,
-  status TEXT DEFAULT 'pending',
-  error_message TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### build_versions
-```sql
-CREATE TABLE build_versions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  build_id UUID NOT NULL REFERENCES builds(id) ON DELETE CASCADE,
-  version_number INTEGER NOT NULL,
-  title TEXT NOT NULL,
-  html TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_by_fid BIGINT NOT NULL,
-  description TEXT DEFAULT '',
-  UNIQUE(build_id, version_number)
-);
-```
-
-#### creators
-```sql
-CREATE TABLE creators (
-  fid BIGINT PRIMARY KEY,
-  username TEXT NOT NULL,
-  pfp TEXT,
-  bio TEXT,
-  primary_address TEXT,
-  follower_count INTEGER DEFAULT 0,
-  following_count INTEGER DEFAULT 0,
-  power_badge BOOLEAN DEFAULT FALSE,
-  score NUMERIC DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### coins
-```sql
-CREATE TABLE coins (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  symbol TEXT NOT NULL,
-  coin_address TEXT NOT NULL,
-  build_id UUID NOT NULL REFERENCES builds(id),
-  fid BIGINT NOT NULL,
-  image TEXT,
-  wallet_address TEXT,
-  wallet_id TEXT,
-  chain_type TEXT DEFAULT 'ethereum',
-  pool_initialized BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-### Version Control System
-
-The application implements automatic version control for all build modifications:
-
-- **Automatic Versioning**: Creates versions on every build update
-- **Atomic Operations**: Uses PostgreSQL RPC functions for consistency
-- **Restore Capability**: Revert to any previous version
-- **Version Cleanup**: Users can delete unnecessary versions
 
 ## �📡 API Reference
 
@@ -564,29 +454,6 @@ Create `.env.local` with required variables (see [Environment Variables](#enviro
 - **PostgreSQL**: Database with Supabase or self-hosted
 - **IPFS Gateway**: Pinata or alternative IPFS service
 
-### Build Configuration
-
-```typescript
-// next.config.ts
-const nextConfig = {
-  experimental: {
-    serverActions: true,
-  },
-  images: {
-    domains: ['your-supabase-project.supabase.co'],
-  },
-};
-```
-
-### Production Checklist
-
-- [ ] Environment variables configured
-- [ ] Database migrations applied
-- [ ] CORS settings configured for domain
-- [ ] API rate limits configured
-- [ ] Monitoring and analytics setup
-- [ ] Backup strategy implemented
-
 ## 🔧 Environment Variables
 
 ### Required Variables
@@ -632,18 +499,8 @@ ANALYTICS_ID=your_analytics_id
 ## 📖 Additional Documentation
 
 - [Creator Docs](/docs) - User guide for game creation and tokenization
-- [VERSION_CONTROL.md](./VERSION_CONTROL.md) - Detailed version control system documentation
 - [AGENTS.md](./AGENTS.md) - Contributor guidelines and development standards
 - [CLAUDE.md](./CLAUDE.md) - AI assistant guidance for code modifications
-
-## 🤝 Contributing
-
-1. **Fork the repository**
-2. **Create feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Follow coding standards** outlined in AGENTS.md
-4. **Add comprehensive tests** for new functionality
-5. **Update documentation** as needed
-6. **Submit pull request** with detailed description
 
 ## 📄 License
 
@@ -651,4 +508,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Mini Games Studio** - Empowering creators to build, tokenize, and share games in the decentralized social web.
+**Mini Games Studio** - Empowering creators to build tokenized games that can be played on Zora and Farcaster.
