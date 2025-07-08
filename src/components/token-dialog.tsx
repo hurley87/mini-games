@@ -538,7 +538,7 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                 Launch Your Game Token
               </DialogTitle>
               <DialogDescription className="text-center text-gray-400 mt-2">
-                {`Create a unique token for your game's economy`}
+                {`Create a unique token for your game's economy. Each game starts with 10 million tokens.`}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
