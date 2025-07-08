@@ -143,15 +143,6 @@ const stream = openai.beta.threads.runs.stream(threadId, {
 - **Cumulative Improvements**: Each modification builds upon previous changes
 - **Intelligent Suggestions**: AI can propose improvements based on conversation history
 
-**Example Conversation Flow:**
-
-1. User: "Make the game easier"
-2. AI: Updates difficulty parameters, remembers this preference
-3. User: "Add particle effects"
-4. AI: Adds effects while maintaining the easier difficulty from step 1
-5. User: "Make the background darker but keep everything else"
-6. AI: Only modifies background, preserving all previous improvements
-
 This threading system enables a natural, conversational approach to game development where each modification is informed by the complete context of the user's creative process.
 
 ### Game Constraints
@@ -162,18 +153,6 @@ This threading system enables a natural, conversational approach to game develop
 - **Input**: Mouse/tap only (no keyboard/gestures)
 - **Environment**: Sandboxed iframe, no external dependencies
 - **UI Requirements**: No visible text, scores, or timers
-
-### Scoring System Integration
-
-Games communicate with the parent window through predefined functions:
-
-```javascript
-function tryAwardPoints(score) {
-  if (typeof window.awardPoints === 'function') {
-    window.awardPoints(score);
-  }
-}
-```
 
 ## 💰 Tokenization System
 
@@ -258,17 +237,6 @@ Games generate compliant metadata stored on IPFS:
 4. **Deploy**: Creates token contract, reward pool wallet, and IPFS metadata
 5. **Share**: Direct integration to share on Farcaster with embedded gameplay
 
-#### Real-time Validation
-
-The interface includes real-time validation ensuring:
-
-- All parameters are within acceptable ranges
-- Token symbols are 3-6 characters uppercase
-- Configuration values are economically viable
-- Game duration aligns with platform constraints
-
-This configuration system allows creators to fine-tune their game's economy to match their community and monetization strategy.
-
 ## �📡 API Reference
 
 ### Build Management
@@ -325,7 +293,7 @@ This configuration system allows creators to fine-tune their game's economy to m
 - **npm/yarn** package manager
 - **Supabase** project with PostgreSQL database
 - **OpenAI** API key with GPT-4 access
-- **Privy** account for Web3 authentication
+- **Privy** account for authentication
 - **Neynar** API key for Farcaster integration
 - **Pinata** account for IPFS storage
 - **Base network** RPC access for blockchain interactions
