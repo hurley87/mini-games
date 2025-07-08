@@ -157,7 +157,7 @@ function HomeContent() {
               onClick={login}
               disabled={isSubmitting}
               size="lg"
-              className="bg-white text-black hover:bg-zinc-200 rounded-full px-8 cursor-pointer"
+              className="bg-white text-black hover:bg-zinc-200 rounded-lg px-8 cursor-pointer"
             >
               Get Started
             </Button>

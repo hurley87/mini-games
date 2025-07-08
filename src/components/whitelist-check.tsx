@@ -3,6 +3,8 @@
 import { usePrivy } from '@privy-io/react-auth';
 import type { ReactNode } from 'react';
 import { isUserWhitelisted } from '@/lib/whitelist';
+import Link from 'next/link';
+import Header from './header';
 
 interface WhitelistCheckProps {
   children: ReactNode;
@@ -21,11 +23,21 @@ export default function WhitelistCheck({ children }: WhitelistCheckProps) {
 
   if (authenticated && !isUserWhitelisted(user?.farcaster?.username)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1a1a1a] text-white">
-        <p className="text-center">
-          You are not whitelisted. DM <span className="font-semibold">@hurls</span>{' '}
-          on Farcaster to be added.
-        </p>
+      <div className="min-h-screen flex flex-col bg-[#1a1a1a] text-white">
+        <Header />
+        <div className="flex items-center justify-center flex-1">
+          <p className="text-center">
+            You are not whitelisted.{' '}
+            <Link
+              href="https://farcaster.xyz/hurls"
+              target="_blank"
+              className="text-purple-500 hover:text-purple-400"
+            >
+              DM <span className="font-semibold">@hurls</span> on Farcaster
+            </Link>{' '}
+            to be added.
+          </p>
+        </div>
       </div>
     );
   }

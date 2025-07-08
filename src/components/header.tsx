@@ -71,7 +71,13 @@ export default function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button onClick={login}>Login</Button>
+          <Button
+            variant="secondary"
+            className="cursor-pointer"
+            onClick={login}
+          >
+            Login
+          </Button>
         )}
       </div>
     </header>

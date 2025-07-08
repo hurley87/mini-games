@@ -62,7 +62,7 @@ export default async function CoinPage({ params }: CoinPageProps) {
               className="text-white bg-transparent border-white cursor-pointer"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              Trade on Zora
+              Trade ${coin.symbol}
             </Button>
           </Link>
           <Link
@@ -79,7 +79,7 @@ export default async function CoinPage({ params }: CoinPageProps) {
               className="text-black bg-white cursor-pointer"
             >
               <Share2 className="w-4 h-4 mr-2" />
-              Earn on Farcaster
+              Play to Earn ${coin.symbol}
             </Button>
           </Link>
         </div>
@@ -114,10 +114,7 @@ export default async function CoinPage({ params }: CoinPageProps) {
                 <div>
                   <h1 className="text-2xl font-bold text-white">{coin.name}</h1>
                   <div className="text-sm text-[#adadad] mt-1">
-                    Token Symbol:{' '}
-                    <span className="text-white font-medium">
-                      {coin.symbol}
-                    </span>
+                    ${coin.symbol}
                   </div>
                 </div>
               </div>
