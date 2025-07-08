@@ -195,13 +195,25 @@ const { address: coinAddress } = await createCoin({
 
 ### Token Economics
 
-Each tokenized game includes:
+Each tokenized game includes configurable parameters that creators can customize during token creation:
 
-- **Token Name & Symbol**: User-defined branding
-- **Reward Pool**: Dedicated wallet for player payouts
-- **Token Multiplier**: Points → Token conversion rate
-- **Premium Threshold**: Minimum token balance for enhanced rewards
-- **Play Limits**: Maximum plays per user per session
+#### Creator-Configurable Parameters
+
+| Parameter | Range | Description |
+|-----------|--------|-------------|
+| **Token Name & Symbol** | 3-6 chars | User-defined branding for the game token |
+| **Game Duration** | 0-60 seconds | How long each game session lasts (0 = unlimited) |
+| **Maximum Points** | 1-100 points | Maximum points a player can earn per game |
+| **Token Multiplier** | 1-1,000,000x | Multiplier for converting points to tokens |
+| **Premium Threshold** | 1-10,000,000 tokens | Minimum tokens held to play more than once per day |
+| **Max Daily Plays** | 1-100 plays | Maximum games a player can play per day |
+
+#### Token Economics Flow
+
+- **Basic Players**: Can play once per day for free
+- **Token Holders**: Players holding ≥ `premium_threshold` tokens can play up to `max_plays` times daily
+- **Reward Pool**: Dedicated wallet address that automatically pays out tokens based on player scores
+- **Instant Payouts**: Players receive tokens immediately upon game completion
 
 ### Reward Formula
 
@@ -232,6 +244,34 @@ Games generate compliant metadata stored on IPFS:
 ```
 
 **🎮 Zora Integration**: The EIP-7572 metadata standard makes games **directly playable on Zora**. When users view the token on Zora's platform, they can play the game inline without leaving the site. The `animation_url` and `content.uri` fields point to the IPFS-hosted HTML game, enabling Zora to render the interactive experience directly within the token's metadata view.
+
+### Token Configuration Interface
+
+The **Token Dialog** (`src/components/token-dialog.tsx`) provides a user-friendly interface for creators to configure all tokenization parameters:
+
+#### Configuration Process
+
+1. **Launch Game**: Click "Launch Game" button on any completed build
+2. **Token Branding**: Set token name and symbol (e.g., "Space Credits" / "SPACE")
+3. **Game Parameters**: Configure gameplay and economic settings:
+   - **Game Duration**: Slider for 0-60 second time limits
+   - **Max Points**: Set scoring ceiling (1-100 points)
+   - **Token Multiplier**: Define point-to-token conversion rate
+   - **Premium Threshold**: Set token holding requirement for multiple daily plays
+   - **Max Daily Plays**: Limit how many times premium users can play
+
+4. **Deploy**: Creates token contract, reward pool wallet, and IPFS metadata
+5. **Share**: Direct integration to share on Farcaster with embedded gameplay
+
+#### Real-time Validation
+
+The interface includes real-time validation ensuring:
+- All parameters are within acceptable ranges
+- Token symbols are 3-6 characters uppercase
+- Configuration values are economically viable
+- Game duration aligns with platform constraints
+
+This configuration system allows creators to fine-tune their game's economy to match their community and monetization strategy.
 
 ## 📡 API Reference
 
