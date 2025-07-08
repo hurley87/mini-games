@@ -143,14 +143,48 @@ const { object: agentResponse } = await generateObject({
 
 2. **Background Processing** (`/api/process-build.background`):
    - Generates game code using structured AI prompts
-   - Creates OpenAI assistant thread for iterations
+   - Creates OpenAI assistant thread for future iterations
    - Generates preview image using DALL-E 3
    - Updates build status to "completed"
 
 3. **Iterative Improvements** (`/api/threads/[threadId]/messages`):
-   - Streams responses from OpenAI assistant
-   - Maintains conversation context for refinements
-   - Calls `update_game` function with complete HTML
+   - Uses OpenAI's **Assistants SDK** for conversational game updates
+   - Each thread functions like a persistent ChatGPT conversation
+   - Maintains full context of all previous modifications and user requests
+   - Streams real-time responses from the AI assistant
+   - Calls `update_game` function tool with complete updated HTML
+
+### OpenAI Assistants Integration
+
+The game update system leverages **OpenAI's Assistants SDK** to provide intelligent, context-aware modifications:
+
+```typescript
+// Creating persistent conversation thread
+const thread = await openai.beta.threads.create();
+
+// Each message maintains conversation history
+const stream = openai.beta.threads.runs.stream(threadId, {
+  assistant_id: assistantId,
+  instructions: `You are an interactive game editor assistant...`,
+});
+```
+
+**Key Benefits:**
+- **Conversation Memory**: AI remembers all previous changes and user feedback
+- **Context Awareness**: Understands the current game state and user's intent
+- **Natural Iteration**: Users can make requests like "make it harder" or "change the colors to blue"
+- **Cumulative Improvements**: Each modification builds upon previous changes
+- **Intelligent Suggestions**: AI can propose improvements based on conversation history
+
+**Example Conversation Flow:**
+1. User: "Make the game easier"
+2. AI: Updates difficulty parameters, remembers this preference
+3. User: "Add particle effects"
+4. AI: Adds effects while maintaining the easier difficulty from step 1
+5. User: "Make the background darker but keep everything else"
+6. AI: Only modifies background, preserving all previous improvements
+
+This threading system enables a natural, conversational approach to game development where each modification is informed by the complete context of the user's creative process.
 
 ### Game Constraints
 
