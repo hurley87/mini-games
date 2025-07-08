@@ -43,6 +43,44 @@ interface CreatedTokenData {
   walletAddress?: string;
 }
 
+interface ConfigInputProps {
+  label: string;
+  field: keyof CoinConfig;
+  min: number;
+  max: number;
+  suffix?: string;
+  description?: string;
+  value: string;
+  onChange: (field: keyof CoinConfig, value: string) => void;
+}
+
+const ConfigInput = ({
+  label,
+  field,
+  min,
+  max,
+  suffix = '',
+  description,
+  value,
+  onChange,
+}: ConfigInputProps) => (
+  <div className="space-y-2">
+    <label className="text-sm font-medium text-gray-300">{label}</label>
+    <div className="flex items-center gap-2">
+      <input
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(field, e.target.value)}
+        className="flex-1 rounded-md border border-[#30363d] bg-[#1a1a1a] px-4 py-3 text-white placeholder:text-gray-500 focus:border-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-600 transition-colors"
+      />
+      {suffix && <span className="text-sm text-gray-500">{suffix}</span>}
+    </div>
+    {description && <p className="text-xs text-gray-500">{description}</p>}
+  </div>
+);
+
 export default function TokenDialog({ buildId }: { buildId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -58,13 +96,15 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
   );
   const [copied, setCopied] = useState(false);
 
-  // Coin configuration state
-  const [coinConfig, setCoinConfig] = useState<CoinConfig>({
-    duration: 30,
-    max_points: 50,
-    token_multiplier: 1000,
-    premium_threshold: 100000,
-    max_plays: 10,
+  // Coin configuration state - using strings to allow empty fields during editing
+  const [coinConfig, setCoinConfig] = useState<
+    Record<keyof CoinConfig, string>
+  >({
+    duration: '20',
+    max_points: '20',
+    token_multiplier: '1000',
+    premium_threshold: '100000',
+    max_plays: '5',
   });
 
   // Fetch build data to get tutorial for description
@@ -88,25 +128,38 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
     }
   }, [buildId]);
 
-  const handleConfigChange = (field: keyof CoinConfig, value: number) => {
+  const handleConfigChange = (field: keyof CoinConfig, value: string) => {
     setCoinConfig((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const validateConfig = (config: CoinConfig): boolean => {
+  const validateConfig = (
+    config: Record<keyof CoinConfig, string>
+  ): boolean => {
+    const duration = parseInt(config.duration);
+    const maxPoints = parseInt(config.max_points);
+    const tokenMultiplier = parseInt(config.token_multiplier);
+    const premiumThreshold = parseInt(config.premium_threshold);
+    const maxPlays = parseInt(config.max_plays);
+
     return (
-      config.duration >= 0 &&
-      config.duration <= 60 &&
-      config.max_points >= 1 &&
-      config.max_points <= 100 &&
-      config.token_multiplier >= 1 &&
-      config.token_multiplier <= 1000000 &&
-      config.premium_threshold >= 1 &&
-      config.premium_threshold <= 10000000 &&
-      config.max_plays >= 1 &&
-      config.max_plays <= 100
+      !isNaN(duration) &&
+      duration >= 0 &&
+      duration <= 60 &&
+      !isNaN(maxPoints) &&
+      maxPoints >= 1 &&
+      maxPoints <= 100 &&
+      !isNaN(tokenMultiplier) &&
+      tokenMultiplier >= 1 &&
+      tokenMultiplier <= 1000000 &&
+      !isNaN(premiumThreshold) &&
+      premiumThreshold >= 1 &&
+      premiumThreshold <= 10000000 &&
+      !isNaN(maxPlays) &&
+      maxPlays >= 1 &&
+      maxPlays <= 100
     );
   };
 
@@ -123,11 +176,11 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
     setActiveTab('overview');
     setCopied(false);
     setCoinConfig({
-      duration: 30,
-      max_points: 50,
-      token_multiplier: 1000,
-      premium_threshold: 100000,
-      max_plays: 10,
+      duration: '30',
+      max_points: '50',
+      token_multiplier: '1000',
+      premium_threshold: '100000',
+      max_plays: '10',
     });
   };
 
@@ -160,42 +213,20 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
     window.open(shareUrl, '_blank');
   };
 
-  const ConfigInput = ({
-    label,
-    field,
-    min,
-    max,
-    suffix = '',
-    description,
-  }: {
-    label: string;
-    field: keyof CoinConfig;
-    min: number;
-    max: number;
-    suffix?: string;
-    description?: string;
-  }) => (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-300">{label}</label>
-      <div className="flex items-center gap-2">
-        <input
-          type="number"
-          min={min}
-          max={max}
-          value={coinConfig[field]}
-          onChange={(e) =>
-            handleConfigChange(field, parseInt(e.target.value) || min)
-          }
-          className="flex-1 rounded-md border border-[#30363d] bg-[#1a1a1a] px-4 py-3 text-white placeholder:text-gray-500 focus:border-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-600 transition-colors"
-        />
-        {suffix && <span className="text-sm text-gray-500">{suffix}</span>}
-      </div>
-      {description && <p className="text-xs text-gray-500">{description}</p>}
-    </div>
-  );
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Validate form before submitting
+    if (!validateSymbol(symbol)) {
+      toast.error('Token symbol must be 3-8 characters long');
+      return;
+    }
+
+    if (!validateConfig(coinConfig)) {
+      toast.error('Please check your game configuration values');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -204,11 +235,11 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
         title,
         symbol,
         description,
-        duration: coinConfig.duration,
-        max_points: coinConfig.max_points,
-        token_multiplier: coinConfig.token_multiplier,
-        premium_threshold: coinConfig.premium_threshold,
-        max_plays: coinConfig.max_plays,
+        duration: parseInt(coinConfig.duration) || 30,
+        max_points: parseInt(coinConfig.max_points) || 50,
+        token_multiplier: parseInt(coinConfig.token_multiplier) || 1000,
+        premium_threshold: parseInt(coinConfig.premium_threshold) || 100000,
+        max_plays: parseInt(coinConfig.max_plays) || 10,
       };
 
       const coinsResponse = await fetch(`/api/coins/${buildId}`, {
@@ -488,7 +519,10 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                       <div>
                         <span className="text-gray-400">Token Multiplier:</span>
                         <div className="text-white font-medium">
-                          {coinConfig.token_multiplier.toLocaleString()}x
+                          {parseInt(
+                            coinConfig.token_multiplier
+                          ).toLocaleString()}
+                          x
                         </div>
                       </div>
                       <div>
@@ -569,21 +603,11 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                     placeholder="e.g., SPACE"
                     value={symbol}
                     onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                    className={`w-full rounded-md border bg-[#1a1a1a] px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 transition-colors ${
-                      symbol && !validateSymbol(symbol)
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/50'
-                        : 'border-[#30363d] focus:border-gray-600 focus:ring-gray-600'
-                    }`}
+                    className="w-full rounded-md border border-[#30363d] bg-[#1a1a1a] px-4 py-3 text-white placeholder:text-gray-500 focus:border-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-600 transition-colors"
                     required
                     maxLength={8}
                   />
-                  <p
-                    className={`text-xs ${
-                      symbol && !validateSymbol(symbol)
-                        ? 'text-red-400'
-                        : 'text-gray-500'
-                    }`}
-                  >
+                  <p className="text-xs text-gray-500">
                     3-8 characters, typically uppercase
                   </p>
                 </div>
@@ -597,6 +621,8 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                   min={0}
                   max={60}
                   description="How long each game session lasts (0 = unlimited)"
+                  value={coinConfig.duration}
+                  onChange={handleConfigChange}
                 />
 
                 <ConfigInput
@@ -605,6 +631,8 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                   min={1}
                   max={100}
                   description="Maximum points a player can earn per game"
+                  value={coinConfig.max_points}
+                  onChange={handleConfigChange}
                 />
 
                 <ConfigInput
@@ -613,6 +641,8 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                   min={1}
                   max={1000000}
                   description="Multiplier for converting points to tokens"
+                  value={coinConfig.token_multiplier}
+                  onChange={handleConfigChange}
                 />
 
                 <ConfigInput
@@ -621,6 +651,8 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                   min={1}
                   max={10000000}
                   description="Minimum tokens needed for premium rewards"
+                  value={coinConfig.premium_threshold}
+                  onChange={handleConfigChange}
                 />
 
                 <ConfigInput
@@ -629,6 +661,8 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                   min={1}
                   max={100}
                   description="Maximum games a player can play per day"
+                  value={coinConfig.max_plays}
+                  onChange={handleConfigChange}
                 />
               </div>
 
@@ -637,13 +671,7 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
                   type="submit"
                   size="lg"
                   className="w-full bg-white text-black hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  disabled={
-                    isLoading ||
-                    !title ||
-                    !symbol ||
-                    !validateSymbol(symbol) ||
-                    !validateConfig(coinConfig)
-                  }
+                  disabled={isLoading || !title || !symbol}
                 >
                   {isLoading ? (
                     <>
