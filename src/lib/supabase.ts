@@ -266,7 +266,7 @@ export const insertCoin = async (coin: Omit<Coin, 'id' | 'created_at'>) => {
       .from('coins')
       .insert({
         ...coin,
-        pool_initialized: false,
+        pool_initialized: true,
       })
       .select()
       .single();

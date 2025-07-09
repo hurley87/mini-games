@@ -24,14 +24,11 @@ export async function GET(
 ) {
   try {
     const { buildId } = await params;
-    console.log('buildId', buildId);
     const coin = await getCoinByBuildId(buildId);
 
-    console.log('coin', coin);
-
     // Only return the coin if the pool is initialized
-    if (coin && !coin.pool_initialized) {
-      return NextResponse.json({ coin: null });
+    if (coin) {
+      return NextResponse.json({ coin });
     }
 
     return NextResponse.json({ coin });

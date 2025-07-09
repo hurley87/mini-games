@@ -27,10 +27,13 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
   const fetchPublishedCoin = useCallback(async () => {
     try {
       const response = await fetch(`/api/coins/${buildId}`);
+      console.log('buildId', buildId);
       if (!response.ok) {
         throw new Error('Failed to fetch coin data');
       }
       const data = await response.json();
+
+      console.log('data', data);
 
       if (data.coin) {
         setPublishedCoin({
@@ -59,6 +62,8 @@ export default function PublishButton({ buildId }: PublishButtonProps) {
       </div>
     );
   }
+
+  console.log('publishedCoin', publishedCoin);
 
   return (
     <div className="flex items-center gap-2">

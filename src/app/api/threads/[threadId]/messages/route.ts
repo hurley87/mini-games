@@ -278,10 +278,7 @@ export async function GET(
   { params }: { params: Promise<{ threadId: string }> }
 ) {
   try {
-    console.log('request', request);
     const { threadId } = await params;
-
-    console.log('Fetching messages for thread:', threadId);
 
     const messages = await openai.beta.threads.messages.list(threadId);
 

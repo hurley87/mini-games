@@ -8,6 +8,8 @@ export async function GET(
   try {
     const { id } = await params;
 
+    console.log('id', id);
+
     // Validate that the ID is provided and not "undefined"
     if (!id || id === 'undefined') {
       return NextResponse.json(
