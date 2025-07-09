@@ -271,10 +271,6 @@ export async function POST(
     const walletId = wallet.id;
     const walletAddress = wallet.address as `0x${string}`;
 
-    console.log('Wallet:', wallet);
-    console.log('Wallet address:', walletAddress);
-    console.log('Wallet id', walletId);
-
     const privateKey = process.env.PRIVATE_KEY;
     const account = privateKeyToAccount(privateKey as `0x${string}`);
 
