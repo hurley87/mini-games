@@ -254,8 +254,7 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
 
         // Set created token data with response info
         setCreatedTokenData({
-          tokenAddress:
-            coinsResult.tokenAddress || coinsResult.coin?.coin_address,
+          tokenAddress: coinsResult.tokenAddress,
           transactionHash: coinsResult.transactionHash,
           tokenName: title,
           tokenSymbol: symbol,

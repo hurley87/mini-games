@@ -351,6 +351,7 @@ export async function POST(
         htmlUri: '',
         username,
         buildFid,
+        tokenAddress: coin_address,
         gameConfig: {
           duration,
           max_points,
