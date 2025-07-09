@@ -316,7 +316,6 @@ export async function POST(
 
       console.log('Transaction hash:', result.hash);
       console.log('Coin address:', result.address);
-      console.log('Deployment details:', result.deployment);
 
       const coin_address = result.address as `0x${string}`;
 
