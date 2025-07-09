@@ -58,7 +58,7 @@ export default async function CoinPage({ params }: CoinPageProps) {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Game Not Found</h1>
           <p className="text-gray-400">
-            The game you're looking for doesn't exist.
+            {`The game you're looking for doesn't exist.`}
           </p>
         </div>
       </div>
