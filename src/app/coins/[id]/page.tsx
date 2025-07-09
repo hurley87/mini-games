@@ -23,12 +23,44 @@ export async function generateMetadata({
 
 export default async function CoinPage({ params }: CoinPageProps) {
   const { id } = await params;
+
+  // Validate that the ID is provided and not "undefined"
+  if (!id || id === 'undefined') {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#1a1a1a] text-white">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Invalid Game ID</h1>
+          <p className="text-gray-400">The game ID provided is not valid.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Validate UUID format (basic check)
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(id)) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#1a1a1a] text-white">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Invalid Game ID Format</h1>
+          <p className="text-gray-400">The game ID format is not valid.</p>
+        </div>
+      </div>
+    );
+  }
+
   const coin = await getCoin(id);
 
   if (!coin) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#1a1a1a] text-white">
-        Game not found
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Game Not Found</h1>
+          <p className="text-gray-400">
+            The game you're looking for doesn't exist.
+          </p>
+        </div>
       </div>
     );
   }

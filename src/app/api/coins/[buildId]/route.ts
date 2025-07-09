@@ -342,51 +342,52 @@ export async function POST(
       });
 
       console.log('Coin inserted:', coin);
+
+      return NextResponse.json({
+        success: true,
+        message: 'Coin metadata created successfully',
+        coin,
+        uri,
+        htmlUri: '',
+        username,
+        buildFid,
+        gameConfig: {
+          duration,
+          max_points,
+          token_multiplier,
+          premium_threshold,
+          max_plays,
+        },
+        metadata: {
+          version: 'eip-7572',
+          name: title,
+          description,
+          image: build.image || '',
+          animation_url: htmlUri,
+          content: {
+            mime: 'text/html',
+            uri: htmlUri,
+          },
+          properties: {
+            category: 'game',
+          },
+        },
+        receivedData: {
+          buildId,
+          title,
+          symbol,
+          duration,
+          max_points,
+          token_multiplier,
+          premium_threshold,
+          max_plays,
+          ...otherData,
+        },
+      });
     } catch (error) {
       console.error('Error creating coin:', error);
       throw error;
     }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Coin metadata created successfully',
-      uri,
-      htmlUri: '',
-      username,
-      buildFid,
-      gameConfig: {
-        duration,
-        max_points,
-        token_multiplier,
-        premium_threshold,
-        max_plays,
-      },
-      metadata: {
-        version: 'eip-7572',
-        name: title,
-        description,
-        image: build.image || '',
-        animation_url: htmlUri,
-        content: {
-          mime: 'text/html',
-          uri: htmlUri,
-        },
-        properties: {
-          category: 'game',
-        },
-      },
-      receivedData: {
-        buildId,
-        title,
-        symbol,
-        duration,
-        max_points,
-        token_multiplier,
-        premium_threshold,
-        max_plays,
-        ...otherData,
-      },
-    });
   } catch (error) {
     console.error('Error creating coin metadata:', error);
     return NextResponse.json(

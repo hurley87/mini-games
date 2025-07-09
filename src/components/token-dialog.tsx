@@ -264,7 +264,13 @@ export default function TokenDialog({ buildId }: { buildId: string }) {
             coinsResult.walletAddress || coinsResult.coin?.wallet_address,
         });
 
-        router.push(`/coins/${coinsResult.coin?.id}`);
+        // Only navigate if we have a valid coin ID
+        if (coinsResult.coin?.id) {
+          router.push(`/coins/${coinsResult.coin.id}`);
+        } else {
+          console.error('Coin ID is missing from response:', coinsResult);
+          toast.error('Coin created but navigation failed - coin ID missing');
+        }
         toast.success('Token created successfully!');
       } else {
         const errorResult = await coinsResponse.json();
