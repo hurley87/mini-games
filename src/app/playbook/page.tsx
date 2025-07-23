@@ -1,7 +1,7 @@
 import Header from '@/components/header';
 
 export const metadata = {
-  title: 'Creator Docs - Mini Games Studio',
+  title: 'Creator Playbook - Mini Games Studio',
   description:
     'Learn how to create and publish mini games with optional tokens.',
 };

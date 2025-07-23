@@ -435,7 +435,7 @@ ANALYTICS_ID=your_analytics_id
 
 ## 📖 Additional Documentation
 
-- [Creator Docs](/docs) - User guide for game creation and tokenization
+ - [Creator Playbook](/playbook) - User guide for game creation and tokenization
 - [AGENTS.md](./AGENTS.md) - Contributor guidelines and development standards
 - [CLAUDE.md](./CLAUDE.md) - AI assistant guidance for code modifications
 
