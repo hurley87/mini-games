@@ -1,26 +1,34 @@
 import Header from '@/components/header';
 
 export const metadata = {
-  title: 'Creator Docs - Mini Games Studio',
+  title: 'Creator Playbook - Mini Games Studio',
   description:
-    'Learn how to create and publish mini games with optional tokens.',
+    'Learn how to create tokenized mini games and earn rewards.',
 };
 
 /**
  * Detailed documentation for creators building mini games.
  * Covers the workflow, AI models, prompting strategies, scoring and token mechanics.
  */
-export default function CreatorDocs() {
+export default function CreatorPlaybook() {
   return (
     <div className="min-h-screen bg-[#1a1a1a] text-white flex flex-col">
       <Header />
       <main className="flex-1 w-full max-w-3xl mx-auto p-6 space-y-8">
         <section>
-          <h1 className="text-3xl font-semibold mb-4">Game Creation Guide</h1>
+          <h1 className="text-3xl font-semibold mb-4">
+            Creator Playbook: Earn Money with Mini Games
+          </h1>
+          <p className="text-zinc-300 mb-2">
+            Use AI to generate fun game mechanics and assets in minutes.
+          </p>
+          <p className="text-zinc-300 mb-2">
+            Publishing a game automatically creates a token that rewards players
+            based on their scores.
+          </p>
           <p className="text-zinc-300">
-            Mini Games Studio lets you create tokenized games that run in
-            Farcaster. Understanding the constraints and token mechanics will
-            help you build successful games that players love.
+            Fund your reward pool by adding more tokens and keep an eye on the
+            balance to maintain engagement.
           </p>
         </section>
 

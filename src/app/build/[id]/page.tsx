@@ -53,8 +53,8 @@ export default async function BuildPage({ params }: BuildPageProps) {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            <Link href="/docs" className="mr-4 text-white hover:text-white">
-              Docs
+            <Link href="/playbook" className="mr-4 text-white hover:text-white">
+              Playbook
             </Link>
             <PublishButton buildId={id} />
           </div>

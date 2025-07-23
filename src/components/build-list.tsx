@@ -116,10 +116,10 @@ export default function BuildList() {
           <p className="text-gray-300 mb-8 leading-relaxed">
             Before creating your first game, we recommend checking out our{' '}
             <Link
-              href="/docs"
+              href="/playbook"
               className="text-blue-400 hover:text-blue-300 underline font-semibold"
             >
-              documentation
+              playbook
             </Link>{' '}
             to understand best practices and get inspired by examples.
           </p>

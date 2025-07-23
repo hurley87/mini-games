@@ -31,8 +31,8 @@ export default function Header() {
         <Link href="/create" className="text-gray-300 hover:text-gray-200">
           Create
         </Link>
-        <Link href="/docs" className="text-gray-300 hover:text-gray-200">
-          Docs
+        <Link href="/playbook" className="text-gray-300 hover:text-gray-200">
+          Playbook
         </Link>
         {authenticated ? (
           <DropdownMenu>
